@@ -50,9 +50,7 @@ function actionExplore(thisCreep) {
         convertRoomPositionStringBackToRoomPositionObject(
           thisCreep.memory.destination
         ),
-        {
-          visualizePathStyle: { stroke: "#ffaa00" }
-        }
+        { visualizePathStyle: { stroke: "#ffaa00" } }
       )
     }
   }

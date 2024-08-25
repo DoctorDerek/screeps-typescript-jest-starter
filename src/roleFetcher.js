@@ -111,9 +111,7 @@ var roleFetcher = {
           ) {
             thisCreep.moveTo(
               droppedResources[thisCreep.memory.droppedResourceNumber],
-              {
-                visualizePathStyle: { stroke: "#ffaa00" }
-              }
+              { visualizePathStyle: { stroke: "#ffaa00" } }
             )
           }
           if (
