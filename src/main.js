@@ -126,7 +126,7 @@ module.exports.loop = function () {
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
         {
-          memory: { role: "upgrader" },
+          memory: { role: "upgrader" }
         }
       )
     } else if (
@@ -142,7 +142,7 @@ module.exports.loop = function () {
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
         {
-          memory: { role: "builder" },
+          memory: { role: "builder" }
         }
       )
     } else if (defenders.length < Math.floor(miners.length / 100)) {
@@ -154,7 +154,7 @@ module.exports.loop = function () {
         [ATTACK, ATTACK, ATTACK, MOVE], // 290
         newName,
         {
-          memory: { role: "defender" },
+          memory: { role: "defender" }
         }
       )
     } else {
@@ -166,7 +166,7 @@ module.exports.loop = function () {
         [WORK, WORK, MOVE, MOVE], // 300
         newName,
         {
-          memory: { role: "miner" },
+          memory: { role: "miner" }
         }
       )
     }
@@ -195,7 +195,7 @@ module.exports.loop = function () {
     const closestDamagedStructure = tower.pos.findClosestByRange(
       FIND_STRUCTURES,
       {
-        filter: (structure) => structure.hits < structure.hitsMax,
+        filter: (structure) => structure.hits < structure.hitsMax
       }
     )
     if (closestDamagedStructure) {

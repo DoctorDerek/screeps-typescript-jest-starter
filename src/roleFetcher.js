@@ -24,7 +24,7 @@ var roleFetcher = {
     // Create a decay effect by occasionally wiping the room clean of pending roads
     if (Math.random < 0.01) {
       const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
-        filter: { structureType: STRUCTURE_ROAD },
+        filter: { structureType: STRUCTURE_ROAD }
       })
       for (const pendingRoadSite of pendingRoadSites) {
         pendingRoadSite.remove()
@@ -81,7 +81,7 @@ var roleFetcher = {
         const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
           filter: function (resource) {
             return resource.amount >= targetResourceAmount
-          },
+          }
         })
         // Only target resources that have at least that many times carryingCapacity
 
@@ -112,7 +112,7 @@ var roleFetcher = {
             thisCreep.moveTo(
               droppedResources[thisCreep.memory.droppedResourceNumber],
               {
-                visualizePathStyle: { stroke: "#ffaa00" },
+                visualizePathStyle: { stroke: "#ffaa00" }
               }
             )
           }
@@ -137,7 +137,7 @@ var roleFetcher = {
         }
       }
     }
-  },
+  }
 }
 
 module.exports = roleFetcher

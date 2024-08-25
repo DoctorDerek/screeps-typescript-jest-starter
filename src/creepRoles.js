@@ -74,8 +74,8 @@ const creepRoles = [
   {
     role: "Miner",
     buildTemplate: [WORK, WORK, MOVE],
-    emoji: "⛏️",
-  },
+    emoji: "⛏️"
+  }
 ]
 
 creepRoles // export

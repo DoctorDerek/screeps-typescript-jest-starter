@@ -13,7 +13,7 @@ var roleDefender = {
       actionExplore(thisCreep)
       // actionPatrol(thisCreep)
     }
-  },
+  }
 }
 
 module.exports = roleDefender

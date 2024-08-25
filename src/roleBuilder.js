@@ -27,7 +27,7 @@ const roleBuilder = {
           ERR_NOT_IN_RANGE
         ) {
           thisCreep.moveTo(buildSites[thisCreep.memory.buildSiteNumber], {
-            visualizePathStyle: { stroke: "#ffffff" },
+            visualizePathStyle: { stroke: "#ffffff" }
           })
         } else if (
           thisCreep.build(buildSites[thisCreep.memory.buildSiteNumber]) != OK
@@ -49,7 +49,7 @@ const roleBuilder = {
         actionExplore(thisCreep)
       }
     }
-  },
+  }
 }
 
 module.exports = roleBuilder

@@ -14,7 +14,7 @@ function actionHarvest(creep) {
     }
     if (creep.harvest(sources[creep.memory.sourceNumber]) == ERR_NOT_IN_RANGE) {
       creep.moveTo(sources[creep.memory.sourceNumber], {
-        visualizePathStyle: { stroke: "#ffaa00" },
+        visualizePathStyle: { stroke: "#ffaa00" }
       })
     }
     if (creep.harvest(sources[creep.memory.sourceNumber]) === OK) {

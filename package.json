@@ -5,6 +5,7 @@
   "main": "index.js",
   "//": "If you add or change the names of destinations in screeps.json, make sure you update these scripts to reflect the changes",
   "scripts": {
+    "format": "prettier --write .",
     "lint": "eslint . --ext .js,.ts",
     "lint-stats": "eslint . --ext .js,.ts --format \"node_modules/eslint-stats/byErrorAndWarning.js\"",
     "build": "rollup -c",
@@ -43,6 +44,7 @@
     "eslint-stats": "^1.0.1",
     "jest": "^27.1.0",
     "lodash": "^3.10.1",
+    "prettier": "^2",
     "rollup": "^2.56.3",
     "rollup-plugin-clear": "^2.0.7",
     "rollup-plugin-screeps": "^1.0.1",

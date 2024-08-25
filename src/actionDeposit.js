@@ -16,7 +16,7 @@ function actionDeposit(thisCreep) {
             structure.structureType == STRUCTURE_STORAGE) &&
           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
         )
-      },
+      }
     }
   )
   if (targetDropOffSite != null) {
@@ -26,14 +26,14 @@ function actionDeposit(thisCreep) {
       ERR_NOT_IN_RANGE
     ) {
       thisCreep.moveTo(targetDropOffSite, {
-        visualizePathStyle: { stroke: "#ffffff" },
+        visualizePathStyle: { stroke: "#ffffff" }
       })
     }
   } else {
     // There is nowhere to drop it off in the current room
     // Move to within 5 tiles of the spawn. Then we drop it if everything is full
     thisCreep.moveTo(Game.spawns["Spawn1"].pos, {
-      visualizePathStyle: { stroke: "#ffffff" },
+      visualizePathStyle: { stroke: "#ffffff" }
     })
     if (
       thisCreep.room === Game.spawns["Spawn1"].room &&

@@ -146,15 +146,16 @@ const roleMiner = {
             )
           }
 
-          const sourcePosition = convertRoomPositionStringBackToRoomPositionObject(
-            thisCreep.memory.objective
-          )
-          const destinationPosition = convertRoomPositionStringBackToRoomPositionObject(
-            thisCreep.memory.destination
-          )
-          const sourceObjectAtObjective = sourcePosition.findClosestByRange(
-            FIND_SOURCES_ACTIVE
-          )
+          const sourcePosition =
+            convertRoomPositionStringBackToRoomPositionObject(
+              thisCreep.memory.objective
+            )
+          const destinationPosition =
+            convertRoomPositionStringBackToRoomPositionObject(
+              thisCreep.memory.destination
+            )
+          const sourceObjectAtObjective =
+            sourcePosition.findClosestByRange(FIND_SOURCES_ACTIVE)
           /*
           if (
             thisCreep.harvest(sourceObjectAtObjective) < 0 &&
@@ -169,7 +170,7 @@ const roleMiner = {
               thisCreep.memory.mission = "THINK"
             }*/
             thisCreep.moveTo(destinationPosition, {
-              visualizePathStyle: { stroke: "#ffaa00" },
+              visualizePathStyle: { stroke: "#ffaa00" }
             })
           }
         }
@@ -182,7 +183,7 @@ const roleMiner = {
         actionExplore(thisCreep)
       }
     }
-  },
+  }
 }
 
 module.exports = roleMiner

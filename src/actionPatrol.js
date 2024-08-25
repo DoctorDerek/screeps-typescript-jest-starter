@@ -25,7 +25,7 @@ function actionPatrol(creep) {
     } else {
       // Get to moving
       creep.moveTo(flags[creep.memory.flagNumber], {
-        visualizePathStyle: { stroke: "#ffaa00" },
+        visualizePathStyle: { stroke: "#ffaa00" }
       })
     }
   } else {

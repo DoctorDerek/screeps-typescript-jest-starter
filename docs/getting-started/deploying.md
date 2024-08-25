@@ -23,4 +23,3 @@ You're done! Now go to your Screeps client and make sure your code is deployed p
 ![deploying-2](../.gitbook/assets/deploying-2.png)
 
 Ready for something extra? [Read on.](../in-depth/module-bundling.md)
-

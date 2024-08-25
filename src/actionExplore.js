@@ -51,7 +51,7 @@ function actionExplore(thisCreep) {
           thisCreep.memory.destination
         ),
         {
-          visualizePathStyle: { stroke: "#ffaa00" },
+          visualizePathStyle: { stroke: "#ffaa00" }
         }
       )
     }

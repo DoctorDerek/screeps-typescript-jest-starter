@@ -11,7 +11,7 @@ const actionFillUp = function (thisCreep) {
           structure.structureType == STRUCTURE_STORAGE) &&
         structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0
       )
-    },
+    }
   })
   if (thisCreep.memory.storageSiteNumber > storageSites.length) {
     thisCreep.memory.storageSiteNumber = null
@@ -33,7 +33,7 @@ const actionFillUp = function (thisCreep) {
       ) == ERR_NOT_IN_RANGE
     ) {
       thisCreep.moveTo(storageSites[thisCreep.memory.storageSiteNumber].pos, {
-        visualizePathStyle: { stroke: "#ffffff" },
+        visualizePathStyle: { stroke: "#ffffff" }
       })
     } else if (
       thisCreep.withdraw(

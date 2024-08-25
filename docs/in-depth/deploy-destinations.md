@@ -44,4 +44,3 @@ rollup -c --environment DEST:main
 ```
 
 Omitting the destination will perform a dry run, which will compile and bundle the code without uploading it.
-

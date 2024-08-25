@@ -17,7 +17,7 @@ function actionFillUp(thisCreep) {
           structure.structureType == STRUCTURE_STORAGE) &&
         structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50*/
       )
-    },
+    }
   })
   if (targetFillUpSite != null) {
     // There is somewhere to fill up in the current room
@@ -31,7 +31,7 @@ function actionFillUp(thisCreep) {
       thisCreep.withdraw(targetFillUpSite, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE
     ) {
       thisCreep.moveTo(targetFillUpSite, {
-        visualizePathStyle: { stroke: "#ffffff" },
+        visualizePathStyle: { stroke: "#ffffff" }
       })
     }
   } else {
@@ -41,7 +41,7 @@ function actionFillUp(thisCreep) {
       {
         filter: function (resource) {
           return resource.amount >= 0
-        },
+        }
       }
     )
 
@@ -49,7 +49,7 @@ function actionFillUp(thisCreep) {
       thisCreep.say("🔄 PICK UP")
       if (thisCreep.pickup(droppedResourceTarget) == ERR_NOT_IN_RANGE) {
         thisCreep.moveTo(droppedResourceTarget, {
-          visualizePathStyle: { stroke: "#ffaa00" },
+          visualizePathStyle: { stroke: "#ffaa00" }
         })
       }
     }
