@@ -357,8 +357,8 @@ function unwrappedLoop() {
         { memory: { role: "fetcher" } }
       )
     } else if (
-      builders.length < n &&
-      // Sum consturction sites in all spawns to make sure there is at least 1:
+      builders.length < n * 4 &&
+      // Sum construction sites in all spawns to make sure there is at least 1:
       Object.values(Game.spawns).reduce(
         (acc, spawn) =>
           acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
