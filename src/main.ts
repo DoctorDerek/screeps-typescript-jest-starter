@@ -294,11 +294,19 @@ function unwrappedLoop() {
   // Run all creeps
   for (const creepName in Game.creeps) {
     try {
+      const creeps = Object.values(Game.creeps)
+      const overwhelmingForce =
+        creeps.filter(
+          (creep) =>
+            creep.memory.role === "defenderMelee" ||
+            creep.memory.role === "defenderRanged" ||
+            creep.memory.role === "healer"
+        ).length >= 12
       const creep = Game.creeps[creepName]
       if (creep.memory.role == "defenderMelee")
-        roleDefenderMelee.run(creep as DefenderMelee)
+        roleDefenderMelee.run(creep as DefenderMelee, overwhelmingForce)
       if (creep.memory.role == "defenderRanged")
-        roleDefenderRanged.run(creep as DefenderRanged)
+        roleDefenderRanged.run(creep as DefenderRanged, overwhelmingForce)
       if (creep.memory.role == "miner") roleMiner.run(creep as Miner)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")
