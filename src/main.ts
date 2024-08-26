@@ -430,6 +430,8 @@ function unwrappedLoop() {
   // Run all creeps
   for (const creep of creeps) {
     try {
+      // Don't run creeps that are spawning
+      if (creep.spawning) continue
       if (creep.memory.role == "defenderMelee")
         roleDefenderMelee.run(creep as DefenderMelee, overwhelmingForce)
       if (creep.memory.role == "defenderRanged")
