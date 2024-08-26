@@ -19,18 +19,18 @@ const roleDefenderMelee = {
       const y = 23 + Math.floor(Math.random() * 5)
       thisCreep.moveTo(new RoomPosition(x, y, thisCreep.room.name))
       return
-    }
-
-    const target = thisCreep.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
-    if (target) {
-      thisCreep.say("⚔️ melee")
-      if (thisCreep.attack(target) == ERR_NOT_IN_RANGE) {
-        thisCreep.say("⚔️ hunt")
-        thisCreep.moveTo(target)
+    } else if (overwhelmingForce) {
+      const target = thisCreep.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
+      if (target) {
+        thisCreep.say("⚔️ melee")
+        if (thisCreep.attack(target) == ERR_NOT_IN_RANGE) {
+          thisCreep.say("⚔️ hunt")
+          thisCreep.moveTo(target)
+        }
+      } else if (!target) {
+        actionExplore(thisCreep)
+        // actionPatrol(thisCreep)
       }
-    } else if (!target) {
-      actionExplore(thisCreep)
-      // actionPatrol(thisCreep)
     }
   }
 }
