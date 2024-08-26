@@ -132,14 +132,11 @@ function unwrappedLoop() {
       (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
       0
     )
-    let n = numberOfSources / 4
-    // 1 harvesters, 1 miner, 1 fetcher, 1 upgrader, 1 builder, 1 defender
-    // x n / 4 sources across all rooms.
+    const n = numberOfSources
+    // 1 harvester to start, then miner, fetcher, upgrader, builder, defenders
+    // x n sources across all rooms
     // Builder will only spawn if there are construction sites.
-    const totalCreeps = Object.values(Game.creeps).length
-    // Adjust n depending on if I've spawned enough creeps to cover all sources
-    if (totalCreeps / 6 > n) n = n * (totalCreeps / 6)
-    if (harvesters.length < n) {
+    if (harvesters.length < 1) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
