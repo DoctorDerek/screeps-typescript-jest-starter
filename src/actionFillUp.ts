@@ -5,23 +5,12 @@ import type { Healer } from "roleHealer"
 import type { Upgrader } from "roleUpgrader"
 
 function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
-  const targetFillUpSite = thisCreep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-    //var targets = thisCreep.room.find(FIND_MY_STRUCTURES, {
-    // var targets = Game.spawns["Spawn1"].room.find(FIND_MY_STRUCTURES, {
-    filter: (structure) => {
-      return (
-        // @ts-expect-error Containers are valid structures:
-        (structure.structureType == STRUCTURE_CONTAINER ||
-          structure.structureType == STRUCTURE_STORAGE) &&
-        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50
-        /*        (structure.structureType == STRUCTURE_EXTENSION ||
-          structure.structureType == STRUCTURE_SPAWN ||
-          structure.structureType == STRUCTURE_TOWER ||
-          structure.structureType == STRUCTURE_CONTAINER ||
-          structure.structureType == STRUCTURE_STORAGE) &&
-        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50*/
-      )
-    }
+  // FIND_MY_STRUCTURES doesn't include containers, so I need FIND_STRUCTURES:
+  const targetFillUpSite = thisCreep.pos.findClosestByPath(FIND_STRUCTURES, {
+    filter: (structure) =>
+      (structure.structureType == STRUCTURE_CONTAINER ||
+        structure.structureType == STRUCTURE_STORAGE) &&
+      structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50
   })
   if (targetFillUpSite != null) {
     const result = thisCreep.withdraw(targetFillUpSite, RESOURCE_ENERGY)

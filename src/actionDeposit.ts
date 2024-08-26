@@ -3,22 +3,24 @@ import type { Harvester } from "roleHarvester"
 import type { Healer } from "roleHealer"
 
 function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
-  const targetDropOffSite = thisCreep.pos.findClosestByPath(
-    FIND_MY_STRUCTURES,
-    {
+  // FIND_MY_STRUCTURES doesn't include containers, so I need FIND_STRUCTURES:
+  const targetDropOffSite =
+    thisCreep.pos.findClosestByPath(FIND_STRUCTURES, {
+      filter: (structure) =>
+        (structure.structureType == STRUCTURE_CONTAINER ||
+          structure.structureType == STRUCTURE_STORAGE) &&
+        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+    }) ||
+    thisCreep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
       filter: (structure) => {
         return (
           (structure.structureType == STRUCTURE_EXTENSION ||
             structure.structureType == STRUCTURE_SPAWN ||
-            structure.structureType == STRUCTURE_TOWER ||
-            // @ts-expect-error Containers are valid structures:
-            structure.structureType == STRUCTURE_CONTAINER ||
-            structure.structureType == STRUCTURE_STORAGE) &&
+            structure.structureType == STRUCTURE_TOWER) &&
           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
         )
       }
-    }
-  )
+    })
   if (targetDropOffSite != null) {
     // There is somewhere to drop it off in the current room
     if (
