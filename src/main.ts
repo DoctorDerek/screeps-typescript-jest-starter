@@ -50,6 +50,91 @@ function unwrappedLoop() {
     }
   }
 
+  const miners = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "miner"
+  ) as Miner[]
+
+  const thisRoom = Game.spawns["Spawn1"].room
+  // Select all sources with available energy from this room:
+  const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
+  // Make a hash map of destination -> objective coordinates
+  // Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,12]
+  const mineablePositions = new Map<string, string>()
+  activeSources.forEach((source) => {
+    const sourcePositionString = String(source.pos)
+    const sourceX = source.pos.x
+    const sourceY = source.pos.y
+    // lookForAtArea(type, top, left, bottom, right, [asArray])
+    const lookArray = thisRoom.lookForAtArea(
+      LOOK_TERRAIN,
+      sourceY - 1,
+      sourceX - 1,
+      sourceY + 1,
+      sourceX + 1,
+      true
+    )
+    lookArray
+      .filter((positionAsJSON) => positionAsJSON.terrain !== "wall")
+      .forEach((mineablePositionAsJSON) => {
+        // Each item returned by lookForAtArea looks like:
+        // {"type":"terrain","terrain":"plain","x":24,"y":42}
+        const mineablePosition = thisRoom.getPositionAt(
+          mineablePositionAsJSON.x,
+          mineablePositionAsJSON.y
+        ) // Retrieve a RoomPosition object, mineablePosition, from the x,y coordinates
+        const mineablePositionString = String(mineablePosition)
+        if (
+          mineablePosition &&
+          // Remove occupied positions from the hash map:
+          mineablePosition.lookFor(LOOK_CREEPS).length === 0
+        )
+          mineablePositions.set(mineablePositionString, sourcePositionString)
+      })
+  })
+
+  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
+  miners.forEach((creep) => {
+    if (!creep.memory.destination) return // Miner has no destination
+    const takenPositionString = String(creep.memory.destination)
+    // e.g. [room E55N6 pos 14,11]
+    mineablePositions.delete(takenPositionString)
+  })
+
+  // Remove positions near source keeper lairs as these are "too hot" to mine
+  // (e.g. 5 tiles away from the lair)
+  const sourceKeeperLairs = thisRoom.find(FIND_HOSTILE_STRUCTURES, {
+    filter: (structure) => structure.structureType === STRUCTURE_KEEPER_LAIR
+  })
+  sourceKeeperLairs.forEach((lair) => {
+    const lairX = lair.pos.x
+    const lairY = lair.pos.y
+    const lookArray = thisRoom.lookForAtArea(
+      LOOK_TERRAIN,
+      lairY - 5,
+      lairX - 5,
+      lairY + 5,
+      lairX + 5,
+      true
+    )
+    lookArray.forEach((positionAsJSON) => {
+      const position = thisRoom.getPositionAt(
+        positionAsJSON.x,
+        positionAsJSON.y
+      )
+      const positionString = String(position)
+      mineablePositions.delete(positionString)
+    })
+  })
+  const totalCreeps = Object.values(Game.creeps).length
+
+  // The hash map mineablePositions now only includes available positions
+  // Sum all sources across all spawns
+  const numberOfSources = Object.values(Game.spawns).reduce(
+    (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
+    0
+  )
+  const n = mineablePositions.size
   /*  BODYPART_COST: {
         "move": 50,
         "work": 100,
@@ -116,10 +201,7 @@ function unwrappedLoop() {
       (creep) => creep.memory.role == "fetcher"
     ) as Fetcher[]
     console.log("Fetchers: " + fetchers.length)
-    const miners = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "miner"
-    ) as Miner[]
+    // Moved up
     console.log("Miners: " + miners.length)
     const healers = _.filter(
       Game.creeps,
@@ -127,16 +209,10 @@ function unwrappedLoop() {
     ) as Miner[]
     console.log("Healers: " + healers.length)
 
-    // Sum all sources across all spawns
-    const numberOfSources = Object.values(Game.spawns).reduce(
-      (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
-      0
-    )
-    const n = numberOfSources
     // 1 harvester to start, then miner, fetcher, upgrader, builder, defenders
     // x n sources across all rooms
     // Builder will only spawn if there are construction sites.
-    if (harvesters.length < 1) {
+    if (totalCreeps < 1) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
@@ -217,7 +293,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "builder" } }
       )
-    } else if (defendersRanged.length < n) {
+    } else if (defendersRanged.length < 0) {
+      // off
       const newName = Game.time + "_" + "DefRanged" + defendersRanged.length
       console.log("Spawning new defender ranged: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
@@ -227,7 +304,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "defenderRanged" } }
       )
-    } else if (defendersMelee.length < n) {
+    } else if (defendersMelee.length < 0) {
+      // off
       const newName = Game.time + "_" + "DefMelee" + defendersMelee.length
       console.log("Spawning new defender melee: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
@@ -237,7 +315,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "defenderMelee" } }
       )
-    } else if (healers.length < n) {
+    } else if (healers.length < 0) {
+      // off
       const newName = Game.time + "_" + "Healer" + healers.length
       console.log("Spawning new healer: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
@@ -248,16 +327,19 @@ function unwrappedLoop() {
         { memory: { role: "healer" } }
       )
     }
-    // The fallback role is defenderRanged
+    // The fallback role is builder
     // [ATTACK, ATTACK, MOVE, MOVE], // 260
     // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
     else {
-      const newName = Game.time + "_" + "DefRanged" + defendersRanged.length
-      console.log("Spawning new defender ranged: " + newName)
+      const newName = Game.time + "_" + "Builder" + builders.length
+      console.log("Spawning new builder: " + newName)
+      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
+      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
+      // [WORK, MOVE, MOVE, CARRY], // 250
       Game.spawns["Spawn1"].spawnCreep(
-        [TOUGH, MOVE, MOVE, RANGED_ATTACK], // 260
+        [WORK, WORK, MOVE, CARRY], // 300
         newName,
-        { memory: { role: "defenderRanged" } }
+        { memory: { role: "builder" } }
       )
     }
   }
@@ -320,23 +402,24 @@ function unwrappedLoop() {
       }
     )
 
+  const creeps = Object.values(Game.creeps)
+  const overwhelmingForce =
+    creeps.filter(
+      (creep) =>
+        creep.memory.role === "defenderMelee" ||
+        creep.memory.role === "defenderRanged" ||
+        creep.memory.role === "healer"
+    ).length >= 12
+
   // Run all creeps
-  for (const creepName in Game.creeps) {
+  for (const creep of creeps) {
     try {
-      const creeps = Object.values(Game.creeps)
-      const overwhelmingForce =
-        creeps.filter(
-          (creep) =>
-            creep.memory.role === "defenderMelee" ||
-            creep.memory.role === "defenderRanged" ||
-            creep.memory.role === "healer"
-        ).length >= 12
-      const creep = Game.creeps[creepName]
       if (creep.memory.role == "defenderMelee")
         roleDefenderMelee.run(creep as DefenderMelee, overwhelmingForce)
       if (creep.memory.role == "defenderRanged")
         roleDefenderRanged.run(creep as DefenderRanged, overwhelmingForce)
-      if (creep.memory.role == "miner") roleMiner.run(creep as Miner)
+      if (creep.memory.role == "miner")
+        roleMiner.run(creep as Miner, mineablePositions)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")
         roleHarvester.run(
@@ -350,7 +433,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "healer")
         roleHealer.run(creep as Healer, creepsToHeal)
     } catch (e) {
-      console.log(`${creepName} threw a ${e}`)
+      console.log(`${creep.name} threw a ${e}`)
     }
   }
 }

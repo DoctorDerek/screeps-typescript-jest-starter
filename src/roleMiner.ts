@@ -35,98 +35,10 @@ interface MinerMemory extends CreepMemory {
   home: Room
 }
 
-const assessSources = (thisCreep: Miner) => {
-  const thisRoom = thisCreep.room
-
-  // Select all sources with available energy from this room:
-  const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
-  // Make a hash map of destination -> objective coordinates
-  // Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,11]
-  const mineablePositions = new Map<string, string>()
-  activeSources.forEach((source) => {
-    const sourcePositionString = String(source.pos)
-    const sourceX = source.pos.x
-    const sourceY = source.pos.y
-    // lookForAtArea(type, top, left, bottom, right, [asArray])
-    const lookArray = thisRoom.lookForAtArea(
-      LOOK_TERRAIN,
-      sourceY - 1,
-      sourceX - 1,
-      sourceY + 1,
-      sourceX + 1,
-      true
-    )
-    lookArray
-      .filter((positionAsJSON) => positionAsJSON.terrain !== "wall")
-      .forEach((mineablePositionAsJSON) => {
-        // Each item returned by lookForAtArea looks like:
-        // {"type":"terrain","terrain":"plain","x":24,"y":42}
-        const mineablePosition = thisRoom.getPositionAt(
-          mineablePositionAsJSON.x,
-          mineablePositionAsJSON.y
-        ) // Retrieve a RoomPosition object, mineablePosition, from the x,y coordinates
-        const mineablePositionString = String(mineablePosition)
-        if (
-          mineablePosition &&
-          // Remove occupied positions from the hash map:
-          mineablePosition.lookFor(LOOK_CREEPS).length === 0
-        )
-          mineablePositions.set(mineablePositionString, sourcePositionString)
-      })
-  })
-
-  // Select an array of creeps with assigned destinations in this room:
-  const miners = Object.keys(Game.creeps).filter(
-    (creepName) =>
-      Game.creeps[creepName].memory.role === "miner" &&
-      Game.creeps[creepName].memory.destination != undefined &&
-      creepName !== thisCreep.name
-  )
-  // Using Object.keys() and Array.prototype.filter:
-  // const miners = Object.keys(Game.creeps).filter(
-  //  (creep) => Game.creeps[creep].memory.role === "miner"
-  // )
-  // Equivalent using lodash filter:
-  // const upgraders = _.filter(
-  //  Game.creeps,
-  //  (creep) => thisCreep.memory.role === "miner"
-  // )
-
-  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
-  miners.forEach((creepName) => {
-    const takenPositionString = String(
-      Game.creeps[creepName].memory.destination
-    ) // e.g. [room E55N6 pos 14,11]
-    mineablePositions.delete(takenPositionString)
-  })
-
-  // Remove positions near source keeper lairs as these are "too hot" to mine
-  // (e.g. 5 tiles away from the lair)
-  const sourceKeeperLairs = thisRoom.find(FIND_HOSTILE_STRUCTURES, {
-    filter: (structure) => structure.structureType === STRUCTURE_KEEPER_LAIR
-  })
-  sourceKeeperLairs.forEach((lair) => {
-    const lairX = lair.pos.x
-    const lairY = lair.pos.y
-    const lookArray = thisRoom.lookForAtArea(
-      LOOK_TERRAIN,
-      lairY - 5,
-      lairX - 5,
-      lairY + 5,
-      lairX + 5,
-      true
-    )
-    lookArray.forEach((positionAsJSON) => {
-      const position = thisRoom.getPositionAt(
-        positionAsJSON.x,
-        positionAsJSON.y
-      )
-      const positionString = String(position)
-      mineablePositions.delete(positionString)
-    })
-  })
-
-  // The hash map mineablePositions now only includes available positions
+const assessSources = (
+  thisCreep: Miner,
+  mineablePositions: Map<string, string>
+) => {
   if (mineablePositions.size === 0) {
     // No available mining positions
     // --> Mission: EXPLORE
@@ -160,7 +72,7 @@ const assessSources = (thisCreep: Miner) => {
 }
 
 const roleMiner = {
-  run: function (thisCreep: Miner) {
+  run: function (thisCreep: Miner, mineablePositions: Map<string, string>) {
     if (thisCreep.spawning === true) {
       // INIT mission
       thisCreep.memory.home = thisCreep.room
@@ -170,7 +82,7 @@ const roleMiner = {
         thisCreep.say("🔄 THINK")
         thisCreep.memory.objective = null
         thisCreep.memory.destination = null
-        assessSources(thisCreep)
+        assessSources(thisCreep, mineablePositions)
       }
       if (thisCreep.memory.mission === "MINE") {
         thisCreep.say("⛏️ MINE")
