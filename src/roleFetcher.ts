@@ -138,13 +138,11 @@ const roleFetcher = {
           }
         } else {
           // Explore
-          thisCreep.memory.mission = "EXPLORE"
-          actionExplore(thisCreep)
-          /*if (Math.random() < 1 / 50) {
-          // 1 in 50
-          thisCreep.memory.mission = null
+          // thisCreep.memory.mission = "EXPLORE"
+          // actionExplore(thisCreep)
+
+          thisCreep.memory.mission = "PICK UP"
           console.log(`${thisCreep.name} is going to check for resources`)
-        }*/
         }
       }
     }
