@@ -1,4 +1,3 @@
-import roleDefender, { type Defender } from "roleDefender"
 import roleMiner, { type Miner } from "roleMiner"
 import roleBuilder, { type Builder } from "roleBuilder"
 import roleFetcher, { type Fetcher } from "roleFetcher"
@@ -6,6 +5,10 @@ import roleHarvester, { type Harvester } from "roleHarvester"
 import roleUpgrader, { type Upgrader } from "roleUpgrader"
 import ErrorMapper from "ErrorMapper"
 import roleHealer, { type Healer } from "roleHealer"
+import type { DefenderRanged } from "roleDefenderRanged"
+import type { DefenderMelee } from "roleDefenderMelee"
+import roleDefenderMelee from "roleDefenderMelee"
+import roleDefenderRanged from "roleDefenderRanged"
 
 // const upperFirstCharacter = (string) => string.slice(0, 1).toUpperCase() + string.slice(1)
 // const unitTypesAndCounts = {harvesters: 6, "upgraders", "builders", "defenders", "fetchers"]
@@ -98,11 +101,16 @@ function unwrappedLoop() {
       (creep) => creep.memory.role == "builder"
     ) as Builder[]
     console.log("Builders: " + builders.length)
-    const defenders = _.filter(
+    const defendersRanged = _.filter(
       Game.creeps,
-      (creep) => creep.memory.role == "defender"
-    ) as Defender[]
-    console.log("Defenders: " + defenders.length)
+      (creep) => creep.memory.role == "defenderRanged"
+    ) as DefenderRanged[]
+    console.log("Defenders Ranged: " + defendersRanged.length)
+    const defendersMelee = _.filter(
+      Game.creeps,
+      (creep) => creep.memory.role == "defenderMelee"
+    ) as DefenderMelee[]
+    console.log("Defenders Melee: " + defendersMelee.length)
     const fetchers = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "fetcher"
@@ -192,18 +200,28 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "builder" } }
       )
-    } else if (defenders.length < n) {
-      const newName = Game.time + "_" + "Defender" + defenders.length
-      console.log("Spawning new defender: " + newName)
+    } else if (defendersRanged.length < n) {
+      const newName = Game.time + "_" + "DefRanged" + defendersRanged.length
+      console.log("Spawning new defender ranged: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
       // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
       Game.spawns["Spawn1"].spawnCreep(
         [TOUGH, MOVE, MOVE, RANGED_ATTACK], // 260
         newName,
-        { memory: { role: "defender" } }
+        { memory: { role: "defenderRanged" } }
+      )
+    } else if (defendersMelee.length < n) {
+      const newName = Game.time + "_" + "DefMelee" + defendersMelee.length
+      console.log("Spawning new defender melee: " + newName)
+      // [ATTACK, ATTACK, MOVE, MOVE], // 260
+      // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
+      Game.spawns["Spawn1"].spawnCreep(
+        [TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK], // 250
+        newName,
+        { memory: { role: "defenderMelee" } }
       )
     } else if (healers.length < n) {
-      const newName = Game.time + "_" + "Healer" + defenders.length
+      const newName = Game.time + "_" + "Healer" + healers.length
       console.log("Spawning new healer: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
       // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
@@ -260,14 +278,15 @@ function unwrappedLoop() {
   const creepsToHeal = Object.values(Game.creeps)
     .filter(
       (creep: Creep) =>
-        creep.memory.role === "healer" || creep.memory.role === "defender"
+        creep.memory.role === "healer" || /defender/.exec(creep.memory.role)
     )
     .sort(
       // Sort defenders before healers
       (a, b) => {
-        if (a.memory.role === "defender" && b.memory.role === "healer")
+        if (/defender/.exec(a.memory.role) && b.memory.role === "healer")
           return -1
-        if (a.memory.role === "healer" && b.memory.role === "defender") return 1
+        if (a.memory.role === "healer" && /defender/.exec(b.memory.role))
+          return 1
         return 0
       }
     )
@@ -276,7 +295,10 @@ function unwrappedLoop() {
   for (const creepName in Game.creeps) {
     try {
       const creep = Game.creeps[creepName]
-      if (creep.memory.role == "defender") roleDefender.run(creep as Defender)
+      if (creep.memory.role == "defenderMelee")
+        roleDefenderMelee.run(creep as DefenderMelee)
+      if (creep.memory.role == "defenderRanged")
+        roleDefenderRanged.run(creep as DefenderRanged)
       if (creep.memory.role == "miner") roleMiner.run(creep as Miner)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")

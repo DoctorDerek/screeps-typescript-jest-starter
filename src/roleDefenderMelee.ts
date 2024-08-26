@@ -1,29 +1,29 @@
 import actionExplore from "actionExplore"
 
-export interface Defender extends Creep {
-  memory: DefenderMemory
+export interface DefenderMelee extends Creep {
+  memory: DefenderMeleeMemory
 }
 
-interface DefenderMemory extends CreepMemory {
-  role: "defender"
+interface DefenderMeleeMemory extends CreepMemory {
+  role: "defenderMelee"
   mission: null
   destination: string | null
 }
 
-const roleDefender = {
-  /** @param {Creep} thisCreep **/
-  run: function (thisCreep: Defender) {
+const roleDefenderMelee = {
+  run: function (thisCreep: DefenderMelee) {
     const target = thisCreep.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
     if (target) {
-      thisCreep.say("⚔️ attacking")
+      thisCreep.say("⚔️ attack")
       if (thisCreep.attack(target) == ERR_NOT_IN_RANGE) {
+        thisCreep.say("⚔️ hunt")
         thisCreep.moveTo(target)
       }
-    } else {
+    } else if (!target) {
       actionExplore(thisCreep)
       // actionPatrol(thisCreep)
     }
   }
 }
 
-export default roleDefender
+export default roleDefenderMelee

@@ -1,11 +1,14 @@
 // TODO: Refactor how destination is stored in memory with newer version (string)
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import type { Builder } from "roleBuilder"
-import type { Defender } from "roleDefender"
+import type { DefenderMelee } from "roleDefenderMelee"
+import type { DefenderRanged } from "roleDefenderRanged"
 import type { Fetcher } from "roleFetcher"
 import type { Miner } from "roleMiner"
 
-function actionExplore(thisCreep: Builder | Defender | Fetcher | Miner) {
+function actionExplore(
+  thisCreep: Builder | DefenderMelee | DefenderRanged | Fetcher | Miner
+) {
   // TODO: make sure destination is getting unset
   if (
     thisCreep.memory.destination == undefined ||
