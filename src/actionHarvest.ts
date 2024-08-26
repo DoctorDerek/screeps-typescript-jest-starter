@@ -10,7 +10,7 @@ function actionHarvest(creep: Harvester, harvesters: Harvester[]) {
   if (hasRoom && creep.memory.sourceNumber == null) {
     // Go harvest active resources
     // Grab the used sourceNumbers (indices) from the other harvesters
-    let usedSourceNumbers = harvesters
+    const usedSourceNumbers = harvesters
       .filter((harvester) => harvester.memory.sourceNumber != null)
       .map((harvester) => harvester.memory.sourceNumber)
 
@@ -24,8 +24,11 @@ function actionHarvest(creep: Harvester, harvesters: Harvester[]) {
     // Assign an unused source to this creep
     creep.memory.sourceNumber =
       [...Array(sources.length).keys()].find(
-        (sourceNumber) => !usedSourceNumbers.includes(sourceNumber)
+        (sourceNumber) =>
+          !usedSourceNumbers.includes(sourceNumber) &&
+          creep.pos.findPathTo(sources[sourceNumber]) != null
       ) || 0
+
     creep.say("🔄 assign")
     console.log(
       `🔄 assign: ${creep.name} assigned to @sources[${creep.memory.sourceNumber}]`
@@ -34,12 +37,15 @@ function actionHarvest(creep: Harvester, harvesters: Harvester[]) {
 
   if (hasRoom && creep.memory.sourceNumber != null) {
     if (creep.harvest(sources[creep.memory.sourceNumber]) == ERR_NOT_IN_RANGE) {
-      creep.moveTo(sources[creep.memory.sourceNumber], {
-        visualizePathStyle: { stroke: "#ffaa00" }
-      })
       creep.say("🔄 move")
+      if (
+        creep.moveTo(sources[creep.memory.sourceNumber], {
+          visualizePathStyle: { stroke: "#ffaa00" }
+        }) != OK
+      )
+        creep.memory.sourceNumber = null // Maybe I can't reach it? ERR_NO_PATH?
     }
-    if (creep.harvest(sources[creep.memory.sourceNumber]) === OK) {
+    if (creep.harvest(sources[creep.memory.sourceNumber || 0]) === OK) {
       // Log destination while harvesting
       creep.memory.destination = { x: creep.pos.x, y: creep.pos.y }
       creep.say("🔄 harvest")

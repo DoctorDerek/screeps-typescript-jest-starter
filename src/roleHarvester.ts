@@ -11,7 +11,7 @@ interface HarvesterMemory extends CreepMemory {
   droppedResourceNumber: number | null
   objective: string | null
   destination: { x: number; y: number } | null
-  sourceNumber: number
+  sourceNumber: number | null
 }
 
 const roleHarvester = {
