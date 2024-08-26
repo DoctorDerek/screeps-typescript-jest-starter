@@ -37,14 +37,14 @@ const roleFetcher = {
       thisCreep.room.createConstructionSite(thisCreep.pos, STRUCTURE_ROAD)
 
     // Create a decay effect by occasionally wiping the room clean of pending roads
-    if (Math.random() < 0.01) {
-      const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
-        filter: { structureType: STRUCTURE_ROAD }
-      })
-      for (const pendingRoadSite of pendingRoadSites) {
-        pendingRoadSite.remove()
-      }
-    }
+    // if (Math.random() < 0.01) {
+    //   const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
+    //     filter: { structureType: STRUCTURE_ROAD }
+    //   })
+    //   for (const pendingRoadSite of pendingRoadSites) {
+    //     pendingRoadSite.remove()
+    //   }
+    // }
 
     // Only bring back full loads
     if (thisCreep.memory.mission === "DEPOSIT") {
