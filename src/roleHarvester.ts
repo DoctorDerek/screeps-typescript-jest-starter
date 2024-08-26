@@ -16,6 +16,8 @@ interface HarvesterMemory extends CreepMemory {
 
 const roleHarvester = {
   run: function (creep: Harvester, harvesters: Harvester[]) {
+    // Harvester is the first creep and is useless after 500 ticks
+    if ((creep?.ticksToLive || 1500) < 1000) creep.suicide()
     actionHarvest(creep, harvesters)
   }
 }
