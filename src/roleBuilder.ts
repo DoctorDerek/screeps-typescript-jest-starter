@@ -14,50 +14,59 @@ interface BuilderMemory extends CreepMemory {
 }
 
 const roleBuilder = {
-  run: function (thisCreep: Builder) {
-    if (thisCreep.store[RESOURCE_ENERGY] < thisCreep.store.getCapacity()) {
-      thisCreep.memory.mission = "FILL UP"
-      thisCreep.say("🚧 FILL UP")
-      actionFillUp(thisCreep)
+  run: function (creep: Builder) {
+    const isFull = creep.store.getFreeCapacity() === 0
+    const isEmpty = creep.store[RESOURCE_ENERGY] === 0
+    if (isEmpty) creep.memory.building = false
+    if (!creep.memory.building && !isFull) {
+      creep.memory.mission = "FILL UP"
+      creep.say("🚧 FILL UP")
+      actionFillUp(creep)
     }
-    if (thisCreep.store.getFreeCapacity() === 0) {
-      thisCreep.memory.mission = "BUILD"
-      const buildSites = thisCreep.room.find(FIND_MY_CONSTRUCTION_SITES)
+    if (!creep.memory.building && isFull) {
+      creep.memory.building = true
+      creep.memory.mission = "BUILD"
+      creep.say("🚧 build")
+    }
+
+    if ((creep.memory.building = true)) {
+      creep.memory.mission = "BUILD"
+      const buildSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
       if (buildSites.length) {
-        thisCreep.say("🚧 build")
-        if (thisCreep.memory.buildSiteNumber == null) {
-          thisCreep.memory.buildSiteNumber = Math.floor(
+        creep.say("🚧 build")
+        if (creep.memory.buildSiteNumber == null) {
+          creep.memory.buildSiteNumber = Math.floor(
             Math.random() * buildSites.length
           )
           console.log(
-            `${thisCreep.name} assigned to @buildSites[${thisCreep.memory.buildSiteNumber}]`
+            `${creep.name} assigned to @buildSites[${creep.memory.buildSiteNumber}]`
           )
         }
         if (
-          thisCreep.build(buildSites[thisCreep.memory.buildSiteNumber]) ==
+          creep.build(buildSites[creep.memory.buildSiteNumber]) ==
           ERR_NOT_IN_RANGE
         ) {
-          thisCreep.moveTo(buildSites[thisCreep.memory.buildSiteNumber], {
+          creep.say("🚧 move")
+          creep.moveTo(buildSites[creep.memory.buildSiteNumber], {
             visualizePathStyle: { stroke: "#ffffff" }
           })
         } else if (
-          thisCreep.build(buildSites[thisCreep.memory.buildSiteNumber]) != OK
+          creep.build(buildSites[creep.memory.buildSiteNumber]) != OK
         ) {
+          creep.say("🚧 error")
           // There was a different error
           console.log(
-            `${thisCreep.name} build error ${thisCreep.build(
-              buildSites[thisCreep.memory.buildSiteNumber]
-            )} when trying to build ${
-              buildSites[thisCreep.memory.buildSiteNumber]
-            }`
+            `${creep.name} build error ${creep.build(
+              buildSites[creep.memory.buildSiteNumber]
+            )} when trying to build ${buildSites[creep.memory.buildSiteNumber]}`
           )
-          thisCreep.memory.buildSiteNumber = null
+          creep.memory.buildSiteNumber = null
         }
       } else {
-        thisCreep.memory.mission = "EXPLORE"
-        thisCreep.memory.destination = null
-        thisCreep.memory.buildSiteNumber = null
-        actionExplore(thisCreep)
+        creep.memory.mission = "EXPLORE"
+        creep.memory.destination = null
+        creep.memory.buildSiteNumber = null
+        actionExplore(creep)
       }
     }
   }
