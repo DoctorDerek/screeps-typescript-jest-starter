@@ -259,6 +259,25 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "fetcher" } }
       )
+    } else if (
+      builders.length < 1 &&
+      // Sum consturction sites in all spawns to make sure there is at least 1:
+      Object.values(Game.spawns).reduce(
+        (acc, spawn) =>
+          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
+        0
+      ) > 0
+    ) {
+      const newName = Game.time + "_" + "Builder" + builders.length
+      console.log("Spawning new builder: " + newName)
+      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
+      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
+      // [WORK, MOVE, MOVE, CARRY], // 250
+      Game.spawns["Spawn1"].spawnCreep(
+        [WORK, WORK, MOVE, CARRY], // 300
+        newName,
+        { memory: { role: "builder" } }
+      )
     } else if (miners.length < n) {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
