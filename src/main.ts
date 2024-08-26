@@ -310,17 +310,6 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "fetcher" } }
       )
-    } else if (upgraders.length < n) {
-      const newName = Game.time + "_" + "Upgrader" + upgraders.length
-      console.log("Spawning new upgrader: " + newName)
-      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
-      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
-      // [WORK, MOVE, MOVE, CARRY], // 250
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, CARRY], // 300
-        newName,
-        { memory: { role: "upgrader" } }
-      )
     } else if (
       builders.length < n &&
       // Sum consturction sites in all spawns to make sure there is at least 1:
@@ -339,6 +328,17 @@ function unwrappedLoop() {
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
         { memory: { role: "builder" } }
+      )
+    } else if (upgraders.length < n) {
+      const newName = Game.time + "_" + "Upgrader" + upgraders.length
+      console.log("Spawning new upgrader: " + newName)
+      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
+      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
+      // [WORK, MOVE, MOVE, CARRY], // 250
+      Game.spawns["Spawn1"].spawnCreep(
+        [WORK, WORK, MOVE, CARRY], // 300
+        newName,
+        { memory: { role: "upgrader" } }
       )
     } else if (defendersRanged.length < 0) {
       // off
