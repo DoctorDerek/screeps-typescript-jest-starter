@@ -37,9 +37,9 @@ interface MinerMemory extends CreepMemory {
 
 const assessSources = (
   thisCreep: Miner,
-  mineablePositions: Map<string, string>
+  availableMiningPositions: Map<string, string>
 ) => {
-  if (mineablePositions.size === 0) {
+  if (availableMiningPositions.size === 0) {
     // No available mining positions
     // --> Mission: EXPLORE
     thisCreep.memory.mission = "EXPLORE"
@@ -48,11 +48,11 @@ const assessSources = (
     // Found at least 1 available mining position
     // --> Mission: MINE
     thisCreep.memory.mission = "MINE"
-    console.log("Mineable positions: " + [...mineablePositions.keys()])
+    console.log("Mineable positions: " + [...availableMiningPositions.keys()])
     // Select a position available at random and assign it as the mission destination
     // (RoomPosition object stored in memory)
     // Select the nearest mineable position available
-    const destination = [...mineablePositions.keys()].reduce((a, b) => {
+    const destination = [...availableMiningPositions.keys()].reduce((a, b) => {
       const posA = convertRoomPositionStringBackToRoomPositionObject(a)
       const posB = convertRoomPositionStringBackToRoomPositionObject(b)
       return thisCreep.pos.getRangeTo(posA) < thisCreep.pos.getRangeTo(posB)
@@ -63,7 +63,7 @@ const assessSources = (
     // Assign the energy source to the mission objective (string resulting from RoomPosition object stored in memory)
     // Hash key accessed by string lookup of string resulting from RoomPosition
     thisCreep.memory.objective =
-      mineablePositions.get(thisCreep.memory.destination) || null
+      availableMiningPositions.get(thisCreep.memory.destination) || null
     thisCreep.say("⛏️ MINE!!")
     console.log(
       `${thisCreep.name} assigned mission to MINE Objective ${thisCreep.memory.objective} from Destination ${thisCreep.memory.destination}`

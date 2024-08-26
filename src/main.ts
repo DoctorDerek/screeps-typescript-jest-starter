@@ -56,11 +56,20 @@ function unwrappedLoop() {
   ) as Miner[]
 
   const thisRoom = Game.spawns["Spawn1"].room
-  // Select all sources with available energy from this room:
+  /** Select all sources with available energy from this room: */
   const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
-  // Make a hash map of destination -> objective coordinates
-  // Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,12]
+  /**
+   * Make a hash map of destination -> objective coordinates.
+   * Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,12]
+   * */
   const mineablePositions = new Map<string, string>()
+  /**
+   * `mineablePositions` is all of the available positions to mine taking into
+   * account that some sources are too close to Source Keeper Lairs.
+   * `availableMineablePositions` accounts for miners that are already mining,
+   * so this is the list sent to the miners themselves.
+   * */
+  const availableMineablePositions = new Map<string, string>()
   activeSources.forEach((source) => {
     const sourcePositionString = String(source.pos)
     const sourceX = source.pos.x
@@ -84,21 +93,17 @@ function unwrappedLoop() {
           mineablePositionAsJSON.y
         ) // Retrieve a RoomPosition object, mineablePosition, from the x,y coordinates
         const mineablePositionString = String(mineablePosition)
+        mineablePositions.set(mineablePositionString, sourcePositionString)
         if (
           mineablePosition &&
           // Remove occupied positions from the hash map:
           mineablePosition.lookFor(LOOK_CREEPS).length === 0
         )
-          mineablePositions.set(mineablePositionString, sourcePositionString)
+          availableMineablePositions.set(
+            mineablePositionString,
+            sourcePositionString
+          )
       })
-  })
-
-  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
-  miners.forEach((creep) => {
-    if (!creep.memory.destination) return // Miner has no destination
-    const takenPositionString = String(creep.memory.destination)
-    // e.g. [room E55N6 pos 14,11]
-    mineablePositions.delete(takenPositionString)
   })
 
   // Remove positions near source keeper lairs as these are "too hot" to mine
@@ -126,6 +131,18 @@ function unwrappedLoop() {
       mineablePositions.delete(positionString)
     })
   })
+
+  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
+  miners.forEach((creep) => {
+    if (!creep.memory.destination) return // Miner has no destination
+    const takenPositionString = String(creep.memory.destination)
+    // e.g. [room E55N6 pos 14,11]
+    availableMineablePositions.delete(takenPositionString)
+  })
+
+  /** `n` is how many miners and used as the factor for priority order */
+  const n = mineablePositions.size
+
   const totalCreeps = Object.values(Game.creeps).length
 
   // The hash map mineablePositions now only includes available positions
@@ -134,7 +151,6 @@ function unwrappedLoop() {
     (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
     0
   )
-  const n = mineablePositions.size
   /*  BODYPART_COST: {
         "move": 50,
         "work": 100,
@@ -419,7 +435,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "defenderRanged")
         roleDefenderRanged.run(creep as DefenderRanged, overwhelmingForce)
       if (creep.memory.role == "miner")
-        roleMiner.run(creep as Miner, mineablePositions)
+        roleMiner.run(creep as Miner, availableMineablePositions)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")
         roleHarvester.run(
