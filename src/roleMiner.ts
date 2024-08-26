@@ -73,48 +73,48 @@ const assessSources = (
 
 const roleMiner = {
   run: function (thisCreep: Miner, mineablePositions: Map<string, string>) {
-    if (thisCreep.spawning === true) {
+    if (!thisCreep?.memory?.mission) {
       // INIT mission
       thisCreep.memory.home = thisCreep.room
       thisCreep.memory.mission = "THINK"
-    } else {
-      if (thisCreep.memory.mission === "THINK") {
-        thisCreep.say("⛏ THINK")
-        thisCreep.memory.objective = null
-        thisCreep.memory.destination = null
-        assessSources(thisCreep, mineablePositions)
-      }
-      if (thisCreep.memory.mission === "MINE") {
-        thisCreep.say("⛏️ MINE")
-        if (
-          thisCreep.memory.objective == undefined ||
-          thisCreep.memory.destination == undefined
-        ) {
-          thisCreep.memory.mission = "THINK"
-        } else {
-          // In the creep's memory, the objective and destination are stored as strings, so we have to convert them
-          if (thisCreep.memory.objective == undefined) {
-            console.log(
-              `Attempting to call convertRoomPositionStringBackToRoomPositionObject with value ${thisCreep.memory.objective}`
-            )
-          }
-          if (thisCreep.memory.destination == undefined) {
-            console.log(
-              `Attempting to call convertRoomPositionStringBackToRoomPositionObject with value ${thisCreep.memory.destination}`
-            )
-          }
+    }
+    if (thisCreep.memory.mission === "THINK") {
+      thisCreep.say("⛏ THINK")
+      thisCreep.memory.objective = null
+      thisCreep.memory.destination = null
+      assessSources(thisCreep, mineablePositions)
+    }
+    if (thisCreep.memory.mission === "MINE") {
+      thisCreep.say("⛏️ MINE")
+      if (
+        thisCreep.memory.objective == undefined ||
+        thisCreep.memory.destination == undefined
+      ) {
+        thisCreep.memory.mission = "THINK"
+      } else {
+        // In the creep's memory, the objective and destination are stored as strings, so we have to convert them
+        if (thisCreep.memory.objective == undefined) {
+          console.log(
+            `Attempting to call convertRoomPositionStringBackToRoomPositionObject with value ${thisCreep.memory.objective}`
+          )
+        }
+        if (thisCreep.memory.destination == undefined) {
+          console.log(
+            `Attempting to call convertRoomPositionStringBackToRoomPositionObject with value ${thisCreep.memory.destination}`
+          )
+        }
 
-          const sourcePosition =
-            convertRoomPositionStringBackToRoomPositionObject(
-              thisCreep.memory.objective
-            )
-          const destinationPosition =
-            convertRoomPositionStringBackToRoomPositionObject(
-              thisCreep.memory.destination
-            )
-          const sourceObjectAtObjective =
-            sourcePosition.findClosestByRange(FIND_SOURCES_ACTIVE)
-          /*
+        const sourcePosition =
+          convertRoomPositionStringBackToRoomPositionObject(
+            thisCreep.memory.objective
+          )
+        const destinationPosition =
+          convertRoomPositionStringBackToRoomPositionObject(
+            thisCreep.memory.destination
+          )
+        const sourceObjectAtObjective =
+          sourcePosition.findClosestByRange(FIND_SOURCES_ACTIVE)
+        /*
           if (
             thisCreep.harvest(sourceObjectAtObjective) < 0 &&
             thisCreep.harvest(sourceObjectAtObjective) !== ERR_NOT_IN_RANGE
@@ -122,29 +122,28 @@ const roleMiner = {
             // Think about it if our mining site is giving us an error, such as because it's empty
             thisCreep.memory.mission = "THINK"
           }*/
-          if (
-            sourceObjectAtObjective &&
-            thisCreep.harvest(sourceObjectAtObjective) === ERR_NOT_IN_RANGE
-          ) {
-            /*if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
+        if (
+          sourceObjectAtObjective &&
+          thisCreep.harvest(sourceObjectAtObjective) === ERR_NOT_IN_RANGE
+        ) {
+          /*if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
               // Think about it if our mining site is occupied
               thisCreep.memory.mission = "THINK"
             }*/
-            thisCreep.say("⛏️ MOVE")
-            thisCreep.moveTo(destinationPosition, {
-              visualizePathStyle: { stroke: "#ffaa00" }
-            })
-          }
+          thisCreep.say("⛏️ MOVE")
+          thisCreep.moveTo(destinationPosition, {
+            visualizePathStyle: { stroke: "#ffaa00" }
+          })
         }
       }
-      if (thisCreep.memory.mission === "EXPLORE") {
-        thisCreep.say("⛏️ EXPLORE")
-        // Occasionally think about it
-        if (Game.time % 10 === 0) {
-          thisCreep.memory.mission = "THINK"
-        }
-        actionExplore(thisCreep)
+    }
+    if (thisCreep.memory.mission === "EXPLORE") {
+      thisCreep.say("⛏️ EXPLORE")
+      // Occasionally think about it
+      if (Game.time % 10 === 0) {
+        thisCreep.memory.mission = "THINK"
       }
+      actionExplore(thisCreep)
     }
   }
 }
