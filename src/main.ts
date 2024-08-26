@@ -177,7 +177,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner" } }
       )
-    } else if (fetchers.length < n) {
+    } else if (fetchers.length < Math.round(n / 2)) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
