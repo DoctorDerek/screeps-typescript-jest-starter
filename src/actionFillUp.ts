@@ -10,8 +10,9 @@ function actionFillUp(thisCreep: Builder | Upgrader) {
     // var targets = Game.spawns["Spawn1"].room.find(FIND_MY_STRUCTURES, {
     filter: (structure) => {
       return (
-        //structure.structureType == STRUCTURE_CONTAINER ||
-        structure.structureType == STRUCTURE_STORAGE &&
+        // @ts-expect-error Containers are valid structures:
+        (structure.structureType == STRUCTURE_CONTAINER ||
+          structure.structureType == STRUCTURE_STORAGE) &&
         structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50
         /*        (structure.structureType == STRUCTURE_EXTENSION ||
           structure.structureType == STRUCTURE_SPAWN ||
