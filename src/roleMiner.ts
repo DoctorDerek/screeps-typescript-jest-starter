@@ -103,6 +103,7 @@ const assessSources = (thisCreep: Miner) => {
     // No available mining positions
     // --> Mission: EXPLORE
     thisCreep.memory.mission = "EXPLORE"
+    thisCreep.say("🔍 EXPLORE")
   } else {
     // Found at least 1 available mining position
     // --> Mission: MINE
@@ -119,6 +120,7 @@ const assessSources = (thisCreep: Miner) => {
     thisCreep.memory.objective = mineablePositions.get(
       thisCreep.memory.destination
     )
+    thisCreep.say("⛏️ MINE")
     console.log(
       `${thisCreep.name} assigned mission to MINE Objective ${thisCreep.memory.objective} from Destination ${thisCreep.memory.destination}`
     )
