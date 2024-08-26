@@ -113,7 +113,37 @@ function unwrappedLoop() {
     )
     console.log("Miners: " + miners.length)
 
-    if (fetchers.length < 2 * miners.length) {
+    // Sum all sources across all spawns
+    const numberOfSources = Object.values(Game.spawns).reduce(
+      (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
+      0
+    )
+    const n = numberOfSources
+    // 3 harvesters, 1 miner, 1 fetcher, 1 upgrader, 1 builder, 1 defender
+    // x n sources across all rooms.
+    // Builder will only spawn if there are construction sites.
+    if (harvesters.length < 3 * n) {
+      const newName = Game.time + "_" + "Harvester" + harvesters.length
+      console.log("Spawning new harvester: " + newName)
+      // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
+      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
+      // [WORK, MOVE, MOVE, CARRY], // 250
+      Game.spawns["Spawn1"].spawnCreep(
+        [WORK, MOVE, MOVE, CARRY], // 250
+        newName,
+        { memory: { role: "harvester" } }
+      )
+    } else if (miners.length < n) {
+      const newName = Game.time + "_" + "Miner" + miners.length
+      console.log("Spawning new miner: " + newName)
+      //  [WORK, WORK, MOVE], // 250
+      // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
+      Game.spawns["Spawn1"].spawnCreep(
+        [WORK, WORK, MOVE, MOVE], // 300
+        newName,
+        { memory: { role: "miner" } }
+      )
+    } else if (fetchers.length < n) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
@@ -135,8 +165,13 @@ function unwrappedLoop() {
         { memory: { role: "upgrader" } }
       )
     } else if (
-      builders.length < Math.floor(Math.floor(miners.length / 5)) &&
-      Game.spawns["Spawn1"].room.find(FIND_MY_CONSTRUCTION_SITES).length > 0
+      builders.length < n &&
+      // Sum consturction sites in all spawns to make sure there is at least 1:
+      Object.values(Game.spawns).reduce(
+        (acc, spawn) =>
+          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
+        0
+      ) > 0
     ) {
       const newName = Game.time + "_" + "Builder" + builders.length
       console.log("Spawning new builder: " + newName)
@@ -157,16 +192,6 @@ function unwrappedLoop() {
         [ATTACK, ATTACK, ATTACK, MOVE], // 290
         newName,
         { memory: { role: "defender" } }
-      )
-    } else {
-      const newName = Game.time + "_" + "Miner" + miners.length
-      console.log("Spawning new miner: " + newName)
-      //  [WORK, WORK, MOVE], // 250
-      // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, MOVE], // 300
-        newName,
-        { memory: { role: "miner" } }
       )
     }
   }
@@ -220,7 +245,12 @@ function unwrappedLoop() {
       if (creep.memory.role == "miner") roleMiner.run(creep as Miner)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")
-        roleHarvester.run(creep as Harvester)
+        roleHarvester.run(
+          creep as Harvester,
+          Object.values(Game.creeps).filter(
+            (creep: Creep) => creep.memory.role === "harvester"
+          ) as Harvester[]
+        )
       if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)
       if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
     } catch (e) {
