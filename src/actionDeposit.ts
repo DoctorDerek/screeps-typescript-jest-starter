@@ -25,6 +25,7 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     }
   )
   if (targetDropOffSite != null) {
+    thisCreep.say("🚶 building")
     // There is somewhere to drop it off in the current room
     if (
       thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY) ===
@@ -34,20 +35,38 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
         visualizePathStyle: { stroke: "#ffffff" }
       })
     }
-  } else {
-    // There is nowhere to drop it off in the current room
-    // Move to within 5 tiles of the spawn. Then we drop it if everything is full
-    thisCreep.moveTo(Game.spawns["Spawn1"].pos, {
-      visualizePathStyle: { stroke: "#ffffff" }
-    })
-    if (
-      thisCreep.room === Game.spawns["Spawn1"].room &&
-      thisCreep.pos.getRangeTo(Game.spawns["Spawn1"].pos) < 3
-    ) {
-      console.log("Drop it! There are 0 available targets in the home room.")
-      thisCreep.say("DROP IT!")
-      // There's an issue, so let's drop our resources and mosey on
-      thisCreep.drop(RESOURCE_ENERGY)
+  } else if (targetDropOffSite == null) {
+    // Find the closest construction site
+    let targetConstructionSite = thisCreep.pos.findClosestByPath(
+      FIND_MY_CONSTRUCTION_SITES
+    )
+    if (targetConstructionSite != null) {
+      // Drop it off by the construction site
+      if (thisCreep.pos.getRangeTo(targetConstructionSite) > 3) {
+        thisCreep.moveTo(targetConstructionSite, {
+          visualizePathStyle: { stroke: "#ffffff" }
+        })
+        thisCreep.say("🚶 construction")
+      } else {
+        thisCreep.say("🚶 dropping")
+        thisCreep.drop(RESOURCE_ENERGY)
+        targetConstructionSite = null
+      }
+    } else if (targetConstructionSite == null) {
+      // There is nowhere to drop it off in the current room
+      // Move to within 5 tiles of the spawn. Then we drop it if all is full
+      thisCreep.moveTo(Game.spawns["Spawn1"].pos, {
+        visualizePathStyle: { stroke: "#ffffff" }
+      })
+      if (
+        thisCreep.room === Game.spawns["Spawn1"].room &&
+        thisCreep.pos.getRangeTo(Game.spawns["Spawn1"].pos) < 3
+      ) {
+        console.log("Drop it! There are 0 available targets in the home room.")
+        thisCreep.say("DROP IT!")
+        // There's an issue, so let's drop our resources and mosey on
+        thisCreep.drop(RESOURCE_ENERGY)
+      }
     }
   }
 }
