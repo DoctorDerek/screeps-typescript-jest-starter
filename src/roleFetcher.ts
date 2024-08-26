@@ -24,28 +24,6 @@ const roleFetcher = {
     // If we have at least 50 resources (CARRY_CAPACITY), which is
     // the same as EXTENSION_ENERGY_CAPACITY[0] (i.e. 50 energy)
 
-    // Ant-style: mark current position for a future road
-    if (
-      // Limit the number of construction sites to 10 per room:
-      thisCreep.room.find(FIND_CONSTRUCTION_SITES).length < 10 &&
-      // Check there's no construction site in the current tile already:
-      _.filter(
-        thisCreep.pos.look(),
-        (object) => object.type === "constructionSite"
-      ).length === 0
-    )
-      thisCreep.room.createConstructionSite(thisCreep.pos, STRUCTURE_ROAD)
-
-    // Create a decay effect by occasionally wiping the room clean of pending roads
-    // if (Math.random() < 0.01) {
-    //   const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
-    //     filter: { structureType: STRUCTURE_ROAD }
-    //   })
-    //   for (const pendingRoadSite of pendingRoadSites) {
-    //     pendingRoadSite.remove()
-    //   }
-    // }
-
     // Only bring back full loads
     if (thisCreep.memory.mission === "DEPOSIT") {
       actionDeposit(thisCreep)

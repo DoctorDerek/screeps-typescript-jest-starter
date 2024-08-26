@@ -178,6 +178,39 @@ function unwrappedLoop() {
     }
   )
 
+  // Ant-style: mark current position for a future road
+  const fetchers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "fetcher"
+  ) as Fetcher[]
+  if (
+    // Limit the number of construction sites to 10 per room:
+    thisRoom.find(FIND_CONSTRUCTION_SITES).length < 10
+  ) {
+    fetchers.forEach((fetcher) => {
+      const fetcherPosition = fetcher.pos
+      fetcherPosition.createConstructionSite(STRUCTURE_ROAD)
+
+      // Check there's no construction site in the current tile already:
+      if (
+        _.filter(
+          fetcher.pos.look(),
+          (object) => object.type === "constructionSite"
+        ).length === 0
+      )
+        thisRoom.createConstructionSite(fetcher.pos, STRUCTURE_ROAD)
+    })
+  }
+  // Create a decay effect by occasionally wiping the room clean of pending roads
+  // if (Math.random() < 0.01) {
+  //   const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
+  //     filter: { structureType: STRUCTURE_ROAD }
+  //   })
+  //   for (const pendingRoadSite of pendingRoadSites) {
+  //     pendingRoadSite.remove()
+  //   }
+  // }
+
   // Remove taken positions from the hash map of {"(x,y)": true} coordinates
   miners.forEach((creep) => {
     if (!creep.memory.destination) return // Miner has no destination
@@ -258,10 +291,7 @@ function unwrappedLoop() {
       (creep) => creep.memory.role == "defenderMelee"
     ) as DefenderMelee[]
     console.log("Defenders Melee: " + defendersMelee.length)
-    const fetchers = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "fetcher"
-    ) as Fetcher[]
+    // Moved up
     console.log("Fetchers: " + fetchers.length)
     // Moved up
     console.log("Miners: " + miners.length)
