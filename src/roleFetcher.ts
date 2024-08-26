@@ -26,8 +26,8 @@ const roleFetcher = {
 
     // Ant-style: mark current position for a future road
     if (
-      // Limit the number of construction sites to 1 per room:
-      thisCreep.room.find(FIND_CONSTRUCTION_SITES).length < 1 &&
+      // Limit the number of construction sites to 10 per room:
+      thisCreep.room.find(FIND_CONSTRUCTION_SITES).length < 10 &&
       // Check there's no construction site in the current tile already:
       _.filter(
         thisCreep.pos.look(),
