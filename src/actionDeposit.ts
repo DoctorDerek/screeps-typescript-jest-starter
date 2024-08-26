@@ -1,5 +1,3 @@
-// var actionExplore = require("actionExplore")
-
 import type { Fetcher } from "roleFetcher"
 import type { Harvester } from "roleHarvester"
 import type { Healer } from "roleHealer"
@@ -8,8 +6,6 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
   const targetDropOffSite = thisCreep.pos.findClosestByPath(
     FIND_MY_STRUCTURES,
     {
-      //var targets = thisCreep.room.find(FIND_MY_STRUCTURES, {
-      // var targets = Game.spawns["Spawn1"].room.find(FIND_MY_STRUCTURES, {
       filter: (structure) => {
         return (
           (structure.structureType == STRUCTURE_EXTENSION ||
