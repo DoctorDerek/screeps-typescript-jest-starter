@@ -118,11 +118,14 @@ function unwrappedLoop() {
       (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
       0
     )
-    const n = numberOfSources
-    // 3 harvesters, 1 miner, 1 fetcher, 1 upgrader, 1 builder, 1 defender
-    // x n sources across all rooms.
+    let n = numberOfSources / 4
+    // 1 harvesters, 1 miner, 1 fetcher, 1 upgrader, 1 builder, 1 defender
+    // x n / 4 sources across all rooms.
     // Builder will only spawn if there are construction sites.
-    if (harvesters.length < 3 * n) {
+    const totalCreeps = Object.values(Game.creeps).length
+    // Adjust n depending on if I've spawned enough creeps to cover all sources
+    if (totalCreeps / 4 > n) n = totalCreeps / (4 * n)
+    if (harvesters.length < n) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
@@ -153,7 +156,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "fetcher" } }
       )
-    } else if (upgraders.length < Math.floor(miners.length / 5)) {
+    } else if (upgraders.length < n) {
       const newName = Game.time + "_" + "Upgrader" + upgraders.length
       console.log("Spawning new upgrader: " + newName)
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
@@ -183,7 +186,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "builder" } }
       )
-    } else if (defenders.length < Math.floor(miners.length / 100)) {
+    } else if (defenders.length < n) {
       const newName = Game.time + "_" + "Defender" + defenders.length
       console.log("Spawning new defender: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
