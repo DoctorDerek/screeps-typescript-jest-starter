@@ -85,32 +85,32 @@ function unwrappedLoop() {
     const harvesters = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "harvester"
-    )
+    ) as Harvester[]
     console.log("Harvesters: " + harvesters.length)
     const upgraders = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "upgrader"
-    )
+    ) as Upgrader[]
     console.log("Upgraders: " + upgraders.length)
     const builders = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "builder"
-    )
+    ) as Builder[]
     console.log("Builders: " + builders.length)
     const defenders = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "defender"
-    )
+    ) as Defender[]
     console.log("Defenders: " + defenders.length)
     const fetchers = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "fetcher"
-    )
+    ) as Fetcher[]
     console.log("Fetchers: " + fetchers.length)
     const miners = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "miner"
-    )
+    ) as Miner[]
     console.log("Miners: " + miners.length)
 
     // Sum all sources across all spawns
