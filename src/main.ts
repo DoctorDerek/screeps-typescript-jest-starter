@@ -138,7 +138,11 @@ function unwrappedLoop() {
     })
   })
 
-  // Establish containers at the mining positions
+  /**
+   * Establish containers taking triangular averages of the Spawn, the
+   * Controller, and the mining position, keeping in mind that the terrain
+   * needs to be buildable, not obstructed, non-blocking, and not a wall.
+   * */
   mineablePositions.forEach(
     (sourcePositionString, destinationPositionString) => {
       /**
@@ -150,10 +154,35 @@ function unwrappedLoop() {
         convertRoomPositionStringBackToRoomPositionObject(
           destinationPositionString
         )
+      const proposedX = thisRoom?.controller
+        ? Math.floor(
+            (Game.spawns["Spawn1"].pos.x +
+              destinationPosition.x +
+              thisRoom.controller.pos.x) /
+              3
+          )
+        : Math.floor((Game.spawns["Spawn1"].pos.x + destinationPosition.x) / 2)
+      const proposedY = thisRoom?.controller
+        ? Math.floor(
+            (Game.spawns["Spawn1"].pos.y +
+              destinationPosition.y +
+              thisRoom.controller.pos.y) /
+              3
+          )
+        : Math.floor((Game.spawns["Spawn1"].pos.y + destinationPosition.y) / 2)
+      const proposedContainerPosition = new RoomPosition(
+        proposedX,
+        proposedY,
+        thisRoom.name
+      )
       const noConstructionSite =
-        destinationPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
+        proposedContainerPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
       const noBuildingCurrently =
-        destinationPosition.lookFor(LOOK_STRUCTURES).length === 0
+        proposedContainerPosition.lookFor(LOOK_STRUCTURES).length === 0
+      const noTerrainBlocking =
+        proposedContainerPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
+      const noObstructions =
+        proposedContainerPosition.lookFor(LOOK_CREEPS).length === 0
       const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
         filter: (structure) => {
           return structure.structureType === STRUCTURE_CONTAINER
@@ -167,12 +196,17 @@ function unwrappedLoop() {
           }
         }
       ).length
+      const validContainerPosition =
+        noTerrainBlocking &&
+        noObstructions &&
+        noBuildingCurrently &&
+        noConstructionSite
       const totalContainers =
         totalContainersInRoom + totalContainersUnderConstruction
-      if (noConstructionSite && noBuildingCurrently && totalContainers < 5) {
-        destinationPosition.createConstructionSite(STRUCTURE_CONTAINER)
+      if (validContainerPosition && totalContainers < 5) {
+        proposedContainerPosition.createConstructionSite(STRUCTURE_CONTAINER)
         console.log(
-          `🚧 Created construction site for container at ${destinationPosition.x},${destinationPosition.y}`
+          `🚧 Created construction site for container at ${proposedContainerPosition.x},${proposedContainerPosition.y}`
         )
       }
     }
