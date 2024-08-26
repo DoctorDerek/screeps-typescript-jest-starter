@@ -22,12 +22,12 @@ function actionHarvest(creep: Harvester, harvesters: Harvester[]) {
     )
 
     // Assign an unused source to this creep
-    creep.memory.sourceNumber =
-      [...Array(sources.length).keys()].find(
-        (sourceNumber) =>
-          !usedSourceNumbers.includes(sourceNumber) &&
-          creep.pos.findPathTo(sources[sourceNumber]) != null
-      ) || 0
+    creep.memory.sourceNumber = sources.findIndex(
+      (source, sourceIndex) =>
+        // Not assigned to another harvester and reachable by this creep
+        !usedSourceNumbers.includes(sourceIndex) &&
+        creep.pos.findPathTo(source.pos)?.length > 0
+    ) // || Math.floor(Math.random() * sources.length) // Fall back to random
 
     creep.say("🌾 assign")
     console.log(
