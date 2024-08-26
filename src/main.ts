@@ -228,6 +228,18 @@ function unwrappedLoop() {
         { memory: { role: "healer" } }
       )
     }
+    // The fallback role is defenderRanged
+    // [ATTACK, ATTACK, MOVE, MOVE], // 260
+    // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
+    else {
+      const newName = Game.time + "_" + "DefRanged" + defendersRanged.length
+      console.log("Spawning new defender ranged: " + newName)
+      Game.spawns["Spawn1"].spawnCreep(
+        [TOUGH, MOVE, MOVE, RANGED_ATTACK], // 260
+        newName,
+        { memory: { role: "defenderRanged" } }
+      )
+    }
   }
 
   // Visual display if spawn is spawning
