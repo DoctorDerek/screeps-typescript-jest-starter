@@ -29,7 +29,7 @@ const roleBuilder = {
       creep.say("🚧 full")
     }
 
-    if ((creep.memory.building = true)) {
+    if (creep.memory.building == true) {
       creep.memory.mission = "BUILD"
       const buildSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
       const potentialRepairSites = creep.room.find(FIND_STRUCTURES, {
