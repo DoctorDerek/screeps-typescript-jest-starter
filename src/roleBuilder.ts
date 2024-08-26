@@ -63,7 +63,7 @@ const roleBuilder = {
           creep.build(buildSites[creep.memory.buildSiteNumber]) ==
           ERR_NOT_IN_RANGE
         ) {
-          creep.say("🚧 moveR")
+          creep.say("🚧 moveB")
           creep.moveTo(buildSites[creep.memory.buildSiteNumber], {
             visualizePathStyle: { stroke: "#ffffff" }
           })
