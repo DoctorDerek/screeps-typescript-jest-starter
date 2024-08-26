@@ -57,6 +57,11 @@ function unwrappedLoop() {
   ) as Miner[]
 
   const thisRoom = Game.spawns["Spawn1"].room
+
+  // Trigger safe mode if spawn is under half health (last resort)
+  if (Game.spawns["Spawn1"].hits < Game.spawns["Spawn1"].hitsMax / 2)
+    Game.spawns["Spawn1"].room.controller?.activateSafeMode()
+
   /** Select all sources with available energy from this room: */
   const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
   /**
