@@ -1,9 +1,21 @@
-var actionDeposit = require("actionDeposit")
-var actionExplore = require("actionExplore")
+import actionDeposit from "actionDeposit"
+import actionExplore from "actionExplore"
 
-var roleFetcher = {
-  /** @param {Creep} thisCreep **/
-  run: function (thisCreep) {
+export interface Fetcher extends Creep {
+  memory: FetcherMemory
+}
+
+interface FetcherMemory extends CreepMemory {
+  role: "Fetcher"
+  mission: "PICK UP" | "DEPOSIT" | "EXPLORE"
+  destination: string | null
+  depositTargetNumber: number | null
+  droppedResourceNumber: number | null
+  objective: string | null
+}
+
+const roleFetcher = {
+  run: function (thisCreep: Fetcher) {
     // This calculates the creep's carrying capacity by multiplying the number of
     // CARRY parts times the CARRY_CAPACITY per part, which is 50
     const carryingCapacity =
@@ -22,7 +34,7 @@ var roleFetcher = {
       thisCreep.room.createConstructionSite(thisCreep.pos, STRUCTURE_ROAD)
     }
     // Create a decay effect by occasionally wiping the room clean of pending roads
-    if (Math.random < 0.01) {
+    if (Math.random() < 0.01) {
       const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
         filter: { structureType: STRUCTURE_ROAD }
       })
@@ -98,7 +110,8 @@ var roleFetcher = {
             thisCreep.memory.droppedResourceNumber = Math.floor(
               Math.random() * droppedResources.length
             )
-            // TODO Set objective: thisCreep.memory.objective = String(              droppedResources[thisCreep.memory.droppedResourceNumber].pos            )
+            // TODO Set objective:
+            // thisCreep.memory.objective = String(droppedResources[thisCreep.memory.droppedResourceNumber].pos)
             thisCreep.say("🔄 PICK UP")
             console.log(
               `${thisCreep.name} assigned to @droppedResources[${thisCreep.memory.droppedResourceNumber}]`
@@ -138,4 +151,4 @@ var roleFetcher = {
   }
 }
 
-module.exports = roleFetcher
+export default roleFetcher

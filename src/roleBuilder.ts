@@ -1,9 +1,20 @@
-const actionFillUp = require("actionFillUp")
-const actionExplore = require("actionExplore")
+import actionFillUp from "actionFillUp"
+import actionExplore from "actionExplore"
+
+export interface Builder extends Creep {
+  memory: BuilderMemory
+}
+
+interface BuilderMemory extends CreepMemory {
+  building: boolean
+  role: "builder"
+  buildSiteNumber: number | null
+  mission: "FILL UP" | "BUILD" | "EXPLORE"
+  destination: string | null
+}
 
 const roleBuilder = {
-  /** @param {Creep} thisCreep **/
-  run: function (thisCreep) {
+  run: function (thisCreep: Builder) {
     if (thisCreep.store[RESOURCE_ENERGY] < thisCreep.store.getCapacity()) {
       thisCreep.memory.mission = "FILL UP"
       thisCreep.say("🚧 FILL UP")
@@ -52,4 +63,4 @@ const roleBuilder = {
   }
 }
 
-module.exports = roleBuilder
+export default roleBuilder

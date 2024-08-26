@@ -1,6 +1,9 @@
 // var actionExplore = require("actionExplore")
 
-function actionDeposit(thisCreep) {
+import type { Fetcher } from "roleFetcher"
+import type { Harvester } from "roleHarvester"
+
+function actionDeposit(thisCreep: Harvester | Fetcher) {
   thisCreep.say("🚶 depositing")
   const targetDropOffSite = thisCreep.pos.findClosestByPath(
     FIND_MY_STRUCTURES,
@@ -12,7 +15,7 @@ function actionDeposit(thisCreep) {
           (structure.structureType == STRUCTURE_EXTENSION ||
             structure.structureType == STRUCTURE_SPAWN ||
             structure.structureType == STRUCTURE_TOWER ||
-            structure.structureType == STRUCTURE_CONTAINER ||
+            // structure.structureType == STRUCTURE_CONTAINER || // deprecated?
             structure.structureType == STRUCTURE_STORAGE) &&
           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
         )
@@ -47,4 +50,4 @@ function actionDeposit(thisCreep) {
   }
 }
 
-module.exports = actionDeposit
+export default actionDeposit

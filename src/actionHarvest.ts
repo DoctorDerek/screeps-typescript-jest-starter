@@ -1,9 +1,10 @@
-var actionDeposit = require("actionDeposit")
+import actionDeposit from "actionDeposit"
+import type { Harvester } from "roleHarvester"
 
-function actionHarvest(creep) {
+function actionHarvest(creep: Harvester) {
   if (creep.store.getFreeCapacity() > 0) {
     // Go harvest active resources
-    var sources = creep.room.find(FIND_SOURCES_ACTIVE)
+    const sources = creep.room.find(FIND_SOURCES_ACTIVE)
     if (creep.memory.sourceNumber == null) {
       // Randomize current source assignment
       creep.memory.sourceNumber = Math.floor(Math.random() * sources.length)
@@ -27,4 +28,4 @@ function actionHarvest(creep) {
   }
 }
 
-module.exports = actionHarvest
+export default actionHarvest

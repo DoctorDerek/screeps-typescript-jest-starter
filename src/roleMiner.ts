@@ -17,12 +17,25 @@
 // ----> Mission: MINE ---> (until death)
 // --> If no available sources, go to another room
 // ----> Mission: EXPLORE ---> Mission THINK on entering new room
+import actionExplore from "actionExplore"
 
-const actionExplore = require("actionExplore")
+import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 
-const convertRoomPositionStringBackToRoomPositionObject = require("convertRoomPositionStringBackToRoomPositionObject")
+export interface Miner extends Creep {
+  memory: MinerMemory
+}
 
-const assessSources = (thisCreep) => {
+interface MinerMemory extends CreepMemory {
+  role: "Miner"
+  mission: "THINK" | "MINE" | "EXPLORE"
+  depositTargetNumber: number | null
+  droppedResourceNumber: number | null
+  objective: string | null
+  destination: string | null
+  home: Room
+}
+
+const assessSources = (thisCreep: Miner) => {
   const thisRoom = thisCreep.room
 
   // Select all sources with available energy from this room:
@@ -65,7 +78,7 @@ const assessSources = (thisCreep) => {
     (creepName) =>
       Game.creeps[creepName].memory.role === "miner" &&
       Game.creeps[creepName].memory.destination != undefined &&
-      creepName !== thisCreep.Name
+      creepName !== thisCreep.name
   )
   // Using Object.keys() and Array.prototype.filter:
   // const miners = Object.keys(Game.creeps).filter(
@@ -111,8 +124,7 @@ const assessSources = (thisCreep) => {
 }
 
 const roleMiner = {
-  /** @param {Creep} thisCreep **/
-  run: function (thisCreep) {
+  run: function (thisCreep: Miner) {
     if (thisCreep.spawning === true) {
       // INIT mission
       thisCreep.memory.home = thisCreep.room
@@ -164,7 +176,10 @@ const roleMiner = {
             // Think about it if our mining site is giving us an error, such as because it's empty
             thisCreep.memory.mission = "THINK"
           }*/
-          if (thisCreep.harvest(sourceObjectAtObjective) === ERR_NOT_IN_RANGE) {
+          if (
+            sourceObjectAtObjective &&
+            thisCreep.harvest(sourceObjectAtObjective) === ERR_NOT_IN_RANGE
+          ) {
             /*if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
               // Think about it if our mining site is occupied
               thisCreep.memory.mission = "THINK"
@@ -186,4 +201,4 @@ const roleMiner = {
   }
 }
 
-module.exports = roleMiner
+export default roleMiner

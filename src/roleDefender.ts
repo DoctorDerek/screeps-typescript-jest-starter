@@ -1,8 +1,18 @@
-var actionExplore = require("actionExplore")
+import actionExplore from "actionExplore"
 
-var roleDefender = {
+export interface Defender extends Creep {
+  memory: DefenderMemory
+}
+
+interface DefenderMemory extends CreepMemory {
+  role: "defender"
+  mission: null
+  destination: string | null
+}
+
+const roleDefender = {
   /** @param {Creep} thisCreep **/
-  run: function (thisCreep) {
+  run: function (thisCreep: Defender) {
     const target = thisCreep.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
     if (target) {
       thisCreep.say("⚔️ attacking")
@@ -16,4 +26,4 @@ var roleDefender = {
   }
 }
 
-module.exports = roleDefender
+export default roleDefender

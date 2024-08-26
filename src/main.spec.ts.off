@@ -1,9 +1,9 @@
 import { mockGlobal, mockInstanceOf, mockStructure } from "screeps-jest"
-import { unwrappedLoop } from "./main"
-import roleBuilder from "./roles/builder"
-import roleHarvester from "./roles/harvester"
-import roleUpgrader from "./roles/upgrader"
-import { runTower } from "./tower"
+import { unwrappedLoop } from "./main.ts.off"
+import roleBuilder from "./roles/builder.ts.off"
+import roleHarvester from "./roles/harvester.ts.off"
+import roleUpgrader from "./roles/upgrader.ts.off"
+import { runTower } from "./tower.ts.off"
 
 jest.mock("roles/builder")
 jest.mock("roles/harvester")

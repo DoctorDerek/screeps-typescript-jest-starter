@@ -1,7 +1,11 @@
 // TODO: Refactor how destination is stored in memory with newer version (string)
-const convertRoomPositionStringBackToRoomPositionObject = require("convertRoomPositionStringBackToRoomPositionObject")
+import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
+import type { Builder } from "roleBuilder"
+import type { Defender } from "roleDefender"
+import type { Fetcher } from "roleFetcher"
+import type { Miner } from "roleMiner"
 
-function actionExplore(thisCreep) {
+function actionExplore(thisCreep: Builder | Defender | Fetcher | Miner) {
   // TODO: make sure destination is getting unset
   if (
     thisCreep.memory.destination == undefined ||
@@ -13,7 +17,7 @@ function actionExplore(thisCreep) {
       Object.values(Game.map.describeExits(thisCreep.room.name))
     )
     /* Game.map.describeExits(thisCreep.room.name) Return value
-    
+
 
     The exits information in the following format, or null if the room not found.
 
@@ -41,7 +45,7 @@ function actionExplore(thisCreep) {
         `Attempting to call convertRoomPositionStringBackToRoomPositionObject with value ${thisCreep.memory.destination}`
       )
     }
-    if (thisCreep.room.find(FIND_HOSTILE_CREEPS) > 1) {
+    if (thisCreep.room.find(FIND_HOSTILE_CREEPS).length > 1) {
       // Potentially a source keeper room or enemy room, leave it by walking back home
       thisCreep.moveTo(Game.spawns["Spawn1"].pos)
     } else {
@@ -69,4 +73,4 @@ function actionExplore(thisCreep) {
   }
 }
 
-module.exports = actionExplore
+export default actionExplore

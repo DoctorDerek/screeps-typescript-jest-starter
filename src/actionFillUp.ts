@@ -1,14 +1,17 @@
 // var actionExplore = require("actionExplore")
 
-function actionFillUp(thisCreep) {
+import type { Builder } from "roleBuilder"
+import type { Upgrader } from "roleUpgrader"
+
+function actionFillUp(thisCreep: Builder | Upgrader) {
   thisCreep.say("🚶 FILL UP")
   const targetFillUpSite = thisCreep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
     //var targets = thisCreep.room.find(FIND_MY_STRUCTURES, {
     // var targets = Game.spawns["Spawn1"].room.find(FIND_MY_STRUCTURES, {
     filter: (structure) => {
       return (
-        (structure.structureType == STRUCTURE_CONTAINER ||
-          structure.structureType == STRUCTURE_STORAGE) &&
+        //structure.structureType == STRUCTURE_CONTAINER ||
+        structure.structureType == STRUCTURE_STORAGE &&
         structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50
         /*        (structure.structureType == STRUCTURE_EXTENSION ||
           structure.structureType == STRUCTURE_SPAWN ||
@@ -56,4 +59,4 @@ function actionFillUp(thisCreep) {
   }
 }
 
-module.exports = actionFillUp
+export default actionFillUp

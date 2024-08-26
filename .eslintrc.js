@@ -1,7 +1,10 @@
 module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
-  parserOptions: { project: "./tsconfig.eslint.json" },
+  parserOptions: {
+    project: "./tsconfig.eslint.json",
+    extraFileExtensions: [".js"]
+  },
   plugins: ["@typescript-eslint", "only-warn"],
   extends: [
     "plugin:@typescript-eslint/eslint-recommended",
@@ -10,7 +13,7 @@ module.exports = {
     "plugin:prettier/recommended"
   ],
   rules: {
-    "arrow-parens": ["error", "as-needed"],
+    "arrow-parens": ["off"],
     "comma-dangle": ["error", "never"],
     "import/no-unresolved": ["off"],
     "linebreak-style": "off",
@@ -28,7 +31,8 @@ module.exports = {
       }
     ],
     "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-use-before-define": "off"
+    "@typescript-eslint/no-use-before-define": "off",
+    "typescript-eslint/explicit-module-boundary-types": "off"
   },
   overrides: [
     {

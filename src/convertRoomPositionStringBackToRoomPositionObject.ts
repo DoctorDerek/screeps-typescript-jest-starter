@@ -1,4 +1,6 @@
-function convertRoomPositionStringBackToRoomPositionObject(stringRoomPosition) {
+function convertRoomPositionStringBackToRoomPositionObject(
+  stringRoomPosition: string
+) {
   // input example: [room E56N8 pos 23,26]
   // output example: new RoomPosition(23, 26, 'E56N8');
   // Using the constructor for to create a new RoomPosition object: constructor(x, y, roomName)
@@ -12,6 +14,10 @@ function convertRoomPositionStringBackToRoomPositionObject(stringRoomPosition) {
     console.log(`Failed RegExp exec on ${stringRoomPosition}`)
     return new RoomPosition(25, 25, Game.spawns["Spawn1"].room.name)
   } else {
+    if (!resultOfRegExp.groups) {
+      console.log(`Failed RegExp exec on ${stringRoomPosition}`)
+      return new RoomPosition(25, 25, Game.spawns["Spawn1"].room.name)
+    }
     const roomName = resultOfRegExp.groups.roomName // e.g. E56N8
     const xCoordinate = Number(resultOfRegExp.groups.x) // e.g. 23
     const yCoordinate = Number(resultOfRegExp.groups.y) // e.g. 26
@@ -19,5 +25,5 @@ function convertRoomPositionStringBackToRoomPositionObject(stringRoomPosition) {
   }
 }
 
-module.exports = convertRoomPositionStringBackToRoomPositionObject
+export default convertRoomPositionStringBackToRoomPositionObject
 // [room E56N8 pos 0,45]

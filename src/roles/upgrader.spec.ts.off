@@ -1,5 +1,5 @@
 import { mockInstanceOf, mockStructure } from "screeps-jest"
-import roleUpgrader, { Upgrader } from "./upgrader"
+import roleUpgrader, { Upgrader } from "./upgrader.ts.off"
 
 const controller = mockStructure(STRUCTURE_CONTROLLER)
 const source1 = mockInstanceOf<Source>({ id: "source1" as Id<Source> })

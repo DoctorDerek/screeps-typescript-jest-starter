@@ -1,8 +1,16 @@
-const actionFillUp = require("actionFillUp")
+import actionFillUp from "actionFillUp"
+
+export interface Upgrader extends Creep {
+  memory: UpgraderMemory
+}
+
+interface UpgraderMemory extends CreepMemory {
+  role: "Upgrader"
+  upgrading: boolean
+}
 
 const roleUpgrader = {
-  /** @param {Creep} creep **/
-  run: function (creep) {
+  run: function (creep: Upgrader) {
     if (
       creep.memory.upgrading &&
       creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()
@@ -16,7 +24,10 @@ const roleUpgrader = {
     }
 
     if (creep.memory.upgrading) {
-      if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+      if (
+        creep.room.controller &&
+        creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE
+      ) {
         creep.moveTo(creep.room.controller, {
           visualizePathStyle: { stroke: "#ffffff" }
         })
@@ -27,4 +38,4 @@ const roleUpgrader = {
   }
 }
 
-module.exports = roleUpgrader
+export default roleUpgrader
