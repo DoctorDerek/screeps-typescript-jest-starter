@@ -109,15 +109,33 @@ const roleFetcher = {
 
         if (droppedResources.length) {
           if (thisCreep.memory.droppedResourceNumber == null) {
-            // Randomize current droppedResource assignment
-            thisCreep.memory.droppedResourceNumber = Math.floor(
-              Math.random() * droppedResources.length
-            )
+            // Decide on current droppedResource assignment by dividing
+            // the amount of dropped resources by the distance to them:
+            let bestIndex = 0
+            const bestResource = droppedResources.reduce((a, b) => {
+              const aDistance = thisCreep.pos.getRangeTo(a)
+              const bDistance = thisCreep.pos.getRangeTo(b)
+              if (a.amount / aDistance > b.amount / bDistance) {
+                bestIndex = droppedResources.indexOf(a)
+                return a
+              } else {
+                bestIndex = droppedResources.indexOf(b)
+                return b
+              }
+            })
+            thisCreep.memory.droppedResourceNumber = bestIndex
             // TODO Set objective:
             // thisCreep.memory.objective = String(droppedResources[thisCreep.memory.droppedResourceNumber].pos)
-            thisCreep.say("🔄 PICK UP")
+            thisCreep.say(`🛍️ ${bestResource.amount}`)
             console.log(
               `${thisCreep.name} assigned to @droppedResources[${thisCreep.memory.droppedResourceNumber}]`
+            )
+            console.log(
+              `${bestResource.amount} dropped resources at ${
+                bestResource.pos.x
+              },${
+                bestResource.pos.y
+              } with a distance of ${thisCreep.pos.getRangeTo(bestResource)}`
             )
           }
           if (
