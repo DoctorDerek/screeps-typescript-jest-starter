@@ -26,13 +26,16 @@ const roleFetcher = {
 
     // Ant-style: mark current position for a future road
     if (
+      // Limit the number of construction sites to 1 per room:
+      thisCreep.room.find(FIND_CONSTRUCTION_SITES).length < 1 &&
+      // Check there's no construction site in the current tile already:
       _.filter(
         thisCreep.pos.look(),
         (object) => object.type === "constructionSite"
       ).length === 0
-    ) {
+    )
       thisCreep.room.createConstructionSite(thisCreep.pos, STRUCTURE_ROAD)
-    }
+
     // Create a decay effect by occasionally wiping the room clean of pending roads
     if (Math.random() < 0.01) {
       const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
