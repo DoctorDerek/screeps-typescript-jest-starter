@@ -67,7 +67,6 @@ const roleBuilder = {
         } else if (
           creep.build(buildSites[creep.memory.buildSiteNumber]) != OK
         ) {
-          creep.say("🚧 error")
           // There was a different error
           console.log(
             `${creep.name} build error ${creep.build(
