@@ -5,7 +5,6 @@ import type { Healer } from "roleHealer"
 import type { Upgrader } from "roleUpgrader"
 
 function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
-  thisCreep.say("🚶 FILL UP")
   const targetFillUpSite = thisCreep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
     //var targets = thisCreep.room.find(FIND_MY_STRUCTURES, {
     // var targets = Game.spawns["Spawn1"].room.find(FIND_MY_STRUCTURES, {
@@ -25,6 +24,7 @@ function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
     }
   })
   if (targetFillUpSite != null) {
+    const result = thisCreep.withdraw(targetFillUpSite, RESOURCE_ENERGY)
     // There is somewhere to fill up in the current room
     /*    console.log(
       `${thisCreep.name} attempting withdraw with result ${thisCreep.withdraw(
@@ -32,9 +32,9 @@ function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
         RESOURCE_ENERGY
       )}`
     )*/
-    if (
-      thisCreep.withdraw(targetFillUpSite, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE
-    ) {
+    if (result === OK) thisCreep.say("🚶 WITHDRAW")
+    if (result === ERR_NOT_IN_RANGE) {
+      thisCreep.say("🚶 FILL UP")
       thisCreep.moveTo(targetFillUpSite, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
@@ -51,12 +51,16 @@ function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
     )
 
     if (droppedResourceTarget != null) {
-      thisCreep.say("🔄 PICK UP")
+      const result = thisCreep.pickup(droppedResourceTarget)
+      if (result === OK) thisCreep.say("🚶 PICKED")
       if (thisCreep.pickup(droppedResourceTarget) == ERR_NOT_IN_RANGE) {
+        thisCreep.say("🚶 PICK UP")
         thisCreep.moveTo(droppedResourceTarget, {
           visualizePathStyle: { stroke: "#ffaa00" }
         })
       }
+    } else {
+      thisCreep.say("🚶 IDLE")
     }
   }
 }
