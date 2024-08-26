@@ -143,7 +143,7 @@ function unwrappedLoop() {
       // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
       // [WORK, MOVE, MOVE, CARRY], // 250
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, MOVE, MOVE, CARRY], // 250
+        [WORK, WORK, MOVE, CARRY], // 300
         newName,
         { memory: { role: "harvester" } }
       )
