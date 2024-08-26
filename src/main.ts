@@ -154,7 +154,7 @@ function unwrappedLoop() {
         convertRoomPositionStringBackToRoomPositionObject(
           destinationPositionString
         )
-      const proposedX = thisRoom?.controller
+      let proposedX = thisRoom?.controller
         ? Math.floor(
             (Game.spawns["Spawn1"].pos.x +
               destinationPosition.x +
@@ -162,7 +162,7 @@ function unwrappedLoop() {
               3
           )
         : Math.floor((Game.spawns["Spawn1"].pos.x + destinationPosition.x) / 2)
-      const proposedY = thisRoom?.controller
+      let proposedY = thisRoom?.controller
         ? Math.floor(
             (Game.spawns["Spawn1"].pos.y +
               destinationPosition.y +
@@ -170,6 +170,19 @@ function unwrappedLoop() {
               3
           )
         : Math.floor((Game.spawns["Spawn1"].pos.y + destinationPosition.y) / 2)
+      // Check for no terrain blocking, move y using a for loop
+      while (
+        thisRoom
+          .lookAt(proposedX, proposedY)
+          .filter((object) => object.type === "terrain")[0].terrain === "wall"
+      ) {
+        // Random walk weighted 60%/40% in favor of decreasing x/y
+        if (Math.random() > 0.6) Math.random() > 0.5 ? proposedY-- : proposedX--
+        else Math.random() > 0.5 ? proposedY++ : proposedX++
+        if (proposedX < 0 || proposedY < 0) break
+      }
+      proposedX = proposedX < 0 ? 0 : proposedX
+      proposedY = proposedY < 0 ? 0 : proposedY
       const proposedContainerPosition = new RoomPosition(
         proposedX,
         proposedY,
