@@ -2,8 +2,9 @@
 
 import type { Fetcher } from "roleFetcher"
 import type { Harvester } from "roleHarvester"
+import type { Healer } from "roleHealer"
 
-function actionDeposit(thisCreep: Harvester | Fetcher) {
+function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
   thisCreep.say("🚶 depositing")
   const targetDropOffSite = thisCreep.pos.findClosestByPath(
     FIND_MY_STRUCTURES,

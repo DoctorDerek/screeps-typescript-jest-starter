@@ -5,6 +5,7 @@ import roleFetcher, { type Fetcher } from "roleFetcher"
 import roleHarvester, { type Harvester } from "roleHarvester"
 import roleUpgrader, { type Upgrader } from "roleUpgrader"
 import ErrorMapper from "ErrorMapper"
+import roleHealer, { type Healer } from "roleHealer"
 
 // const upperFirstCharacter = (string) => string.slice(0, 1).toUpperCase() + string.slice(1)
 // const unitTypesAndCounts = {harvesters: 6, "upgraders", "builders", "defenders", "fetchers"]
@@ -112,6 +113,11 @@ function unwrappedLoop() {
       (creep) => creep.memory.role == "miner"
     ) as Miner[]
     console.log("Miners: " + miners.length)
+    const healers = _.filter(
+      Game.creeps,
+      (creep) => creep.memory.role == "healer"
+    ) as Miner[]
+    console.log("Healers: " + healers.length)
 
     // Sum all sources across all spawns
     const numberOfSources = Object.values(Game.spawns).reduce(
@@ -196,6 +202,16 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "defender" } }
       )
+    } else if (healers.length < n) {
+      const newName = Game.time + "_" + "Healer" + defenders.length
+      console.log("Spawning new healer: " + newName)
+      // [ATTACK, ATTACK, MOVE, MOVE], // 260
+      // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
+      Game.spawns["Spawn1"].spawnCreep(
+        [HEAL, MOVE], // 300
+        newName,
+        { memory: { role: "healer" } }
+      )
     }
   }
 
@@ -240,6 +256,22 @@ function unwrappedLoop() {
     }
   })
 
+  /** For the healers to know whom to heal */
+  const creepsToHeal = Object.values(Game.creeps)
+    .filter(
+      (creep: Creep) =>
+        creep.memory.role === "healer" || creep.memory.role === "defender"
+    )
+    .sort(
+      // Sort defenders before healers
+      (a, b) => {
+        if (a.memory.role === "defender" && b.memory.role === "healer")
+          return -1
+        if (a.memory.role === "healer" && b.memory.role === "defender") return 1
+        return 0
+      }
+    )
+
   // Run all creeps
   for (const creepName in Game.creeps) {
     try {
@@ -256,6 +288,8 @@ function unwrappedLoop() {
         )
       if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)
       if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
+      if (creep.memory.role == "healer")
+        roleHealer.run(creep as Healer, creepsToHeal)
     } catch (e) {
       console.log(`${creepName} threw a ${e}`)
     }

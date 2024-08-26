@@ -1,9 +1,10 @@
 // var actionExplore = require("actionExplore")
 
 import type { Builder } from "roleBuilder"
+import type { Healer } from "roleHealer"
 import type { Upgrader } from "roleUpgrader"
 
-function actionFillUp(thisCreep: Builder | Upgrader) {
+function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
   thisCreep.say("🚶 FILL UP")
   const targetFillUpSite = thisCreep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
     //var targets = thisCreep.room.find(FIND_MY_STRUCTURES, {
