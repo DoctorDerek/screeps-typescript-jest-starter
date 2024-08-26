@@ -35,11 +35,24 @@ const roleBuilder = {
       if (buildSites.length) {
         creep.say("🚧 build")
         if (creep.memory.buildSiteNumber == null) {
-          creep.memory.buildSiteNumber = Math.floor(
-            Math.random() * buildSites.length
-          )
+          // Find the closest construction site
+          let closestIndex = 0
+          const closestSite = buildSites.reduce((prev, current) => {
+            if (creep.pos.getRangeTo(prev) < creep.pos.getRangeTo(current)) {
+              closestIndex = buildSites.indexOf(prev)
+              return prev
+            }
+            closestIndex = buildSites.indexOf(current)
+            return current
+          })
+          creep.memory.buildSiteNumber = closestIndex
           console.log(
             `${creep.name} assigned to @buildSites[${creep.memory.buildSiteNumber}]`
+          )
+          console.log(
+            `builder moving to ${closestSite.pos.x}, ${
+              closestSite.pos.y
+            } at distance of ${creep.pos.getRangeTo(closestSite)}`
           )
         }
         if (
