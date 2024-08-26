@@ -79,7 +79,7 @@ const roleMiner = {
       thisCreep.memory.mission = "THINK"
     } else {
       if (thisCreep.memory.mission === "THINK") {
-        thisCreep.say("🔄 THINK")
+        thisCreep.say("⛏ THINK")
         thisCreep.memory.objective = null
         thisCreep.memory.destination = null
         assessSources(thisCreep, mineablePositions)
