@@ -13,6 +13,7 @@ interface DefenderMeleeMemory extends CreepMemory {
 const roleDefenderMelee = {
   run: function (thisCreep: DefenderMelee, overwhelmingForce: boolean) {
     if (!overwhelmingForce) {
+      thisCreep.say("⚔️ rally")
       // Go to the rally point in the center of the room
       const x = 23 + Math.floor(Math.random() * 5)
       const y = 23 + Math.floor(Math.random() * 5)

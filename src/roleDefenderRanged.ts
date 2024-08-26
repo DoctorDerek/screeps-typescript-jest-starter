@@ -13,6 +13,7 @@ interface DefenderRangedMemory extends CreepMemory {
 const roleDefenderRanged = {
   run: function (thisCreep: DefenderRanged, overwhelmingForce: boolean) {
     if (!overwhelmingForce) {
+      thisCreep.say("🏹️ rally")
       // Go to the rally point in the center of the room
       const x = 23 + Math.floor(Math.random() * 5)
       const y = 23 + Math.floor(Math.random() * 5)
@@ -24,14 +25,14 @@ const roleDefenderRanged = {
     const targets = thisCreep.pos.findInRange(FIND_HOSTILE_CREEPS, 3)
     if (targets.length >= 1) {
       thisCreep.rangedMassAttack()
-      thisCreep.say("⚔️ mass")
+      thisCreep.say("🏹️ mass")
       return
     }
     const target = thisCreep.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
     if (target) {
-      thisCreep.say("⚔️ ranged")
+      thisCreep.say("🏹️ ranged")
       if (thisCreep.rangedAttack(target) == ERR_NOT_IN_RANGE) {
-        thisCreep.say("⚔️ hunt")
+        thisCreep.say("🏹️ hunt")
         thisCreep.moveTo(target)
       }
     } else if (!target) {
