@@ -42,7 +42,7 @@ const assessSources = (thisCreep: Miner) => {
   const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
   // Make a hash map of destination -> objective coordinates
   // Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,11]
-  const mineablePositions = new Map()
+  const mineablePositions = new Map<string, string>()
   activeSources.forEach((source) => {
     const sourcePositionString = String(source.pos)
     const sourceX = source.pos.x
@@ -66,10 +66,12 @@ const assessSources = (thisCreep: Miner) => {
           mineablePositionAsJSON.y
         ) // Retrieve a RoomPosition object, mineablePosition, from the x,y coordinates
         const mineablePositionString = String(mineablePosition)
-        // Remove occupied positions from the hash map
-        // if (mineablePosition.lookFor(LOOK_CREEPS).length === 0) {
-        mineablePositions.set(mineablePositionString, sourcePositionString)
-        //}
+        if (
+          mineablePosition &&
+          // Remove occupied positions from the hash map:
+          mineablePosition.lookFor(LOOK_CREEPS).length === 0
+        )
+          mineablePositions.set(mineablePositionString, sourcePositionString)
       })
   })
 
@@ -109,17 +111,21 @@ const assessSources = (thisCreep: Miner) => {
     // --> Mission: MINE
     thisCreep.memory.mission = "MINE"
     console.log("Mineable positions: " + [...mineablePositions.keys()])
-    // Select a position available at random and assign it as the mission destination (RoomPosition object stored in memory)
+    // Select a position available at random and assign it as the mission destination
+    // (RoomPosition object stored in memory)
     // Select the nearest mineable position available
-    const destination = [...mineablePositions.keys()].reduce((a, b) =>
-      thisCreep.pos.getRangeTo(a) < thisCreep.pos.getRangeTo(b) ? a : b
-    )
+    const destination = [...mineablePositions.keys()].reduce((a, b) => {
+      const posA = convertRoomPositionStringBackToRoomPositionObject(a)
+      const posB = convertRoomPositionStringBackToRoomPositionObject(b)
+      return thisCreep.pos.getRangeTo(posA) < thisCreep.pos.getRangeTo(posB)
+        ? a
+        : b
+    })
     thisCreep.memory.destination = destination
     // Assign the energy source to the mission objective (string resulting from RoomPosition object stored in memory)
     // Hash key accessed by string lookup of string resulting from RoomPosition
-    thisCreep.memory.objective = mineablePositions.get(
-      thisCreep.memory.destination
-    )
+    thisCreep.memory.objective =
+      mineablePositions.get(thisCreep.memory.destination) || null
     thisCreep.say("⛏️ MINE!!")
     console.log(
       `${thisCreep.name} assigned mission to MINE Objective ${thisCreep.memory.objective} from Destination ${thisCreep.memory.destination}`
