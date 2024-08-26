@@ -33,9 +33,7 @@ const roleBuilder = {
       creep.memory.mission = "BUILD"
       const buildSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
       const potentialRepairSites = creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-          return structure.hits < structure.hitsMax
-        }
+        filter: (structure) => structure.hits < structure.hitsMax
       })
       if (buildSites.length > 0) {
         creep.say("🚧 build")
