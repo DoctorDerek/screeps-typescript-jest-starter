@@ -143,6 +143,7 @@ const roleFetcher = {
               droppedResources[thisCreep.memory.droppedResourceNumber]
             ) == ERR_NOT_IN_RANGE
           ) {
+            thisCreep.say(`🛍️ move`)
             thisCreep.moveTo(
               droppedResources[thisCreep.memory.droppedResourceNumber],
               { visualizePathStyle: { stroke: "#ffaa00" } }
