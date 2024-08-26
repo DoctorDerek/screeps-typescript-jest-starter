@@ -148,7 +148,7 @@ function unwrappedLoop() {
       const noConstructionSite =
         destinationPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
       const noBuildingCurrently =
-        destinationPosition.lookFor(LOOK_STRUCTURES).length
+        destinationPosition.lookFor(LOOK_STRUCTURES).length === 0
       const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
         filter: (structure) => {
           return structure.structureType === STRUCTURE_CONTAINER
@@ -164,7 +164,6 @@ function unwrappedLoop() {
       ).length
       const totalContainers =
         totalContainersInRoom + totalContainersUnderConstruction
-
       if (noConstructionSite && noBuildingCurrently && totalContainers < 5) {
         destinationPosition.createConstructionSite(STRUCTURE_CONTAINER)
         console.log(
