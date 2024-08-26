@@ -225,6 +225,18 @@ function unwrappedLoop() {
     ) as Miner[]
     console.log("Healers: " + healers.length)
 
+    // Once we have miners, the harvester transforms into a builder
+    if (miners.length >= numberOfSources && harvesters.length > 0) {
+      harvesters.forEach((harvester: Harvester) => {
+        const builder = harvester as unknown as Builder
+        builder.memory.role = "builder"
+        builder.memory.building = false
+        builder.memory.buildSiteNumber = null
+        builder.memory.mission = "FILL UP"
+        builder.memory.destination = null
+      })
+    }
+
     // 1 harvester to start, then miner, fetcher, upgrader, builder, defenders
     // x n sources across all rooms
     // Builder will only spawn if there are construction sites.
@@ -239,7 +251,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "harvester" } }
       )
-    } else if (miners.length < (Math.floor(n / 2) || 1)) {
+    } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
       //  [WORK, WORK, MOVE, MOVE], // 300
@@ -249,7 +261,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner" } }
       )
-    } else if (fetchers.length < (Math.floor(n / 4) || 1)) {
+    } else if (fetchers.length < Math.max(Math.floor(n / 4), 1)) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
