@@ -103,7 +103,7 @@ const assessSources = (thisCreep: Miner) => {
     // No available mining positions
     // --> Mission: EXPLORE
     thisCreep.memory.mission = "EXPLORE"
-    thisCreep.say("🔍 EXPLORE")
+    thisCreep.say("🔍 EXPLORE!!")
   } else {
     // Found at least 1 available mining position
     // --> Mission: MINE
@@ -120,7 +120,7 @@ const assessSources = (thisCreep: Miner) => {
     thisCreep.memory.objective = mineablePositions.get(
       thisCreep.memory.destination
     )
-    thisCreep.say("⛏️ MINE")
+    thisCreep.say("⛏️ MINE!!")
     console.log(
       `${thisCreep.name} assigned mission to MINE Objective ${thisCreep.memory.objective} from Destination ${thisCreep.memory.destination}`
     )
@@ -141,9 +141,7 @@ const roleMiner = {
         assessSources(thisCreep)
       }
       if (thisCreep.memory.mission === "MINE") {
-        if (Math.random() < 0.01) {
-          thisCreep.say("🔄 MINE")
-        }
+        thisCreep.say("⛏️ MINE")
         if (
           thisCreep.memory.objective == undefined ||
           thisCreep.memory.destination == undefined
@@ -188,6 +186,7 @@ const roleMiner = {
               // Think about it if our mining site is occupied
               thisCreep.memory.mission = "THINK"
             }*/
+            thisCreep.say("⛏️ MOVE")
             thisCreep.moveTo(destinationPosition, {
               visualizePathStyle: { stroke: "#ffaa00" }
             })
@@ -195,6 +194,7 @@ const roleMiner = {
         }
       }
       if (thisCreep.memory.mission === "EXPLORE") {
+        thisCreep.say("⛏️ EXPLORE")
         // Occasionally think about it
         if (Game.time % 10 === 0) {
           thisCreep.memory.mission = "THINK"
