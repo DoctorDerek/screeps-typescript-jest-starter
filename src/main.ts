@@ -198,7 +198,7 @@ function unwrappedLoop() {
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
       // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
       Game.spawns["Spawn1"].spawnCreep(
-        [RANGED_ATTACK, MOVE, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], // 300
+        [TOUGH, MOVE, MOVE, RANGED_ATTACK], // 260
         newName,
         { memory: { role: "defender" } }
       )
