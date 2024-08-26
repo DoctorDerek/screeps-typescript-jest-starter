@@ -63,6 +63,7 @@ const roleBuilder = {
           creep.moveTo(buildSites[creep.memory.buildSiteNumber], {
             visualizePathStyle: { stroke: "#ffffff" }
           })
+          return
         } else if (
           creep.build(buildSites[creep.memory.buildSiteNumber]) != OK
         ) {
