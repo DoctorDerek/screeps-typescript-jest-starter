@@ -9,6 +9,7 @@ import type { DefenderRanged } from "roleDefenderRanged"
 import type { DefenderMelee } from "roleDefenderMelee"
 import roleDefenderMelee from "roleDefenderMelee"
 import roleDefenderRanged from "roleDefenderRanged"
+import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 
 // const upperFirstCharacter = (string) => string.slice(0, 1).toUpperCase() + string.slice(1)
 // const unitTypesAndCounts = {harvesters: 6, "upgraders", "builders", "defenders", "fetchers"]
@@ -131,6 +132,47 @@ function unwrappedLoop() {
       mineablePositions.delete(positionString)
     })
   })
+
+  // Establish containers at the mining positions
+  mineablePositions.forEach(
+    (sourcePositionString, destinationPositionString) => {
+      /**
+       * Set a construction site for a container at this location if available
+       * because resources dropped on the ground will decay after 300 ticks.
+       * Builders will auto-build the container once the miners set the sites.
+       * */
+      const destinationPosition =
+        convertRoomPositionStringBackToRoomPositionObject(
+          destinationPositionString
+        )
+      const noConstructionSite =
+        destinationPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
+      const noBuildingCurrently =
+        destinationPosition.lookFor(LOOK_STRUCTURES).length
+      const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
+        filter: (structure) => {
+          return structure.structureType === STRUCTURE_CONTAINER
+        }
+      }).length
+      const totalContainersUnderConstruction = thisRoom.find(
+        FIND_MY_CONSTRUCTION_SITES,
+        {
+          filter: (structure) => {
+            return structure.structureType === STRUCTURE_CONTAINER
+          }
+        }
+      ).length
+      const totalContainers =
+        totalContainersInRoom + totalContainersUnderConstruction
+
+      if (noConstructionSite && noBuildingCurrently && totalContainers < 5) {
+        destinationPosition.createConstructionSite(STRUCTURE_CONTAINER)
+        console.log(
+          `🚧 Created construction site for container at ${destinationPosition.x},${destinationPosition.y}`
+        )
+      }
+    }
+  )
 
   // Remove taken positions from the hash map of {"(x,y)": true} coordinates
   miners.forEach((creep) => {

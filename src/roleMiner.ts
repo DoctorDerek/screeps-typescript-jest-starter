@@ -135,34 +135,6 @@ const roleMiner = {
             visualizePathStyle: { stroke: "#ffaa00" }
           })
         }
-
-        /**
-         * Set a construction site for a container at this location if available
-         * because resources dropped on the ground will decay after 300 ticks.
-         * Builders will auto-build the container once the miners set the sites.
-         * */
-        const noConstructionSite =
-          destinationPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
-        const noBuildingCurrently =
-          destinationPosition.lookFor(LOOK_STRUCTURES).length
-        const totalContainersInRoom = thisCreep.room.find(FIND_STRUCTURES, {
-          filter: (structure) => {
-            return structure.structureType === STRUCTURE_CONTAINER
-          }
-        }).length
-        const totalContainersUnderConstruction = thisCreep.room.find(
-          FIND_MY_CONSTRUCTION_SITES,
-          {
-            filter: (structure) => {
-              return structure.structureType === STRUCTURE_CONTAINER
-            }
-          }
-        ).length
-        const totalContainers =
-          totalContainersInRoom + totalContainersUnderConstruction
-
-        if (noConstructionSite && noBuildingCurrently && totalContainers < 5)
-          destinationPosition.createConstructionSite(STRUCTURE_CONTAINER)
       }
     }
     if (thisCreep.memory.mission === "EXPLORE") {
