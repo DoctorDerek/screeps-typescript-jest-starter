@@ -5,7 +5,6 @@ import type { Harvester } from "roleHarvester"
 import type { Healer } from "roleHealer"
 
 function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
-  thisCreep.say("🚶 depositing")
   const targetDropOffSite = thisCreep.pos.findClosestByPath(
     FIND_MY_STRUCTURES,
     {
@@ -25,7 +24,6 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     }
   )
   if (targetDropOffSite != null) {
-    thisCreep.say("🚶 building")
     // There is somewhere to drop it off in the current room
     if (
       thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY) ===
@@ -46,9 +44,7 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
         thisCreep.moveTo(targetConstructionSite, {
           visualizePathStyle: { stroke: "#ffffff" }
         })
-        thisCreep.say("🚶 construction")
       } else {
-        thisCreep.say("🚶 dropping")
         thisCreep.drop(RESOURCE_ENERGY)
         targetConstructionSite = null
       }
@@ -63,7 +59,6 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
         thisCreep.pos.getRangeTo(Game.spawns["Spawn1"].pos) < 3
       ) {
         console.log("Drop it! There are 0 available targets in the home room.")
-        thisCreep.say("DROP IT!")
         // There's an issue, so let's drop our resources and mosey on
         thisCreep.drop(RESOURCE_ENERGY)
       }

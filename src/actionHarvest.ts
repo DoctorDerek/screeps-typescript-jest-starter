@@ -29,15 +29,15 @@ function actionHarvest(creep: Harvester, harvesters: Harvester[]) {
           creep.pos.findPathTo(sources[sourceNumber]) != null
       ) || 0
 
-    creep.say("🔄 assign")
+    creep.say("🌾 assign")
     console.log(
-      `🔄 assign: ${creep.name} assigned to @sources[${creep.memory.sourceNumber}]`
+      `🌾 assign: ${creep.name} assigned to @sources[${creep.memory.sourceNumber}]`
     )
   }
 
   if (hasRoom && creep.memory.sourceNumber != null) {
     if (creep.harvest(sources[creep.memory.sourceNumber]) == ERR_NOT_IN_RANGE) {
-      creep.say("🔄 move")
+      creep.say("🌾 move")
       if (
         creep.moveTo(sources[creep.memory.sourceNumber], {
           visualizePathStyle: { stroke: "#ffaa00" }
@@ -48,13 +48,14 @@ function actionHarvest(creep: Harvester, harvesters: Harvester[]) {
     if (creep.harvest(sources[creep.memory.sourceNumber || 0]) === OK) {
       // Log destination while harvesting
       creep.memory.destination = { x: creep.pos.x, y: creep.pos.y }
-      creep.say("🔄 harvest")
+      creep.say("🌾 harvest")
     }
   }
 
   if (isFull) {
     // Deposit if full
     creep.memory.destination = null
+    creep.say("🌾 deposit")
     actionDeposit(creep)
   }
 }
