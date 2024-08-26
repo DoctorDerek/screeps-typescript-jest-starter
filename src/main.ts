@@ -168,14 +168,14 @@ function unwrappedLoop() {
         { memory: { role: "fetcher" } }
       )
     } else if (miners.length < n) {
-      const newName = Game.time + "_" + "Fetcher" + fetchers.length
-      console.log("Spawning new fetcher: " + newName)
-      // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
-      //        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
+      const newName = Game.time + "_" + "Miner" + miners.length
+      console.log("Spawning new miner: " + newName)
+      //  [WORK, WORK, MOVE, MOVE], // 300
+      // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
       Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
+        [WORK, WORK, MOVE], // 250
         newName,
-        { memory: { role: "fetcher" } }
+        { memory: { role: "miner" } }
       )
     } else if (fetchers.length < n) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
