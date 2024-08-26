@@ -8,10 +8,13 @@ interface DefenderRangedMemory extends CreepMemory {
   role: "defenderRanged"
   mission: null
   destination: string | null
+  /** Once `overwhelmingForce` triggers, fury means a fight to the death. */
+  fury: boolean
 }
 
 const roleDefenderRanged = {
   run: function (thisCreep: DefenderRanged, overwhelmingForce: boolean) {
+    const fury = thisCreep.memory.fury
     if (!overwhelmingForce) {
       thisCreep.say("🏹️ rally")
       // Go to the rally point in the center of the room
@@ -19,7 +22,8 @@ const roleDefenderRanged = {
       const y = 23 + Math.floor(Math.random() * 5)
       thisCreep.moveTo(new RoomPosition(x, y, thisCreep.room.name))
       return
-    } else if (overwhelmingForce) {
+    } else if (fury || overwhelmingForce) {
+      thisCreep.memory.fury = true
       // Check for hostile units within 3 tiles for ranged mass attack
       const targets = thisCreep.pos.findInRange(FIND_HOSTILE_CREEPS, 3)
       if (targets.length >= 1) {
