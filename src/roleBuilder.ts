@@ -32,8 +32,9 @@ const roleBuilder = {
     if (creep.memory.building == true) {
       creep.memory.mission = "BUILD"
       const buildSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
+      /** Buildings less than 50% HP are eligible for repair. */
       const potentialRepairSites = creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) => structure.hits < structure.hitsMax
+        filter: (structure) => structure.hits / structure.hitsMax < 0.5
       })
       if (buildSites.length > 0) {
         creep.say("🚧 build")
