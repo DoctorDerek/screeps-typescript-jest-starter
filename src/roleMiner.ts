@@ -100,6 +100,32 @@ const assessSources = (thisCreep: Miner) => {
     mineablePositions.delete(takenPositionString)
   })
 
+  // Remove positions near source keeper lairs as these are "too hot" to mine
+  // (e.g. 5 tiles away from the lair)
+  const sourceKeeperLairs = thisRoom.find(FIND_HOSTILE_STRUCTURES, {
+    filter: (structure) => structure.structureType === STRUCTURE_KEEPER_LAIR
+  })
+  sourceKeeperLairs.forEach((lair) => {
+    const lairX = lair.pos.x
+    const lairY = lair.pos.y
+    const lookArray = thisRoom.lookForAtArea(
+      LOOK_TERRAIN,
+      lairY - 5,
+      lairX - 5,
+      lairY + 5,
+      lairX + 5,
+      true
+    )
+    lookArray.forEach((positionAsJSON) => {
+      const position = thisRoom.getPositionAt(
+        positionAsJSON.x,
+        positionAsJSON.y
+      )
+      const positionString = String(position)
+      mineablePositions.delete(positionString)
+    })
+  })
+
   // The hash map mineablePositions now only includes available positions
   if (mineablePositions.size === 0) {
     // No available mining positions
