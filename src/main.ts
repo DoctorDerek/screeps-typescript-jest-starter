@@ -177,7 +177,13 @@ function unwrappedLoop() {
       const totalExtensions =
         totalExtensionsInRoom + totalExtensionsUnderConstruction
       // There's an early limit of 5/room for each of containers and extensions
-      if (totalContainers >= 5 && totalExtensions >= 5) return
+      const totalSum = totalContainers + totalExtensions
+      // Find current Screeps level limit of containers per room
+      const roomLevel = thisRoom.controller?.level || 1
+      // If the room level is less than 2, then there's a hard limit of 5/room
+      if (totalSum >= 5 && roomLevel < 2) return
+      // If the room level is 2 or greater, then there's a hard limit of 10/room
+      if (totalSum >= 10 && roomLevel >= 2) return
       const buildingType =
         totalContainers < 5 ? STRUCTURE_CONTAINER : STRUCTURE_EXTENSION
       /**
