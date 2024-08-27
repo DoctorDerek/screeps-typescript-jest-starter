@@ -43,11 +43,6 @@ function actionExplore(
       `${thisCreep.name} assigned mission to EXPLORE to Destination ${thisCreep.memory.destination}`
     )
   } else {
-    if (thisCreep.memory.destination == undefined) {
-      console.log(
-        `Attempting to call convertRoomPositionStringBackToRoomPositionObject with value ${thisCreep.memory.destination}`
-      )
-    }
     if (thisCreep.room.find(FIND_HOSTILE_CREEPS).length > 1) {
       // Potentially a source keeper room or enemy room, leave it by walking back home
       thisCreep.moveTo(Game.spawns["Spawn1"].pos)
