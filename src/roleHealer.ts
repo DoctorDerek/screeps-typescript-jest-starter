@@ -1,4 +1,5 @@
 import actionHeal from "actionHeal"
+import type { Position } from "main"
 
 export interface Healer extends Creep {
   memory: HealerMemory
@@ -7,7 +8,7 @@ export interface Healer extends Creep {
 interface HealerMemory extends CreepMemory {
   role: "Healer"
   mission: "HEAL"
-  destination: string | null
+  destination: Position | null
   target: "container" | "extension" | null
 }
 

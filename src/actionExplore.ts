@@ -1,13 +1,21 @@
 // TODO: Refactor how destination is stored in memory with newer version (string)
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
+import type { Position, RoomName } from "main"
 import type { Builder } from "roleBuilder"
 import type { DefenderMelee } from "roleDefenderMelee"
 import type { DefenderRanged } from "roleDefenderRanged"
 import type { Fetcher } from "roleFetcher"
+import type { Harvester } from "roleHarvester"
 import type { Miner } from "roleMiner"
 
 function actionExplore(
-  thisCreep: Builder | DefenderMelee | DefenderRanged | Fetcher | Miner
+  thisCreep:
+    | Builder
+    | DefenderMelee
+    | DefenderRanged
+    | Fetcher
+    | Harvester
+    | Miner
 ) {
   // TODO: make sure destination is getting unset
   if (
@@ -32,12 +40,13 @@ function actionExplore(
     } */
 
     // Select an exit to move to at random
-    const destinationRoom =
-      exitRoomNameArray[Math.floor(exitRoomNameArray.length * Math.random())]
+    const destinationRoom = exitRoomNameArray[
+      Math.floor(exitRoomNameArray.length * Math.random())
+    ] as RoomName
 
     thisCreep.memory.destination = String(
       new RoomPosition(25, 25, destinationRoom)
-    )
+    ) as Position
 
     console.log(
       `${thisCreep.name} assigned mission to EXPLORE to Destination ${thisCreep.memory.destination}`

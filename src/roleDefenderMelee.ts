@@ -1,4 +1,5 @@
 import actionExplore from "actionExplore"
+import type { Position } from "main"
 
 export interface DefenderMelee extends Creep {
   memory: DefenderMeleeMemory
@@ -7,7 +8,7 @@ export interface DefenderMelee extends Creep {
 interface DefenderMeleeMemory extends CreepMemory {
   role: "defenderMelee"
   mission: null
-  destination: string | null
+  destination: Position | null
   /** Once `overwhelmingForce` triggers, fury means a fight to the death. */
   fury: boolean
 }

@@ -1,5 +1,6 @@
 import actionFillUp from "actionFillUp"
 import actionExplore from "actionExplore"
+import type { Position } from "main"
 
 export interface Builder extends Creep {
   memory: BuilderMemory
@@ -10,7 +11,7 @@ interface BuilderMemory extends CreepMemory {
   role: "builder"
   buildSiteNumber: number | null
   mission: "FILL UP" | "BUILD" | "EXPLORE"
-  destination: string | null
+  destination: Position | null
 }
 
 const roleBuilder = {

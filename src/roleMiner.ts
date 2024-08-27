@@ -20,30 +20,31 @@
 import actionExplore from "actionExplore"
 
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
+import type { MineablePositions, Position } from "main"
 
 export interface Miner extends Creep {
   memory: MinerMemory
 }
 
 interface MinerMemory extends CreepMemory {
-  role: "Miner"
+  role: "miner"
   mission: "THINK" | "MINE" | "EXPLORE"
   depositTargetNumber: number | null
   droppedResourceNumber: number | null
-  objective: string | null
-  destination: string | null
-  home: Room
+  objective: Position | null
+  destination: Position | null
+  home: Position | null
 }
 
 const assessSources = (
   thisCreep: Miner,
-  availableMiningPositions: Map<string, string>
+  availableMiningPositions: MineablePositions
 ) => {
   if (availableMiningPositions.size === 0) {
     // No available mining positions
     // --> Mission: EXPLORE
     thisCreep.memory.mission = "EXPLORE"
-    thisCreep.say("🔍 EXPLORE!!")
+    thisCreep.say("⛏️ EXPLORE!!")
   } else {
     // Found at least 1 available mining position
     // --> Mission: MINE
@@ -55,9 +56,9 @@ const assessSources = (
     const destination = [...availableMiningPositions.keys()].reduce((a, b) => {
       const posA = convertRoomPositionStringBackToRoomPositionObject(a)
       const posB = convertRoomPositionStringBackToRoomPositionObject(b)
-      return thisCreep.pos.getRangeTo(posA) < thisCreep.pos.getRangeTo(posB)
-        ? a
-        : b
+      const rangeToA = thisCreep.pos.getRangeTo(posA)
+      const rangeToB = thisCreep.pos.getRangeTo(posB)
+      return rangeToA < rangeToB ? a : b
     })
     thisCreep.memory.destination = destination
     // Assign the energy source to the mission objective (string resulting from RoomPosition object stored in memory)
@@ -72,10 +73,10 @@ const assessSources = (
 }
 
 const roleMiner = {
-  run: function (thisCreep: Miner, mineablePositions: Map<string, string>) {
+  run: function (thisCreep: Miner, mineablePositions: MineablePositions) {
     if (!thisCreep?.memory?.mission) {
       // INIT mission
-      thisCreep.memory.home = thisCreep.room
+      thisCreep.memory.home = String(thisCreep.pos) as Position
       thisCreep.memory.mission = "THINK"
     }
     if (thisCreep.memory.mission === "THINK") {
@@ -102,9 +103,11 @@ const roleMiner = {
           )
         const sourceObjectAtObjective =
           sourcePosition.findClosestByRange(FIND_SOURCES)
-        if (!sourceObjectAtObjective)
+        if (!sourceObjectAtObjective) {
           // Shouldn't happen, but if it does, think about it
-          return (thisCreep.memory.mission = "THINK")
+          thisCreep.memory.mission = "THINK"
+          return
+        }
         const result = thisCreep.harvest(sourceObjectAtObjective)
         if (result === OK) thisCreep.say("⛏️ MINE")
         if (result === ERR_NOT_IN_RANGE) {
@@ -131,11 +134,14 @@ const roleMiner = {
       }
       if (thisCreep.memory.mission === "EXPLORE") {
         // If there are mineable positions unexploited in the room, go to them
-        if (mineablePositions.size > 0)
-          return (thisCreep.memory.mission = "THINK")
-        // mineablePositions.size === 0
-        thisCreep.say("⛏️ EXPLORE")
-        actionExplore(thisCreep)
+        if (mineablePositions.size > 0) {
+          thisCreep.memory.mission = "THINK"
+          thisCreep.say("⛏️ THINK")
+          assessSources(thisCreep, mineablePositions)
+        } else if (mineablePositions.size === 0) {
+          thisCreep.say("⛏️ EXPLORE")
+          actionExplore(thisCreep)
+        }
       }
     }
   }

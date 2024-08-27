@@ -1,5 +1,7 @@
+import type { Position } from "main"
+
 function convertRoomPositionStringBackToRoomPositionObject(
-  stringRoomPosition: string
+  stringRoomPosition: Position
 ) {
   // input example: [room E56N8 pos 23,26]
   // output example: new RoomPosition(23, 26, 'E56N8');

@@ -11,6 +11,21 @@ import roleDefenderMelee from "roleDefenderMelee"
 import roleDefenderRanged from "roleDefenderRanged"
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 
+/** IntRange<0,49> types create unions too complex to evaluate 😎 */
+export type X = number
+export type Y = number
+export type RoomName = `${"E" | "W"}${number}${"N" | "S"}${number}`
+/**
+ * Hash map destination (mineable position) -> objective (source) coordinates.
+ * Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,12]
+ * */
+export type Position = `[room ${RoomName} pos ${X},${Y}]`
+export type MineablePosition = Position
+export type SourcePosition = Position
+export type MineablePositions = Map<MineablePosition, SourcePosition>
+
+export type MineablePositionsMap = Map<RoomName, MineablePositions>
+
 // const upperFirstCharacter = (string) => string.slice(0, 1).toUpperCase() + string.slice(1)
 // const unitTypesAndCounts = {harvesters: 6, "upgraders", "builders", "defenders", "fetchers"]
 /*  BODYPART_COST: {
@@ -39,7 +54,7 @@ import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositi
 declare global {
   interface CreepMemory {
     role: string
-    destination?: string | null | { x: number; y: number }
+    destination?: Position | null | { x: number; y: number }
   }
 }
 function unwrappedLoop() {
@@ -50,14 +65,14 @@ function unwrappedLoop() {
       console.log("Clearing non-existing creep memory:", name)
     }
   }
+  // Populate the mineablePositions hash map across every room where I have vision
+  const allRooms = Object.keys(Game.rooms) as RoomName[]
+  const mineablePositionsMap = new Map() as MineablePositionsMap
 
   const miners = _.filter(
     Game.creeps,
     (creep) => creep.memory.role == "miner"
   ) as Miner[]
-
-  type MineablePositionsMap = Map<`${number},${number}`, `${number},${number}`>
-  // Populate the mineablePositions hash map across every room where I have vision
 
   const thisRoom = Game.spawns["Spawn1"].room
 
@@ -68,30 +83,6 @@ function unwrappedLoop() {
   /** Select all sources with available energy from this room: */
   const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
 
-  type Enumerate<
-    N extends number,
-    Acc extends number[] = []
-  > = Acc["length"] extends N
-    ? Acc[number]
-    : Enumerate<N, [...Acc, Acc["length"]]>
-
-  type IntRange<F extends number, T extends number> = Exclude<
-    Enumerate<T>,
-    Enumerate<F>
-  >
-
-  type X = IntRange<0, 49>
-  type Y = IntRange<0, 49>
-  /**
-   * Hash map destination (mineable position) -> objective (source) coordinates.
-   * Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,12]
-   * */
-  type Position = `[room ${"E" | "W"}${number}${
-    | "N"
-    | "S"}${number} pos ${X},${Y}]`
-  type MineablePosition = Position
-  type SourcePosition = Position
-  type MineablePositions = Map<MineablePosition, SourcePosition>
   const mineablePositions = new Map() as MineablePositions
   /**
    * `mineablePositions` is all of the available positions to mine taking into
@@ -664,12 +655,7 @@ function unwrappedLoop() {
         roleMiner.run(creep as Miner, availableMineablePositions)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")
-        roleHarvester.run(
-          creep as Harvester,
-          Object.values(Game.creeps).filter(
-            (creep: Creep) => creep.memory.role === "harvester"
-          ) as Harvester[]
-        )
+        roleHarvester.run(creep as Harvester)
       if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)
       if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
       if (creep.memory.role == "healer")

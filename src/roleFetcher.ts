@@ -1,5 +1,6 @@
 import actionDeposit from "actionDeposit"
 import actionExplore from "actionExplore"
+import type { Position } from "main"
 
 export interface Fetcher extends Creep {
   memory: FetcherMemory
@@ -8,7 +9,7 @@ export interface Fetcher extends Creep {
 interface FetcherMemory extends CreepMemory {
   role: "Fetcher"
   mission: "PICK UP" | "DEPOSIT" | "EXPLORE"
-  destination: string | null
+  destination: Position | null
   depositTargetNumber: number | null
   droppedResourceNumber: number | null
   objective: string | null

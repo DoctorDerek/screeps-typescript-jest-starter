@@ -1,4 +1,5 @@
 import actionHarvest from "actionHarvest"
+import type { Position } from "main"
 
 export interface Harvester extends Creep {
   memory: HarvesterMemory
@@ -10,16 +11,14 @@ interface HarvesterMemory extends CreepMemory {
   depositTargetNumber: number | null
   droppedResourceNumber: number | null
   objective: string | null
-  destination: { x: number; y: number } | null
+  destination: Position | null
   sourceNumber: number | null
   target: "container" | "extension" | null
 }
 
 const roleHarvester = {
-  run: function (creep: Harvester, harvesters: Harvester[]) {
-    // Harvester is the first creep and is useless after 500 ticks
-    if ((creep?.ticksToLive || 1500) < 1000) creep.suicide()
-    actionHarvest(creep, harvesters)
+  run: function (creep: Harvester) {
+    actionHarvest(creep)
   }
 }
 
