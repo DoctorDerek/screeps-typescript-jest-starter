@@ -4,6 +4,7 @@ import type { Position, RoomName } from "main"
 import type { Builder } from "roleBuilder"
 import type { DefenderMelee } from "roleDefenderMelee"
 import type { DefenderRanged } from "roleDefenderRanged"
+import type { Eye } from "roleEye"
 import type { Fetcher } from "roleFetcher"
 import type { Harvester } from "roleHarvester"
 import type { Miner } from "roleMiner"
@@ -13,6 +14,7 @@ function actionExplore(
     | Builder
     | DefenderMelee
     | DefenderRanged
+    | Eye
     | Fetcher
     | Harvester
     | Miner

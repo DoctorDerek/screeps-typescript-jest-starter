@@ -10,6 +10,7 @@ import type { DefenderMelee } from "roleDefenderMelee"
 import roleDefenderMelee from "roleDefenderMelee"
 import roleDefenderRanged from "roleDefenderRanged"
 import findMineablePositions from "findMineablePositions"
+import roleEye, { type Eye } from "roleEye"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
 export type X = number
@@ -206,6 +207,11 @@ function unwrappedLoop() {
       (creep) => creep.memory.role == "healer"
     ) as Miner[]
     console.log("Healers: " + healers.length)
+    const eyes = _.filter(
+      Game.creeps,
+      (creep) => creep.memory.role == "eye"
+    ) as Miner[]
+    console.log("Eyes: " + eyes.length)
 
     // Once we have miners, the harvester transforms into a builder
     if (miners.length >= numberOfSources && harvesters.length > 0) {
@@ -247,6 +253,14 @@ function unwrappedLoop() {
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
         { memory: { role: "harvester" } }
+      )
+    } else if (eyes.length < Math.max(Math.floor(n / 4), 2)) {
+      const newName = Game.time + "_" + "Eyes" + eyes.length
+      console.log("Spawning new eye: " + newName)
+      Game.spawns["Spawn1"].spawnCreep(
+        [MOVE], // 50
+        newName,
+        { memory: { role: "eye" } }
       )
     } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Miner" + miners.length
@@ -478,6 +492,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
       if (creep.memory.role == "healer")
         roleHealer.run(creep as Healer, creepsToHeal)
+      if (creep.memory.role == "eye") roleEye.run(creep as Eye)
     } catch (e) {
       console.log(`${creep.name} threw a ${e}`)
     }
