@@ -72,7 +72,7 @@ TOUGH 	10 	No effect, just additional hit points to the creep's body. Can be boo
 
 const creepRoles = [
   {
-    role: "Miner",
+    role: "miner",
     buildTemplate: [WORK, WORK, MOVE],
     emoji: "⛏️"
   }

@@ -216,12 +216,10 @@ function unwrappedLoop() {
     // Once we have miners, the harvester transforms into a builder
     if (miners.length >= numberOfSources && harvesters.length > 0) {
       harvesters.forEach((harvester: Harvester) => {
-        const builder = harvester as unknown as Builder
-        builder.memory.role = "builder"
-        builder.memory.building = false
-        builder.memory.buildSiteNumber = null
-        builder.memory.mission = "FILL UP"
-        builder.memory.destination = null
+        const fetcher = harvester as unknown as Fetcher
+        fetcher.memory.role = "fetcher"
+        fetcher.memory.mission = "FILL UP"
+        fetcher.memory.destination = null
       })
     }
     // If there are no construction sites, the builders transform into upgraders

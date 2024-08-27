@@ -6,7 +6,7 @@ export interface Eye extends Creep {
 }
 
 interface EyeMemory extends CreepMemory {
-  role: "Eye"
+  role: "eye"
   mission: "EXPLORE" | "THINK" | null
   destination: Position | null
 }

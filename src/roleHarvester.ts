@@ -6,7 +6,7 @@ export interface Harvester extends Creep {
 }
 
 interface HarvesterMemory extends CreepMemory {
-  role: "Harvester"
+  role: "harvester"
   mission: "PICK UP" | "DEPOSIT" | "EXPLORE"
   depositTargetNumber: number | null
   droppedResourceNumber: number | null

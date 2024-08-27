@@ -7,7 +7,7 @@ export interface Fetcher extends Creep {
 }
 
 interface FetcherMemory extends CreepMemory {
-  role: "Fetcher"
+  role: "fetcher"
   mission: "PICK UP" | "DEPOSIT" | "EXPLORE"
   destination: Position | null
   depositTargetNumber: number | null

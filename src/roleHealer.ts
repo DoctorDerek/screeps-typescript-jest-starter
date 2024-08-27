@@ -6,7 +6,7 @@ export interface Healer extends Creep {
 }
 
 interface HealerMemory extends CreepMemory {
-  role: "Healer"
+  role: "healer"
   mission: "HEAL"
   destination: Position | null
   target: "container" | "extension" | null
