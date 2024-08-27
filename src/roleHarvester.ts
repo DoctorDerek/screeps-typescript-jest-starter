@@ -12,6 +12,7 @@ interface HarvesterMemory extends CreepMemory {
   objective: string | null
   destination: { x: number; y: number } | null
   sourceNumber: number | null
+  target: "container" | "extension" | null
 }
 
 const roleHarvester = {

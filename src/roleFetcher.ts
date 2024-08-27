@@ -12,6 +12,7 @@ interface FetcherMemory extends CreepMemory {
   depositTargetNumber: number | null
   droppedResourceNumber: number | null
   objective: string | null
+  target: "container" | "extension" | null
 }
 
 const roleFetcher = {
