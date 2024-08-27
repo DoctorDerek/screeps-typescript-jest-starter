@@ -56,6 +56,9 @@ function unwrappedLoop() {
     (creep) => creep.memory.role == "miner"
   ) as Miner[]
 
+  type MineablePositionsMap = Map<`${number},${number}`, `${number},${number}`>
+  // Populate the mineablePositions hash map across every room where I have vision
+
   const thisRoom = Game.spawns["Spawn1"].room
 
   // Trigger safe mode if spawn is under half health (last resort)
@@ -64,20 +67,41 @@ function unwrappedLoop() {
 
   /** Select all sources with available energy from this room: */
   const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
+
+  type Enumerate<
+    N extends number,
+    Acc extends number[] = []
+  > = Acc["length"] extends N
+    ? Acc[number]
+    : Enumerate<N, [...Acc, Acc["length"]]>
+
+  type IntRange<F extends number, T extends number> = Exclude<
+    Enumerate<T>,
+    Enumerate<F>
+  >
+
+  type X = IntRange<0, 49>
+  type Y = IntRange<0, 49>
   /**
-   * Make a hash map of destination -> objective coordinates.
+   * Hash map destination (mineable position) -> objective (source) coordinates.
    * Both are strings: e.g. [room E55N6 pos 14,11] -> [room E55N6 pos 14,12]
    * */
-  const mineablePositions = new Map<string, string>()
+  type Position = `[room ${"E" | "W"}${number}${
+    | "N"
+    | "S"}${number} pos ${X},${Y}]`
+  type MineablePosition = Position
+  type SourcePosition = Position
+  type MineablePositions = Map<MineablePosition, SourcePosition>
+  const mineablePositions = new Map() as MineablePositions
   /**
    * `mineablePositions` is all of the available positions to mine taking into
    * account that some sources are too close to Source Keeper Lairs.
    * `availableMineablePositions` accounts for miners that are already mining,
    * so this is the list sent to the miners themselves.
    * */
-  const availableMineablePositions = new Map<string, string>()
+  const availableMineablePositions = new Map() as MineablePositions
   activeSources.forEach((source) => {
-    const sourcePositionString = String(source.pos)
+    const sourcePositionString = String(source.pos) as SourcePosition
     const sourceX = source.pos.x
     const sourceY = source.pos.y
     // lookForAtArea(type, top, left, bottom, right, [asArray])
@@ -94,11 +118,15 @@ function unwrappedLoop() {
       .forEach((mineablePositionAsJSON) => {
         // Each item returned by lookForAtArea looks like:
         // {"type":"terrain","terrain":"plain","x":24,"y":42}
+        // Retrieve RoomPosition object `mineablePosition` from x,y coordinates
         const mineablePosition = thisRoom.getPositionAt(
           mineablePositionAsJSON.x,
           mineablePositionAsJSON.y
-        ) // Retrieve a RoomPosition object, mineablePosition, from the x,y coordinates
-        const mineablePositionString = String(mineablePosition)
+        )
+        if (!mineablePosition) return // Shouldn't happen, but fixes types.
+        const mineablePositionString = String(
+          mineablePosition
+        ) as MineablePosition
         mineablePositions.set(mineablePositionString, sourcePositionString)
         if (
           mineablePosition &&
@@ -133,7 +161,7 @@ function unwrappedLoop() {
         positionAsJSON.x,
         positionAsJSON.y
       )
-      const positionString = String(position)
+      const positionString = String(position) as MineablePosition
       mineablePositions.delete(positionString)
     })
   })
@@ -289,7 +317,9 @@ function unwrappedLoop() {
   // Remove taken positions from the hash map of {"(x,y)": true} coordinates
   miners.forEach((creep) => {
     if (!creep.memory.destination) return // Miner has no destination
-    const takenPositionString = String(creep.memory.destination)
+    const takenPositionString = String(
+      creep.memory.destination
+    ) as MineablePosition
     // e.g. [room E55N6 pos 14,11]
     availableMineablePositions.delete(takenPositionString)
   })
