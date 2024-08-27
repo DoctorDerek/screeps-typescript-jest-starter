@@ -24,7 +24,7 @@ function actionExplore(
     thisCreep.memory.destination == undefined ||
     typeof thisCreep.memory.destination != "string"
   ) {
-    thisCreep.say("🚶 EXPLORE")
+    thisCreep.say("👁️ ASSIGN")
     // const exitPositions = thisCreep.room.find(FIND_EXIT)
     const exitRoomNameArray = Array.from(
       Object.values(Game.map.describeExits(thisCreep.room.name))
@@ -58,6 +58,7 @@ function actionExplore(
       // Potentially a source keeper room or enemy room, leave it by walking back home
       thisCreep.moveTo(Game.spawns["Spawn1"].pos)
     } else {
+      thisCreep.say("👁️ EXPLORE")
       // Move toward the assigned exit tile
       thisCreep.moveTo(
         convertRoomPositionStringBackToRoomPositionObject(
