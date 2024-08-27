@@ -145,6 +145,7 @@ function unwrappedLoop() {
    * */
   mineablePositions.forEach(
     (sourcePositionString, destinationPositionString) => {
+      // Containers aren't in FIND_MY_STRUCTURES, so I need FIND_STRUCTURES
       const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
         filter: (structure) => {
           return structure.structureType === STRUCTURE_CONTAINER
@@ -160,7 +161,25 @@ function unwrappedLoop() {
       ).length
       const totalContainers =
         totalContainersInRoom + totalContainersUnderConstruction
-      if (totalContainers >= 5) return // There's an early game limit of 5/room
+      const totalExtensionsInRoom = thisRoom.find(FIND_MY_STRUCTURES, {
+        filter: (structure) => {
+          return structure.structureType === STRUCTURE_EXTENSION
+        }
+      }).length
+      const totalExtensionsUnderConstruction = thisRoom.find(
+        FIND_MY_CONSTRUCTION_SITES,
+        {
+          filter: (structure) => {
+            return structure.structureType === STRUCTURE_EXTENSION
+          }
+        }
+      ).length
+      const totalExtensions =
+        totalExtensionsInRoom + totalExtensionsUnderConstruction
+      // There's an early limit of 5/room for each of containers and extensions
+      if (totalContainers >= 5 && totalExtensions >= 5) return
+      const buildingType =
+        totalContainers < 5 ? STRUCTURE_CONTAINER : STRUCTURE_EXTENSION
       /**
        * Set a construction site for a container at this location if available
        * because resources dropped on the ground will decay after 300 ticks.
@@ -199,28 +218,28 @@ function unwrappedLoop() {
       }
       proposedX = proposedX < 0 ? 0 : proposedX
       proposedY = proposedY < 0 ? 0 : proposedY
-      const proposedContainerPosition = new RoomPosition(
+      const proposedBuildingPosition = new RoomPosition(
         proposedX,
         proposedY,
         thisRoom.name
       )
       const noConstructionSite =
-        proposedContainerPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
+        proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
       const noBuildingCurrently =
-        proposedContainerPosition.lookFor(LOOK_STRUCTURES).length === 0
+        proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0
       const noTerrainBlocking =
-        proposedContainerPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
+        proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
       const noObstructions =
-        proposedContainerPosition.lookFor(LOOK_CREEPS).length === 0
-      const validContainerPosition =
+        proposedBuildingPosition.lookFor(LOOK_CREEPS).length === 0
+      const validBuildingPosition =
         noTerrainBlocking &&
         noObstructions &&
         noBuildingCurrently &&
         noConstructionSite
-      if (validContainerPosition) {
-        proposedContainerPosition.createConstructionSite(STRUCTURE_CONTAINER)
+      if (validBuildingPosition) {
+        proposedBuildingPosition.createConstructionSite(buildingType)
         console.log(
-          `🚧 Created construction site for container at ${proposedContainerPosition.x},${proposedContainerPosition.y}`
+          `🚧 Created construction site ${buildingType} at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
         )
       }
     }
