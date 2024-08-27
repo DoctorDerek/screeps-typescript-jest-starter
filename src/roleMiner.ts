@@ -110,7 +110,7 @@ const roleMiner = {
       }
       const result = thisCreep.harvest(sourceObjectAtObjective)
       if (result === OK) thisCreep.say("⛏️ MINE")
-      if (result === ERR_NOT_IN_RANGE) {
+      else if (result === ERR_NOT_IN_RANGE) {
         /*
           if (
             thisCreep.harvest(sourceObjectAtObjective) < 0 &&
@@ -127,20 +127,19 @@ const roleMiner = {
         thisCreep.moveTo(destinationPosition, {
           visualizePathStyle: { stroke: "#ffaa00" }
         })
-      } else if (result === ERR_NOT_ENOUGH_RESOURCES)
-        // There was an error; time to expand the search to new rooms.
-        thisCreep.memory.mission = "EXPLORE"
-
-      if (thisCreep.memory.mission === "EXPLORE") {
-        // If there are mineable positions unexploited in the room, go to them
-        if (availableMiningPositions.size > 0) {
-          thisCreep.memory.mission = "THINK"
-          thisCreep.say("⛏️ THINK")
-          assessSources(thisCreep, availableMiningPositions)
-        } else if (availableMiningPositions.size === 0) {
-          thisCreep.say("⛏️ EXPLORE")
-          actionExplore(thisCreep)
-        }
+      } // if (result === ERR_NOT_ENOUGH_RESOURCES) // Now: catch all errors
+      // There was an error; time to expand the search to new rooms.
+      else thisCreep.memory.mission = "EXPLORE"
+    }
+    if (thisCreep.memory.mission === "EXPLORE") {
+      // If there are mineable positions unexploited in the room, go to them
+      if (availableMiningPositions.size > 0) {
+        thisCreep.memory.mission = "THINK"
+        thisCreep.say("⛏️ THINK")
+        assessSources(thisCreep, availableMiningPositions)
+      } else if (availableMiningPositions.size === 0) {
+        thisCreep.say("⛏️ EXPLORE")
+        actionExplore(thisCreep)
       }
     }
   }
