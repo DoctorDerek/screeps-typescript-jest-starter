@@ -65,7 +65,7 @@ const assessSources = (
     // Hash key accessed by string lookup of string resulting from RoomPosition
     thisCreep.memory.objective =
       availableMiningPositions.get(thisCreep.memory.destination) || null
-    thisCreep.say("⛏️ MINE!!")
+    thisCreep.say("⛏️ ASSIGN")
     console.log(
       `${thisCreep.name} assigned mission to MINE Objective ${thisCreep.memory.objective} from Destination ${thisCreep.memory.destination}`
     )
@@ -73,7 +73,10 @@ const assessSources = (
 }
 
 const roleMiner = {
-  run: function (thisCreep: Miner, mineablePositions: MineablePositions) {
+  run: function (
+    thisCreep: Miner,
+    availableMiningPositions: MineablePositions
+  ) {
     if (!thisCreep?.memory?.mission) {
       // INIT mission
       thisCreep.memory.home = String(thisCreep.pos) as Position
@@ -83,35 +86,32 @@ const roleMiner = {
       thisCreep.say("⛏ THINK")
       thisCreep.memory.objective = null
       thisCreep.memory.destination = null
-      assessSources(thisCreep, mineablePositions)
+      assessSources(thisCreep, availableMiningPositions)
     }
     if (thisCreep.memory.mission === "MINE") {
-      if (
-        thisCreep.memory.objective == undefined ||
-        thisCreep.memory.destination == undefined
-      ) {
+      if (!thisCreep.memory.objective || !thisCreep.memory.destination) {
         thisCreep.memory.mission = "THINK"
-      } else {
-        // In the creep's memory, the objective and destination are stored as strings, so I have to convert them
-        const sourcePosition =
-          convertRoomPositionStringBackToRoomPositionObject(
-            thisCreep.memory.objective
-          )
-        const destinationPosition =
-          convertRoomPositionStringBackToRoomPositionObject(
-            thisCreep.memory.destination
-          )
-        const sourceObjectAtObjective =
-          sourcePosition.findClosestByRange(FIND_SOURCES)
-        if (!sourceObjectAtObjective) {
-          // Shouldn't happen, but if it does, think about it
-          thisCreep.memory.mission = "THINK"
-          return
-        }
-        const result = thisCreep.harvest(sourceObjectAtObjective)
-        if (result === OK) thisCreep.say("⛏️ MINE")
-        if (result === ERR_NOT_IN_RANGE) {
-          /*
+        return
+      }
+      // In the creep's memory, the objective and destination are stored as strings, so I have to convert them
+      const sourcePosition = convertRoomPositionStringBackToRoomPositionObject(
+        thisCreep.memory.objective
+      )
+      const destinationPosition =
+        convertRoomPositionStringBackToRoomPositionObject(
+          thisCreep.memory.destination
+        )
+      const sourceObjectAtObjective =
+        sourcePosition.findClosestByRange(FIND_SOURCES)
+      if (!sourceObjectAtObjective) {
+        // Shouldn't happen, but if it does, think about it
+        thisCreep.memory.mission = "THINK"
+        return
+      }
+      const result = thisCreep.harvest(sourceObjectAtObjective)
+      if (result === OK) thisCreep.say("⛏️ MINE")
+      if (result === ERR_NOT_IN_RANGE) {
+        /*
           if (
             thisCreep.harvest(sourceObjectAtObjective) < 0 &&
             thisCreep.harvest(sourceObjectAtObjective) !== ERR_NOT_IN_RANGE
@@ -119,26 +119,25 @@ const roleMiner = {
             // Think about it if our mining site is giving us an error, such as because it's empty
             thisCreep.memory.mission = "THINK"
           }*/
-          /*if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
+        /*if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
               // Think about it if our mining site is occupied
               thisCreep.memory.mission = "THINK"
             }*/
-          thisCreep.say("⛏️ MOVE")
-          thisCreep.moveTo(destinationPosition, {
-            visualizePathStyle: { stroke: "#ffaa00" }
-          })
-        }
-        // if (result === ERR_NOT_ENOUGH_RESOURCES)
+        thisCreep.say("⛏️ MOVE")
+        thisCreep.moveTo(destinationPosition, {
+          visualizePathStyle: { stroke: "#ffaa00" }
+        })
+      } else if (result === ERR_NOT_ENOUGH_RESOURCES)
         // There was an error; time to expand the search to new rooms.
         thisCreep.memory.mission = "EXPLORE"
-      }
+
       if (thisCreep.memory.mission === "EXPLORE") {
         // If there are mineable positions unexploited in the room, go to them
-        if (mineablePositions.size > 0) {
+        if (availableMiningPositions.size > 0) {
           thisCreep.memory.mission = "THINK"
           thisCreep.say("⛏️ THINK")
-          assessSources(thisCreep, mineablePositions)
-        } else if (mineablePositions.size === 0) {
+          assessSources(thisCreep, availableMiningPositions)
+        } else if (availableMiningPositions.size === 0) {
           thisCreep.say("⛏️ EXPLORE")
           actionExplore(thisCreep)
         }
