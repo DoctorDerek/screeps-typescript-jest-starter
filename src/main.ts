@@ -145,6 +145,22 @@ function unwrappedLoop() {
    * */
   mineablePositions.forEach(
     (sourcePositionString, destinationPositionString) => {
+      const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
+        filter: (structure) => {
+          return structure.structureType === STRUCTURE_CONTAINER
+        }
+      }).length
+      const totalContainersUnderConstruction = thisRoom.find(
+        FIND_MY_CONSTRUCTION_SITES,
+        {
+          filter: (structure) => {
+            return structure.structureType === STRUCTURE_CONTAINER
+          }
+        }
+      ).length
+      const totalContainers =
+        totalContainersInRoom + totalContainersUnderConstruction
+      if (totalContainers >= 5) return // There's an early game limit of 5/room
       /**
        * Set a construction site for a container at this location if available
        * because resources dropped on the ground will decay after 300 ticks.
@@ -196,27 +212,12 @@ function unwrappedLoop() {
         proposedContainerPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
       const noObstructions =
         proposedContainerPosition.lookFor(LOOK_CREEPS).length === 0
-      const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-          return structure.structureType === STRUCTURE_CONTAINER
-        }
-      }).length
-      const totalContainersUnderConstruction = thisRoom.find(
-        FIND_MY_CONSTRUCTION_SITES,
-        {
-          filter: (structure) => {
-            return structure.structureType === STRUCTURE_CONTAINER
-          }
-        }
-      ).length
       const validContainerPosition =
         noTerrainBlocking &&
         noObstructions &&
         noBuildingCurrently &&
         noConstructionSite
-      const totalContainers =
-        totalContainersInRoom + totalContainersUnderConstruction
-      if (validContainerPosition && totalContainers < 5) {
+      if (validContainerPosition) {
         proposedContainerPosition.createConstructionSite(STRUCTURE_CONTAINER)
         console.log(
           `🚧 Created construction site for container at ${proposedContainerPosition.x},${proposedContainerPosition.y}`
