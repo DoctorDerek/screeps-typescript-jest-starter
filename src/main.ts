@@ -9,7 +9,6 @@ import type { DefenderRanged } from "roleDefenderRanged"
 import type { DefenderMelee } from "roleDefenderMelee"
 import roleDefenderMelee from "roleDefenderMelee"
 import roleDefenderRanged from "roleDefenderRanged"
-import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import findMineablePositions from "findMineablePositions"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
@@ -25,7 +24,13 @@ export type MineablePosition = Position
 export type SourcePosition = Position
 export type MineablePositions = Map<MineablePosition, SourcePosition>
 
-export type MineablePositionsMap = Map<RoomName, MineablePositions>
+export type MineablePositionsMap = Map<
+  RoomName,
+  {
+    mineablePositions: MineablePositions
+    availableMineablePositions: MineablePositions
+  }
+>
 
 // const upperFirstCharacter = (string) => string.slice(0, 1).toUpperCase() + string.slice(1)
 // const unitTypesAndCounts = {harvesters: 6, "upgraders", "builders", "defenders", "fetchers"]
@@ -71,10 +76,6 @@ function unwrappedLoop() {
   if (Game.spawns["Spawn1"].hits < Game.spawns["Spawn1"].hitsMax / 2)
     Game.spawns["Spawn1"].room.controller?.activateSafeMode()
 
-  // Populate the mineablePositions hash map across every room where I have vision
-  const allRooms = Object.keys(Game.rooms) as RoomName[]
-  const mineablePositionsMap = new Map() as MineablePositionsMap
-
   const miners = _.filter(
     Game.creeps,
     (creep) => creep.memory.role == "miner"
@@ -82,8 +83,11 @@ function unwrappedLoop() {
 
   const thisRoom = Game.spawns["Spawn1"].room
 
-  const { mineablePositions, availableMineablePositions } =
-    findMineablePositions(thisRoom.name as RoomName, miners) // MineablePositionsMap.get(thisRoom.name)
+  // Populate the mineablePositions hash map across rooms where I have vision
+  const allRooms = Object.keys(Game.rooms) as RoomName[]
+  const mineablePositionsMap = new Map() as MineablePositionsMap
+  for (const roomName of allRooms)
+    mineablePositionsMap.set(roomName, findMineablePositions(roomName, miners))
 
   // Ant-style: mark current position for a future road
   const fetchers = _.filter(
@@ -120,8 +124,12 @@ function unwrappedLoop() {
   //   }
   // }
 
+  const totalMineablePositions = Array.from(
+    mineablePositionsMap.values()
+  ).reduce((acc, { mineablePositions }) => acc + mineablePositions.size, 0)
+
   /** `n` is how many miners and used as the factor for priority order */
-  const n = mineablePositions.size
+  const n = totalMineablePositions
 
   const totalCreeps = Object.values(Game.creeps).length
 
@@ -449,6 +457,11 @@ function unwrappedLoop() {
 
   // Run all creeps
   for (const creep of creeps) {
+    const { mineablePositions, availableMineablePositions } =
+      mineablePositionsMap.get(creep.room.name as RoomName) || {
+        mineablePositions: new Map(),
+        availableMineablePositions: new Map()
+      }
     try {
       // Don't run creeps that are spawning
       if (creep.spawning) continue
