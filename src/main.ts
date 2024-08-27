@@ -270,6 +270,16 @@ function unwrappedLoop() {
     }
   )
 
+  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
+  miners.forEach((creep) => {
+    if (!creep.memory.destination) return // Miner has no destination
+    const takenPositionString = String(
+      creep.memory.destination
+    ) as MineablePosition
+    // e.g. [room E55N6 pos 14,11]
+    availableMineablePositions.delete(takenPositionString)
+  })
+
   // Ant-style: mark current position for a future road
   const fetchers = _.filter(
     Game.creeps,
@@ -304,16 +314,6 @@ function unwrappedLoop() {
   //     pendingRoadSite.remove()
   //   }
   // }
-
-  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
-  miners.forEach((creep) => {
-    if (!creep.memory.destination) return // Miner has no destination
-    const takenPositionString = String(
-      creep.memory.destination
-    ) as MineablePosition
-    // e.g. [room E55N6 pos 14,11]
-    availableMineablePositions.delete(takenPositionString)
-  })
 
   /** `n` is how many miners and used as the factor for priority order */
   const n = mineablePositions.size
