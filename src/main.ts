@@ -218,7 +218,7 @@ function unwrappedLoop() {
       harvesters.forEach((harvester: Harvester) => {
         const fetcher = harvester as unknown as Fetcher
         fetcher.memory.role = "fetcher"
-        fetcher.memory.mission = "FILL UP"
+        fetcher.memory.mission = "PICK UP"
         fetcher.memory.destination = null
       })
     }
