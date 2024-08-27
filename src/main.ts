@@ -240,10 +240,12 @@ function unwrappedLoop() {
       })
     }
 
-    // 1 harvester to start, then miner, fetcher, upgrader, builder, defenders
+    // 2 harvesters to start, then min 2 eyes at all times, then
+    // n/2 miner, n/2 fetcher, n miner, n fetcher, n/4 builder, n/4 upgrader,
+    // NO defenders
     // x n sources across all rooms
     // Builder will only spawn if there are construction sites.
-    if (totalCreeps < 1) {
+    if (totalCreeps < 2) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
@@ -254,7 +256,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "harvester" } }
       )
-    } else if (eyes.length < Math.max(Math.floor(n / 4), 2)) {
+    } else if (eyes.length < 2) {
       const newName = Game.time + "_" + "Eyes" + eyes.length
       console.log("Spawning new eye: " + newName)
       Game.spawns["Spawn1"].spawnCreep(
@@ -272,7 +274,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner" } }
       )
-    } else if (fetchers.length < Math.max(Math.floor(n / 4), 1)) {
+    } else if (fetchers.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
@@ -281,25 +283,6 @@ function unwrappedLoop() {
         [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
         newName,
         { memory: { role: "fetcher" } }
-      )
-    } else if (
-      builders.length < Math.max(Math.floor(n / 4), 1) &&
-      // Sum consturction sites in all spawns to make sure there is at least 1:
-      Object.values(Game.spawns).reduce(
-        (acc, spawn) =>
-          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
-        0
-      ) > 0
-    ) {
-      const newName = Game.time + "_" + "Builder" + builders.length
-      console.log("Spawning new builder: " + newName)
-      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
-      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
-      // [WORK, MOVE, MOVE, CARRY], // 250
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, CARRY], // 300
-        newName,
-        { memory: { role: "builder" } }
       )
     } else if (miners.length < n) {
       const newName = Game.time + "_" + "Miner" + miners.length
@@ -311,7 +294,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner" } }
       )
-    } else if (fetchers.length < Math.round(n / 2)) {
+    } else if (fetchers.length < n) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
@@ -322,7 +305,7 @@ function unwrappedLoop() {
         { memory: { role: "fetcher" } }
       )
     } else if (
-      builders.length < n * 4 &&
+      builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
       // Sum construction sites in all spawns to make sure there is at least 1:
       Object.values(Game.spawns).reduce(
         (acc, spawn) =>
@@ -340,7 +323,9 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "builder" } }
       )
-    } else if (upgraders.length < n) {
+    } else if (
+      upgraders.length < Math.max(Math.floor(n / 4), numberOfSources)
+    ) {
       const newName = Game.time + "_" + "Upgrader" + upgraders.length
       console.log("Spawning new upgrader: " + newName)
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
@@ -385,20 +370,8 @@ function unwrappedLoop() {
         { memory: { role: "healer" } }
       )
     }
-    // The fallback role is builder
-    // [ATTACK, ATTACK, MOVE, MOVE], // 260
-    // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
+    // The fallback role is off
     else {
-      const newName = Game.time + "_" + "Builder" + builders.length
-      console.log("Spawning new builder: " + newName)
-      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
-      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
-      // [WORK, MOVE, MOVE, CARRY], // 250
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, CARRY], // 300
-        newName,
-        { memory: { role: "builder" } }
-      )
     }
   }
 
