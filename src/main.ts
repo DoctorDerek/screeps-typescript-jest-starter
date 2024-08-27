@@ -359,6 +359,21 @@ function unwrappedLoop() {
         builder.memory.destination = null
       })
     }
+    // If there are no construction sites, the builders transform into upgraders
+    if (
+      Object.values(Game.spawns).reduce(
+        (acc, spawn) =>
+          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
+        0
+      ) === 0 &&
+      builders.length > 0
+    ) {
+      builders.forEach((builder: Builder) => {
+        const upgrader = builder as unknown as Upgrader
+        upgrader.memory.role = "upgrader"
+        upgrader.memory.destination = null
+      })
+    }
 
     // 1 harvester to start, then miner, fetcher, upgrader, builder, defenders
     // x n sources across all rooms

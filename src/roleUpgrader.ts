@@ -5,7 +5,7 @@ export interface Upgrader extends Creep {
 }
 
 interface UpgraderMemory extends CreepMemory {
-  role: "Upgrader"
+  role: "upgrader"
   upgrading: boolean
 }
 
