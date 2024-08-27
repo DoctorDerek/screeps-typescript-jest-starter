@@ -256,14 +256,6 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "harvester" } }
       )
-    } else if (eyes.length < 2) {
-      const newName = Game.time + "_" + "Eyes" + eyes.length
-      console.log("Spawning new eye: " + newName)
-      Game.spawns["Spawn1"].spawnCreep(
-        [MOVE], // 50
-        newName,
-        { memory: { role: "eye" } }
-      )
     } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
@@ -303,6 +295,14 @@ function unwrappedLoop() {
         [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
         newName,
         { memory: { role: "fetcher" } }
+      )
+    } else if (eyes.length < 2) {
+      const newName = Game.time + "_" + "Eyes" + eyes.length
+      console.log("Spawning new eye: " + newName)
+      Game.spawns["Spawn1"].spawnCreep(
+        [MOVE], // 50
+        newName,
+        { memory: { role: "eye" } }
       )
     } else if (
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
