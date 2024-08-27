@@ -125,9 +125,27 @@ function unwrappedLoop() {
   //   }
   // }
 
-  const totalMineablePositions = Array.from(
+  const { allMineablePositions, allAvailableMineablePositions } = Array.from(
     mineablePositionsMap.values()
-  ).reduce((acc, { mineablePositions }) => acc + mineablePositions.size, 0)
+  ).reduce(
+    (acc, { mineablePositions, availableMineablePositions }) => {
+      acc.allMineablePositions = new Map([
+        ...acc.allMineablePositions,
+        ...mineablePositions
+      ])
+      acc.allAvailableMineablePositions = new Map([
+        ...acc.allAvailableMineablePositions,
+        ...availableMineablePositions
+      ])
+      return acc
+    },
+    {
+      allMineablePositions: new Map() as MineablePositions,
+      allAvailableMineablePositions: new Map() as MineablePositions
+    }
+  )
+
+  const totalMineablePositions = allMineablePositions.size
 
   /** `n` is how many miners and used as the factor for priority order */
   const n = totalMineablePositions
@@ -442,11 +460,6 @@ function unwrappedLoop() {
 
   // Run all creeps
   for (const creep of creeps) {
-    const { mineablePositions, availableMineablePositions } =
-      mineablePositionsMap.get(creep.room.name as RoomName) || {
-        mineablePositions: new Map(),
-        availableMineablePositions: new Map()
-      }
     try {
       // Don't run creeps that are spawning
       if (creep.spawning) continue
@@ -455,7 +468,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "defenderRanged")
         roleDefenderRanged.run(creep as DefenderRanged, overwhelmingForce)
       if (creep.memory.role == "miner")
-        roleMiner.run(creep as Miner, availableMineablePositions)
+        roleMiner.run(creep as Miner, allAvailableMineablePositions)
       if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
       if (creep.memory.role == "harvester")
         roleHarvester.run(creep as Harvester)
