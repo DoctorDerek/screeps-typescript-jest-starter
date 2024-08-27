@@ -32,7 +32,10 @@ const roleFetcher = {
         thisCreep.memory.depositTargetNumber = null
         thisCreep.memory.mission = "PICK UP"
       }
-    } else if (thisCreep.memory.mission === "PICK UP") {
+    } else if (
+      !thisCreep?.memory.mission ||
+      thisCreep.memory.mission === "PICK UP"
+    ) {
       const isFull = thisCreep.store.getUsedCapacity() >= carryingCapacity
       if (isFull) {
         // We can clear our marker of which resource we were gathering
@@ -63,20 +66,9 @@ const roleFetcher = {
       // TODO: assign a number of fetchers dynamically?
       */
 
-        const fetchers = Object.keys(Game.creeps).filter(
-          (creepName) =>
-            Game.creeps[creepName].memory.role === "fetcher" &&
-            Game.creeps[creepName].room === thisCreep.room &&
-            creepName !== thisCreep.name
-        )
-        // Count other fetchers in the same room
-        const targetResourceAmount = (fetchers.length * carryingCapacity) / 3
-        // console.log(
-        //   `${thisCreep.name} is seeking energy drops >= ${targetResourceAmount} in ${thisCreep.room}`
-        // )
         const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
           filter: function (resource) {
-            return resource.amount >= targetResourceAmount
+            return resource.amount >= carryingCapacity
           }
         })
         // Only target resources that have at least that many times carryingCapacity
