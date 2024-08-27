@@ -41,11 +41,15 @@ function actionExplore(
         "7": "W9N3"     // LEFT
     } */
 
-    // Select an exit to move to at random
-    const destinationRoom = exitRoomNameArray[
-      Math.floor(exitRoomNameArray.length * Math.random())
-    ] as RoomName
-
+    // Select an exit to move to that is moving away from our spawn
+    const spawn = Game.spawns["Spawn1"].room.name
+    // Randomize the array in case of a tie
+    exitRoomNameArray.sort(() => Math.random() - 0.5)
+    const destinationRoom = exitRoomNameArray.reduce((a, b) => {
+      const rangeToA = Game.map.getRoomLinearDistance(spawn, a)
+      const rangeToB = Game.map.getRoomLinearDistance(spawn, b)
+      return rangeToA > rangeToB ? a : b
+    }) as RoomName
     thisCreep.memory.destination = String(
       new RoomPosition(25, 25, destinationRoom)
     ) as Position
@@ -54,7 +58,7 @@ function actionExplore(
       `${thisCreep.name} assigned mission to EXPLORE to Destination ${thisCreep.memory.destination}`
     )
   } else {
-    if (thisCreep.room.find(FIND_HOSTILE_CREEPS).length > 1) {
+    if (thisCreep.room.find(FIND_HOSTILE_STRUCTURES).length >= 1) {
       // Potentially a source keeper room or enemy room, leave it by walking back home
       thisCreep.moveTo(Game.spawns["Spawn1"].pos)
     } else {
