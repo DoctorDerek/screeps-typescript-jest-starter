@@ -10,6 +10,7 @@ import type { DefenderMelee } from "roleDefenderMelee"
 import roleDefenderMelee from "roleDefenderMelee"
 import roleDefenderRanged from "roleDefenderRanged"
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
+import findMineablePositions from "findMineablePositions"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
 export type X = number
@@ -65,6 +66,11 @@ function unwrappedLoop() {
       console.log("Clearing non-existing creep memory:", name)
     }
   }
+
+  // Trigger safe mode if spawn is under half health (last resort)
+  if (Game.spawns["Spawn1"].hits < Game.spawns["Spawn1"].hitsMax / 2)
+    Game.spawns["Spawn1"].room.controller?.activateSafeMode()
+
   // Populate the mineablePositions hash map across every room where I have vision
   const allRooms = Object.keys(Game.rooms) as RoomName[]
   const mineablePositionsMap = new Map() as MineablePositionsMap
@@ -76,209 +82,8 @@ function unwrappedLoop() {
 
   const thisRoom = Game.spawns["Spawn1"].room
 
-  // Trigger safe mode if spawn is under half health (last resort)
-  if (Game.spawns["Spawn1"].hits < Game.spawns["Spawn1"].hitsMax / 2)
-    Game.spawns["Spawn1"].room.controller?.activateSafeMode()
-
-  /** Select all sources with available energy from this room: */
-  const activeSources = thisRoom.find(FIND_SOURCES_ACTIVE)
-
-  const mineablePositions = new Map() as MineablePositions
-  /**
-   * `mineablePositions` is all of the available positions to mine taking into
-   * account that some sources are too close to Source Keeper Lairs.
-   * `availableMineablePositions` accounts for miners that are already mining,
-   * so this is the list sent to the miners themselves.
-   * */
-  const availableMineablePositions = new Map() as MineablePositions
-  activeSources.forEach((source) => {
-    const sourcePositionString = String(source.pos) as SourcePosition
-    const sourceX = source.pos.x
-    const sourceY = source.pos.y
-    // lookForAtArea(type, top, left, bottom, right, [asArray])
-    const lookArray = thisRoom.lookForAtArea(
-      LOOK_TERRAIN,
-      sourceY - 1,
-      sourceX - 1,
-      sourceY + 1,
-      sourceX + 1,
-      true
-    )
-    lookArray
-      .filter((positionAsJSON) => positionAsJSON.terrain !== "wall")
-      .forEach((mineablePositionAsJSON) => {
-        // Each item returned by lookForAtArea looks like:
-        // {"type":"terrain","terrain":"plain","x":24,"y":42}
-        // Retrieve RoomPosition object `mineablePosition` from x,y coordinates
-        const mineablePosition = thisRoom.getPositionAt(
-          mineablePositionAsJSON.x,
-          mineablePositionAsJSON.y
-        )
-        if (!mineablePosition) return // Shouldn't happen, but fixes types.
-        const mineablePositionString = String(
-          mineablePosition
-        ) as MineablePosition
-        mineablePositions.set(mineablePositionString, sourcePositionString)
-        if (
-          mineablePosition &&
-          // Remove occupied positions from the hash map:
-          mineablePosition.lookFor(LOOK_CREEPS).length === 0
-        )
-          availableMineablePositions.set(
-            mineablePositionString,
-            sourcePositionString
-          )
-      })
-  })
-
-  // Remove positions near source keeper lairs as these are "too hot" to mine
-  // (e.g. 5 tiles away from the lair)
-  const sourceKeeperLairs = thisRoom.find(FIND_HOSTILE_STRUCTURES, {
-    filter: (structure) => structure.structureType === STRUCTURE_KEEPER_LAIR
-  })
-  sourceKeeperLairs.forEach((lair) => {
-    const lairX = lair.pos.x
-    const lairY = lair.pos.y
-    const lookArray = thisRoom.lookForAtArea(
-      LOOK_TERRAIN,
-      lairY - 5,
-      lairX - 5,
-      lairY + 5,
-      lairX + 5,
-      true
-    )
-    lookArray.forEach((positionAsJSON) => {
-      const position = thisRoom.getPositionAt(
-        positionAsJSON.x,
-        positionAsJSON.y
-      )
-      const positionString = String(position) as MineablePosition
-      mineablePositions.delete(positionString)
-    })
-  })
-
-  /**
-   * Establish containers taking triangular averages of the Spawn, the
-   * Controller, and the mining position, keeping in mind that the terrain
-   * needs to be buildable, not obstructed, non-blocking, and not a wall.
-   * */
-  mineablePositions.forEach(
-    (sourcePositionString, destinationPositionString) => {
-      // Containers aren't in FIND_MY_STRUCTURES, so I need FIND_STRUCTURES
-      const totalContainersInRoom = thisRoom.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-          return structure.structureType === STRUCTURE_CONTAINER
-        }
-      }).length
-      const totalContainersUnderConstruction = thisRoom.find(
-        FIND_MY_CONSTRUCTION_SITES,
-        {
-          filter: (structure) => {
-            return structure.structureType === STRUCTURE_CONTAINER
-          }
-        }
-      ).length
-      const totalContainers =
-        totalContainersInRoom + totalContainersUnderConstruction
-      const totalExtensionsInRoom = thisRoom.find(FIND_MY_STRUCTURES, {
-        filter: (structure) => {
-          return structure.structureType === STRUCTURE_EXTENSION
-        }
-      }).length
-      const totalExtensionsUnderConstruction = thisRoom.find(
-        FIND_MY_CONSTRUCTION_SITES,
-        {
-          filter: (structure) => {
-            return structure.structureType === STRUCTURE_EXTENSION
-          }
-        }
-      ).length
-      const totalExtensions =
-        totalExtensionsInRoom + totalExtensionsUnderConstruction
-      // There's an early limit of 5/room for each of containers and extensions
-      const totalSum = totalContainers + totalExtensions
-      // Find current Screeps level limit of containers per room
-      const roomLevel = thisRoom.controller?.level || 1
-      // If the room level is less than 2, then there's a hard limit of 5/room
-      if (totalSum >= 5 && roomLevel < 2) return
-      // If the room level is 2 or greater, then there's a hard limit of 10/room
-      if (totalSum >= 10 && roomLevel >= 2) return
-      const buildingType =
-        totalContainers < 5 ? STRUCTURE_CONTAINER : STRUCTURE_EXTENSION
-      /**
-       * Set a construction site for a container at this location if available
-       * because resources dropped on the ground will decay after 300 ticks.
-       * Builders will auto-build the container once the miners set the sites.
-       * */
-      const destinationPosition =
-        convertRoomPositionStringBackToRoomPositionObject(
-          destinationPositionString
-        )
-      let proposedX = thisRoom?.controller
-        ? Math.floor(
-            (Game.spawns["Spawn1"].pos.x +
-              destinationPosition.x +
-              thisRoom.controller.pos.x) /
-              3
-          )
-        : Math.floor((Game.spawns["Spawn1"].pos.x + destinationPosition.x) / 2)
-      let proposedY = thisRoom?.controller
-        ? Math.floor(
-            (Game.spawns["Spawn1"].pos.y +
-              destinationPosition.y +
-              thisRoom.controller.pos.y) /
-              3
-          )
-        : Math.floor((Game.spawns["Spawn1"].pos.y + destinationPosition.y) / 2)
-      // Check for no terrain blocking, move y using a for loop
-      while (
-        thisRoom
-          .lookAt(proposedX, proposedY)
-          .filter((object) => object.type === "terrain")[0].terrain === "wall"
-      ) {
-        // Random walk weighted 60%/40% in favor of decreasing x/y
-        if (Math.random() > 0.6) Math.random() > 0.5 ? proposedY-- : proposedX--
-        else Math.random() > 0.5 ? proposedY++ : proposedX++
-        if (proposedX < 0 || proposedY < 0) break
-      }
-      proposedX = proposedX < 0 ? 0 : proposedX
-      proposedY = proposedY < 0 ? 0 : proposedY
-      const proposedBuildingPosition = new RoomPosition(
-        proposedX,
-        proposedY,
-        thisRoom.name
-      )
-      const noConstructionSite =
-        proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
-      const noBuildingCurrently =
-        proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0
-      const noTerrainBlocking =
-        proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
-      const noObstructions =
-        proposedBuildingPosition.lookFor(LOOK_CREEPS).length === 0
-      const validBuildingPosition =
-        noTerrainBlocking &&
-        noObstructions &&
-        noBuildingCurrently &&
-        noConstructionSite
-      if (validBuildingPosition) {
-        proposedBuildingPosition.createConstructionSite(buildingType)
-        console.log(
-          `🚧 Created construction site ${buildingType} at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
-        )
-      }
-    }
-  )
-
-  // Remove taken positions from the hash map of {"(x,y)": true} coordinates
-  miners.forEach((creep) => {
-    if (!creep.memory.destination) return // Miner has no destination
-    const takenPositionString = String(
-      creep.memory.destination
-    ) as MineablePosition
-    // e.g. [room E55N6 pos 14,11]
-    availableMineablePositions.delete(takenPositionString)
-  })
+  const { mineablePositions, availableMineablePositions } =
+    findMineablePositions(thisRoom.name as RoomName, miners) // MineablePositionsMap.get(thisRoom.name)
 
   // Ant-style: mark current position for a future road
   const fetchers = _.filter(
