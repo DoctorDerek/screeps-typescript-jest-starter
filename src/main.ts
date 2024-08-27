@@ -231,22 +231,24 @@ function unwrappedLoop() {
     Game.creeps,
     (creep) => creep.memory.role == "fetcher"
   ) as Fetcher[]
+  const upgraders = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "upgrader"
+  ) as Upgrader[]
+  const creepsForRoads = [...fetchers, ...upgraders]
   if (
     // Limit the number of construction sites to 10 per room:
     thisRoom.find(FIND_CONSTRUCTION_SITES).length < 10
   ) {
-    fetchers.forEach((fetcher) => {
-      const fetcherPosition = fetcher.pos
-      fetcherPosition.createConstructionSite(STRUCTURE_ROAD)
-
+    creepsForRoads.forEach((creep) => {
       // Check there's no construction site in the current tile already:
       if (
         _.filter(
-          fetcher.pos.look(),
+          creep.pos.look(),
           (object) => object.type === "constructionSite"
         ).length === 0
       )
-        thisRoom.createConstructionSite(fetcher.pos, STRUCTURE_ROAD)
+        thisRoom.createConstructionSite(creep.pos, STRUCTURE_ROAD)
     })
   }
   // Create a decay effect by occasionally wiping the room clean of pending roads
@@ -319,10 +321,7 @@ function unwrappedLoop() {
       (creep) => creep.memory.role == "harvester"
     ) as Harvester[]
     console.log("Harvesters: " + harvesters.length)
-    const upgraders = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "upgrader"
-    ) as Upgrader[]
+    // Moved up
     console.log("Upgraders: " + upgraders.length)
     const builders = _.filter(
       Game.creeps,
