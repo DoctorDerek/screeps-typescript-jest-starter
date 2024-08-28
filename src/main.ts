@@ -259,13 +259,16 @@ function unwrappedLoop() {
     ) as Miner[]
     console.log("Eyes: " + eyes.length)
 
-    // Once we have miners, the harvester transforms into a builder
-    if (miners.length >= numberOfSources && harvesters.length > 0) {
+    /**
+     * Once we have miners, the harvesters transform into upgraders, as the
+     * first goal of the game is RCL 3 + 7-10 extensions to get claimers.
+     * */
+    if (miners.length >= n && harvesters.length > 0) {
       harvesters.forEach((harvester: Harvester) => {
-        const fetcher = harvester as unknown as Fetcher
-        fetcher.memory.role = "fetcher"
-        fetcher.memory.mission = "PICK UP"
-        fetcher.memory.destination = null
+        const upgrader = harvester as unknown as Upgrader
+        upgrader.memory.role = "upgrader"
+        upgrader.memory.upgrading = false
+        upgrader.memory.destination = null
       })
     }
     // If there are no construction sites, the builders transform into upgraders
