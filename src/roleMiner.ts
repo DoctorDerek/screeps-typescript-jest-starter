@@ -53,8 +53,10 @@ const roleMiner = {
       thisCreep.memory.destination = null
       if (availableMiningPositions.size > 0)
         assessSources(thisCreep, availableMiningPositions)
-      else if (availableMiningPositions.size === 0)
+      else if (availableMiningPositions.size === 0) {
         thisCreep.memory.mission = "EXPLORE"
+        thisCreep.memory.destination = null
+      }
     }
     if (thisCreep.memory.mission === "MINE") {
       if (!thisCreep.memory.objective || !thisCreep.memory.destination) {
@@ -100,7 +102,10 @@ const roleMiner = {
         }
       } // if (result === ERR_NOT_ENOUGH_RESOURCES) // Now: catch all errors
       // There was an error; time to expand the search to new rooms.
-      else thisCreep.memory.mission = "EXPLORE"
+      else {
+        thisCreep.memory.mission = "EXPLORE"
+        thisCreep.memory.destination = null
+      }
     }
     if (thisCreep.memory.mission === "EXPLORE") {
       // If there are mineable positions unexploited in the room, go to them
