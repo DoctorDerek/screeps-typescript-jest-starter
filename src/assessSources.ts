@@ -1,5 +1,5 @@
-import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import type { MineablePositions } from "main"
+import parsePosition from "parsePosition"
 import type { Miner } from "roleMiner"
 
 export default function assessSources(
@@ -11,12 +11,19 @@ export default function assessSources(
   console.log("Mineable positions: " + [...availableMiningPositions.keys()])
   // Select the nearest mineable position available, with rooms estimated at 50
   const destination = [...availableMiningPositions.keys()].reduce((a, b) => {
-    const roomsA = Game.map.getRoomLinearDistance(thisCreep.pos.roomName, a)
-    const roomsB = Game.map.getRoomLinearDistance(thisCreep.pos.roomName, b)
-    const posA = convertRoomPositionStringBackToRoomPositionObject(a)
-    const posB = convertRoomPositionStringBackToRoomPositionObject(b)
-    const rangeToA = roomsA === 0 ? thisCreep.pos.getRangeTo(posA) : 50 * roomsA
-    const rangeToB = roomsB === 0 ? thisCreep.pos.getRangeTo(posB) : 50 * roomsB
+    const { roomName: roomNameA, x: xA, y: yA } = parsePosition(a)
+    const { roomName: roomNameB, x: xB, y: yB } = parsePosition(b)
+
+    if (!(roomNameA && xA && yA && roomNameB && xB && yB)) return a
+    const thisRoomName = thisCreep.pos.roomName
+    const roomsA = Game.map.getRoomLinearDistance(thisRoomName, roomNameA)
+    const roomsB = Game.map.getRoomLinearDistance(thisRoomName, roomNameB)
+    const thisX = thisCreep.pos.x
+    const thisY = thisCreep.pos.y
+    const getRangeTo = (rooms: number, x: number, y: number) =>
+      50 * rooms + (Math.abs(x - thisX) + Math.abs(y - thisY)) / 50
+    const rangeToA = getRangeTo(roomsA, xA, yA)
+    const rangeToB = getRangeTo(roomsB, xB, yB)
     return rangeToA < rangeToB ? a : b
   })
   thisCreep.memory.destination = destination
