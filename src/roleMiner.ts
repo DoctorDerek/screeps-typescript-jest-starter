@@ -50,6 +50,15 @@ const roleMiner = {
       thisCreep.memory.home = String(thisCreep.pos) as Position
       thisCreep.memory.mission = "THINK"
     }
+    if (thisCreep.memory.mission === "EXPLORE") {
+      // If there are mineable positions unexploited in the room, go to them
+      if (availableMiningPositions.size > 0) {
+        thisCreep.memory.mission = "THINK"
+        assessSources(thisCreep, availableMiningPositions)
+      } else if (availableMiningPositions.size === 0) {
+        actionExplore(thisCreep)
+      }
+    }
     if (thisCreep.memory.mission === "THINK") {
       thisCreep.say(`${thisCreep.memory.emoji}THINK`)
       thisCreep.memory.objective = null
@@ -109,15 +118,6 @@ const roleMiner = {
         //   thisCreep.memory.mission = "THINK"
         // }
         actionMoveToDestination(thisCreep)
-      }
-    }
-    if (thisCreep.memory.mission === "EXPLORE") {
-      // If there are mineable positions unexploited in the room, go to them
-      if (availableMiningPositions.size > 0) {
-        thisCreep.memory.mission = "THINK"
-        assessSources(thisCreep, availableMiningPositions)
-      } else if (availableMiningPositions.size === 0) {
-        actionExplore(thisCreep)
       }
     }
   }
