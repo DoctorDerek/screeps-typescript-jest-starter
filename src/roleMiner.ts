@@ -63,49 +63,76 @@ const roleMiner = {
         thisCreep.memory.mission = "THINK"
         return
       }
-      // In the creep's memory, the objective and destination are stored as strings, so I have to convert them
-      const sourcePosition = convertRoomPositionStringBackToRoomPositionObject(
-        thisCreep.memory.objective
-      )
-      const destinationPosition =
-        convertRoomPositionStringBackToRoomPositionObject(
-          thisCreep.memory.destination
-        )
-      const sourceObjectAtObjective =
-        sourcePosition.findClosestByRange(FIND_SOURCES)
-      if (!sourceObjectAtObjective) {
-        // Shouldn't happen, but if it does, think about it
-        thisCreep.memory.mission = "THINK"
-        return
-      }
-      const result = thisCreep.harvest(sourceObjectAtObjective)
-      // console.log(`⛏️ Miner ${thisCreep.name} mining result ${result}`)
-      if (result === OK) thisCreep.say("⛏️ MINE")
-      else if (result === ERR_NOT_IN_RANGE) {
-        if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
-          thisCreep.say("⛏️ OCCUPIED")
-          // Think about it if our mining site is occupied
+      try {
+        // In the creep's memory, the objective and destination are stored as strings, so I have to convert them
+        const sourcePosition =
+          convertRoomPositionStringBackToRoomPositionObject(
+            thisCreep.memory.objective
+          )
+        const destinationPosition =
+          convertRoomPositionStringBackToRoomPositionObject(
+            thisCreep.memory.destination
+          )
+        const sourceObjectAtObjective =
+          sourcePosition.findClosestByRange(FIND_SOURCES)
+        if (!sourceObjectAtObjective) {
+          // Shouldn't happen, but if it does, think about it
           thisCreep.memory.mission = "THINK"
+          return
         }
-        const resultMove = thisCreep.moveTo(destinationPosition, {
-          visualizePathStyle: { stroke: "#ffaa00" }
-        })
-        // console.log(`⛏️ Miner ${thisCreep.name} moving result ${resultMove}`)
-        if (resultMove === OK) thisCreep.say("⛏️ MOVE")
-        else if (resultMove === ERR_NO_PATH) {
-          thisCreep.say("⛏️ NO PATH")
-          thisCreep.memory.mission = "THINK"
-        } else if (resultMove !== ERR_TIRED) {
-          thisCreep.say("⛏️ ERROR")
-          // If there was a different error, think about it
-          thisCreep.memory.mission = "THINK"
+        const result = thisCreep.harvest(sourceObjectAtObjective)
+        // console.log(`⛏️ Miner ${thisCreep.name} mining result ${result}`)
+        if (result === OK) thisCreep.say("⛏️ MINE")
+        else if (result === ERR_NOT_IN_RANGE) {
+          if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
+            thisCreep.say("⛏️ OCCUPIED")
+            // Think about it if our mining site is occupied
+            thisCreep.memory.mission = "THINK"
+          }
+          // Is the destination in the same room (for multi-room mining)?
+          if (destinationPosition.roomName === thisCreep.room.name) {
+            const resultMove = thisCreep.moveTo(destinationPosition, {
+              visualizePathStyle: { stroke: "#ffaa00" }
+            })
+            // console.log(`⛏️ Miner ${thisCreep.name} moving result ${resultMove}`)
+            if (resultMove === OK) thisCreep.say("⛏️ MOVE")
+            else if (resultMove === ERR_NO_PATH) {
+              thisCreep.say("⛏️ NO PATH")
+              thisCreep.memory.mission = "THINK"
+            } else if (resultMove !== ERR_TIRED) {
+              thisCreep.say("⛏️ ERROR")
+              // If there was a different error, think about it
+              thisCreep.memory.mission = "THINK"
+            }
+          } else {
+            // The destination is in a different room
+            const exitDir = Game.map.findExit(
+              thisCreep.room,
+              destinationPosition.roomName
+            )
+            if (exitDir !== -2 && exitDir !== -10) {
+              const exit = thisCreep.pos.findClosestByRange(exitDir)
+              if (exit) {
+                thisCreep.moveTo(exit, {
+                  visualizePathStyle: { stroke: "#FFC0CB" }
+                }) // pink
+                thisCreep.say("⛏️️ EXIT")
+              } else {
+                thisCreep.memory.destination = null
+                thisCreep.memory.mission = "THINK"
+              }
+            } else {
+              thisCreep.memory.mission = "THINK"
+              thisCreep.memory.destination = null
+            }
+          }
+        } // if (result === ERR_NOT_ENOUGH_RESOURCES) // Now: catch all errors
+        // There was an error; time to expand the search to new rooms.
+        else {
+          thisCreep.memory.mission = "EXPLORE"
+          thisCreep.memory.destination = null
         }
-      } // if (result === ERR_NOT_ENOUGH_RESOURCES) // Now: catch all errors
-      // There was an error; time to expand the search to new rooms.
-      else {
-        thisCreep.memory.mission = "EXPLORE"
-        thisCreep.memory.destination = null
-      }
+      } catch (error) {}
     }
     if (thisCreep.memory.mission === "EXPLORE") {
       // If there are mineable positions unexploited in the room, go to them
