@@ -310,8 +310,9 @@ function unwrappedLoop() {
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
       // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
       // [WORK, MOVE, MOVE, CARRY], // 250
+      // [WORK, WORK, MOVE, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, CARRY], // 300
+        [WORK, MOVE, MOVE, CARRY], // 250
         newName,
         { memory: { role: "harvester", emoji: "🌾" } } as Pick<
           Harvester,
@@ -321,10 +322,11 @@ function unwrappedLoop() {
     } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
-      //  [WORK, WORK, MOVE, MOVE], // 300
       // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
+      // [WORK, WORK, MOVE, MOVE], // 300
+      // [WORK, WORK, MOVE], // 250
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE], // 250
+        [WORK, WORK, MOVE, MOVE], // 300
         newName,
         { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
@@ -332,19 +334,21 @@ function unwrappedLoop() {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
-      //        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
+      // [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
+      // [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
+        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
         newName,
         { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
       )
     } else if (miners.length < n) {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
-      //  [WORK, WORK, MOVE, MOVE], // 300
       // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
+      // [WORK, WORK, MOVE, MOVE], // 300
+      // [WORK, WORK, MOVE], // 250
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE], // 250
+        [WORK, WORK, MOVE, MOVE], // 300
         newName,
         { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
@@ -352,9 +356,10 @@ function unwrappedLoop() {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
-      //        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
+      // [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
+      // [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
+        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
         newName,
         { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
       )
@@ -380,8 +385,9 @@ function unwrappedLoop() {
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
       // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
       // [WORK, MOVE, MOVE, CARRY], // 250
+      // [WORK, WORK, MOVE, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, CARRY], // 300
+        [WORK, MOVE, MOVE, CARRY], // 250
         newName,
         { memory: { role: "builder", emoji: "🚧" } } as Pick<Builder, "memory">
       )
@@ -393,8 +399,9 @@ function unwrappedLoop() {
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
       // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
       // [WORK, MOVE, MOVE, CARRY], // 250
+      // [WORK, WORK, MOVE, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, CARRY], // 300
+        [WORK, MOVE, MOVE, CARRY], // 250
         newName,
         { memory: { role: "upgrader", emoji: "⚡" } } as Pick<
           Upgrader,
