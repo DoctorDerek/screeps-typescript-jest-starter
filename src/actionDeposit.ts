@@ -58,14 +58,14 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
           visualizePathStyle: { stroke: "#ffffff" }
         })
       } else {
-        thisCreep.say(`{$thisCreep.memory.emoji}dropsite`)
+        thisCreep.say(`${thisCreep.memory.emoji}dropsite`)
         thisCreep.drop(RESOURCE_ENERGY)
         targetConstructionSite = null
       }
     } else if (targetConstructionSite == null) {
       // There is nowhere to drop it off in the current room
       // Move to within 5 tiles of the spawn. Then we drop it if all is full
-      thisCreep.say(`{$thisCreep.memory.emoji}movehome`)
+      thisCreep.say(`${thisCreep.memory.emoji}movehome`)
       thisCreep.moveTo(Game.spawns["Spawn1"].pos, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
