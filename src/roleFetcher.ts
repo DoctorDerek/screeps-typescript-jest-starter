@@ -93,8 +93,8 @@ const roleFetcher = {
          * do deposit energy in containers for upgraders and builders.
          * */
         if (droppedResources.length) {
-          // Decide on current droppedResource assignment by dividing
-          // the square of dropped resources by the distance to them:
+          // Decide on current droppedResource assignment by dividing the
+          // square of dropped resources by the square distance to them:
           const bestResource = droppedResources.reduce((a, b) => {
             const roomsA = a?.room?.name
               ? Game.map.getRoomLinearDistance(
@@ -113,8 +113,8 @@ const roleFetcher = {
             const rangeToB =
               roomsB === 0 ? thisCreep.pos.getRangeTo(b) : 50 * roomsB
             if (
-              Math.pow(a.amount, 2) / rangeToA >
-              Math.pow(b.amount, 2) / rangeToB
+              Math.pow(a.amount, 2) / Math.pow(rangeToA, 2) >
+              Math.pow(b.amount, 2) / Math.pow(rangeToB, 2)
             )
               return a
             else return b

@@ -509,7 +509,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "miner")
         roleMiner.run(creep as Miner, allAvailableMineablePositions)
       if (creep.memory.role == "fetcher")
-        roleFetcher.run(creep as Fetcher, allDroppedResources, allContainers)
+        roleFetcher.run(creep as Fetcher, allDroppedResources)
       if (creep.memory.role == "harvester")
         roleHarvester.run(creep as Harvester)
       if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)
