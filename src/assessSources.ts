@@ -9,12 +9,14 @@ export default function assessSources(
   thisCreep.say("⛏️ ASSIGN")
   thisCreep.memory.mission = "MINE"
   console.log("Mineable positions: " + [...availableMiningPositions.keys()])
-  // Select the nearest mineable position available
+  // Select the nearest mineable position available, with rooms estimated at 50
   const destination = [...availableMiningPositions.keys()].reduce((a, b) => {
+    const roomsA = Game.map.getRoomLinearDistance(thisCreep.pos.roomName, a)
+    const roomsB = Game.map.getRoomLinearDistance(thisCreep.pos.roomName, b)
     const posA = convertRoomPositionStringBackToRoomPositionObject(a)
     const posB = convertRoomPositionStringBackToRoomPositionObject(b)
-    const rangeToA = thisCreep.pos.getRangeTo(posA)
-    const rangeToB = thisCreep.pos.getRangeTo(posB)
+    const rangeToA = roomsA === 0 ? thisCreep.pos.getRangeTo(posA) : 50 * roomsA
+    const rangeToB = roomsB === 0 ? thisCreep.pos.getRangeTo(posB) : 50 * roomsB
     return rangeToA < rangeToB ? a : b
   })
   thisCreep.memory.destination = destination

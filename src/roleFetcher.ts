@@ -58,11 +58,25 @@ const roleFetcher = {
             // the square of dropped resources by the distance to them:
             let bestIndex = 0
             const bestResource = droppedResources.reduce((a, b) => {
-              const aDistance = thisCreep.pos.getRangeTo(a)
-              const bDistance = thisCreep.pos.getRangeTo(b)
+              const roomsA = a?.room?.name
+                ? Game.map.getRoomLinearDistance(
+                    thisCreep.pos.roomName,
+                    a.room.name
+                  )
+                : 0
+              const roomsB = b?.room?.name
+                ? Game.map.getRoomLinearDistance(
+                    thisCreep.pos.roomName,
+                    b.room.name
+                  )
+                : 0
+              const rangeToA =
+                roomsA === 0 ? thisCreep.pos.getRangeTo(a) : 50 * roomsA
+              const rangeToB =
+                roomsB === 0 ? thisCreep.pos.getRangeTo(b) : 50 * roomsB
               if (
-                Math.pow(a.amount, 2) / aDistance >
-                Math.pow(b.amount, 2) / bDistance
+                Math.pow(a.amount, 2) / rangeToA >
+                Math.pow(b.amount, 2) / rangeToB
               ) {
                 bestIndex = droppedResources.indexOf(a)
                 return a
