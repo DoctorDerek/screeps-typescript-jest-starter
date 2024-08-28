@@ -78,19 +78,19 @@ function actionExplore(thisCreep: Explorer) {
   } else {
     actionMoveToDestination(thisCreep)
   }
-  // if (
-  //   thisCreep.pos.x === 0 ||
-  //   thisCreep.pos.x === 49 ||
-  //   thisCreep.pos.y === 0 ||
-  //   thisCreep.pos.y === 49
-  // ) {
-  //   // At an exit on the 50x50 game board
-  //   // Reset mission
-  //   thisCreep.memory.mission = "THINK"
-  //   thisCreep.memory.destination = null
-  //   // Move off the border by 1 step
-  //   thisCreep.moveTo(25, 25)
-  // }
+  if (
+    thisCreep.pos.x === 0 ||
+    thisCreep.pos.x === 49 ||
+    thisCreep.pos.y === 0 ||
+    thisCreep.pos.y === 49
+  ) {
+    // At an exit on the 50x50 game board
+    // Reset mission
+    thisCreep.memory.mission = "THINK"
+    thisCreep.memory.destination = null
+    // Move off the border by 1 step
+    thisCreep.moveTo(25, 25)
+  }
 }
 
 export default actionExplore
