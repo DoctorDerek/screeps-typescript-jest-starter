@@ -261,18 +261,12 @@ function unwrappedLoop() {
     console.log("Eyes: " + eyes.length)
 
     /**
-     * Once I have 2 miners, 1 of the 3 harvesters transform into a fetcher.
-     * Then once I have n miners, the remaining 2 harvester transforms into
-     * upgraders, as goal 1 is RCL 3 + 7-10 extensions to get claimers.
+     * Once I have n miners, the all n harvesters transform into upgraders,
+     * as the main goal is RCL 3 + 7-10 extensions to get claimers ASAP.
+     *
+     * With n harvesters at the beginning, there's no need for extra fetchers;
+     * harvesters have WORK parts and thus make better upgraders anyway.
      * */
-    if (miners.length >= 2 && harvesters.length >= 3) {
-      const harvester = harvesters[0]
-      const fetcher = harvester as unknown as Fetcher
-      fetcher.memory.role = "fetcher"
-      fetcher.memory.emoji = "🛍️"
-      fetcher.memory.mission = "PICK UP"
-      fetcher.memory.destination = null
-    }
     if (miners.length >= n && harvesters.length >= 1) {
       harvesters.forEach((harvester: Harvester) => {
         const upgrader = harvester as unknown as Upgrader
