@@ -95,8 +95,8 @@ const roleMiner = {
           visualizePathStyle: { stroke: "#ffaa00" }
         })
         if (resultMove === OK) thisCreep.say("⛏️ MOVE")
-        if (resultMove === ERR_NO_PATH) {
-          thisCreep.say("⛏️ NO PATH")
+        else {
+          thisCreep.say("⛏️ NO PATH?")
           thisCreep.memory.mission = "THINK"
         }
       } // if (result === ERR_NOT_ENOUGH_RESOURCES) // Now: catch all errors
