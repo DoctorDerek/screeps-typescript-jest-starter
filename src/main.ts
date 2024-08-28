@@ -304,7 +304,7 @@ function unwrappedLoop() {
     // NO defenders
     // x n sources across all rooms
     // Builder will only spawn if there are construction sites.
-    if (totalCreeps < 3) {
+    if (totalCreeps < n) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
