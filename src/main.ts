@@ -101,9 +101,11 @@ function unwrappedLoop() {
   // Target 1x carryingCapacity, i.e. full loads only */
 
   const allContainers: StructureContainer[] = []
-
+  /** Total number of sources across all rooms */
+  let numberOfSources = 0
   for (const roomName of allRooms) {
     const thisRoom = Game.rooms[roomName]
+    numberOfSources += thisRoom.find(FIND_SOURCES).length
     mineablePositionsMap.set(roomName, findMineablePositions(roomName, miners))
     thisRoom
       .find(FIND_DROPPED_RESOURCES)
@@ -154,6 +156,7 @@ function unwrappedLoop() {
   //   }
   // }
 
+  // The hash map mineablePositions now only includes available positions
   const { allMineablePositions, allAvailableMineablePositions } = Array.from(
     mineablePositionsMap.values()
   ).reduce(
@@ -173,7 +176,7 @@ function unwrappedLoop() {
       allAvailableMineablePositions: new Map() as MineablePositions
     }
   )
-
+  /** Total mineable positions across all rooms */
   const totalMineablePositions = allMineablePositions.size
 
   /** `n` is how many miners and used as the factor for priority order */
@@ -181,12 +184,6 @@ function unwrappedLoop() {
 
   const totalCreeps = Object.values(Game.creeps).length
 
-  // The hash map mineablePositions now only includes available positions
-  // Sum all sources across all spawns
-  const numberOfSources = Object.values(Game.spawns).reduce(
-    (acc, spawn) => acc + spawn.room.find(FIND_SOURCES).length,
-    0
-  )
   /*  BODYPART_COST: {
         "move": 50,
         "work": 100,
@@ -261,7 +258,7 @@ function unwrappedLoop() {
     console.log("Eyes: " + eyes.length)
 
     /**
-     * Once I have n miners, the all n harvesters transform into upgraders,
+     * Once I have n miners, the all harvesters transform into upgraders,
      * as the main goal is RCL 3 + 7-10 extensions to get claimers ASAP.
      *
      * With n harvesters at the beginning, there's no need for extra fetchers;
@@ -293,12 +290,14 @@ function unwrappedLoop() {
       })
     }
 
-    // 2 harvesters to start, then min 2 eyes at all times, then
+    // About n harvesters to start, dropping off as vision expands
     // n/2 miner, n/2 fetcher, n miner, n fetcher, n/4 builder, n/4 upgrader,
     // NO defenders
-    // x n sources across all rooms
+    // x n mining sites (and/or `numberOfSources` sources) across all rooms.
     // Builder will only spawn if there are construction sites.
-    if (totalCreeps < n) {
+    if (
+      totalCreeps < Math.max(Math.floor(n / allRooms.length), numberOfSources)
+    ) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
