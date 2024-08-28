@@ -24,7 +24,7 @@ function actionExplore(thisCreep: Explorer) {
     thisCreep.memory.destination == undefined ||
     typeof thisCreep.memory.destination != "string"
   ) {
-    thisCreep.say("👁️ ASSIGN")
+    thisCreep.say(`${thisCreep.memory.emoji}ASSIGN`)
     // const exitPositions = thisCreep.room.find(FIND_EXIT)
     const exitRoomNameArray = Array.from(
       Object.values(Game.map.describeExits(thisCreep.room.name))

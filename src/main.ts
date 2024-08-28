@@ -62,6 +62,7 @@ declare global {
   interface CreepMemory {
     role: string
     destination?: Position | null | { x: number; y: number }
+    emoji: string
   }
 }
 function unwrappedLoop() {
@@ -268,6 +269,7 @@ function unwrappedLoop() {
       const harvester = harvesters[0]
       const fetcher = harvester as unknown as Fetcher
       fetcher.memory.role = "fetcher"
+      fetcher.memory.emoji = "🛍️"
       fetcher.memory.mission = "PICK UP"
       fetcher.memory.destination = null
     }
@@ -275,6 +277,7 @@ function unwrappedLoop() {
       harvesters.forEach((harvester: Harvester) => {
         const upgrader = harvester as unknown as Upgrader
         upgrader.memory.role = "upgrader"
+        upgrader.memory.emoji = "⚡"
         upgrader.memory.upgrading = false
         upgrader.memory.destination = null
       })
@@ -291,6 +294,7 @@ function unwrappedLoop() {
       builders.forEach((builder: Builder) => {
         const upgrader = builder as unknown as Upgrader
         upgrader.memory.role = "upgrader"
+        upgrader.memory.emoji = "⚡"
         upgrader.memory.destination = null
       })
     }
@@ -309,7 +313,10 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
-        { memory: { role: "harvester" } }
+        { memory: { role: "harvester", emoji: "🌾" } } as Pick<
+          Harvester,
+          "memory"
+        >
       )
     } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Miner" + miners.length
@@ -319,7 +326,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [WORK, WORK, MOVE], // 250
         newName,
-        { memory: { role: "miner" } }
+        { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
     } else if (fetchers.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
@@ -329,7 +336,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
         newName,
-        { memory: { role: "fetcher" } }
+        { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
       )
     } else if (miners.length < n) {
       const newName = Game.time + "_" + "Miner" + miners.length
@@ -339,7 +346,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [WORK, WORK, MOVE], // 250
         newName,
-        { memory: { role: "miner" } }
+        { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
     } else if (fetchers.length < n) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
@@ -349,7 +356,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
         newName,
-        { memory: { role: "fetcher" } }
+        { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
       )
     } else if (eyes.length < 2) {
       const newName = Game.time + "_" + "Eyes" + eyes.length
@@ -357,7 +364,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [MOVE], // 50
         newName,
-        { memory: { role: "eye" } }
+        { memory: { role: "eye", emoji: "👁️" } } as Pick<Eye, "memory">
       )
     } else if (
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
@@ -376,7 +383,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
-        { memory: { role: "builder" } }
+        { memory: { role: "builder", emoji: "🚧" } } as Pick<Builder, "memory">
       )
     } else if (
       upgraders.length < Math.max(Math.floor(n / 4), numberOfSources)
@@ -389,7 +396,10 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [WORK, WORK, MOVE, CARRY], // 300
         newName,
-        { memory: { role: "upgrader" } }
+        { memory: { role: "upgrader", emoji: "⚡" } } as Pick<
+          Upgrader,
+          "memory"
+        >
       )
     } else if (defendersRanged.length < 0) {
       // off
@@ -400,7 +410,10 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [TOUGH, MOVE, MOVE, RANGED_ATTACK], // 260
         newName,
-        { memory: { role: "defenderRanged" } }
+        { memory: { role: "defenderRanged", emoji: "🏹" } } as Pick<
+          DefenderRanged,
+          "memory"
+        >
       )
     } else if (defendersMelee.length < 0) {
       // off
@@ -411,7 +424,10 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK], // 250
         newName,
-        { memory: { role: "defenderMelee" } }
+        { memory: { role: "defenderMelee", emoji: "⚔️" } } as Pick<
+          DefenderMelee,
+          "memory"
+        >
       )
     } else if (healers.length < 0) {
       // off
@@ -422,7 +438,7 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(
         [HEAL, MOVE], // 300
         newName,
-        { memory: { role: "healer" } }
+        { memory: { role: "healer", emoji: "🏥" } } as Pick<Healer, "memory">
       )
     }
     // The fallback role is off

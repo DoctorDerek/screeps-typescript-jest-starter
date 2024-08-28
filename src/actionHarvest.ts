@@ -11,19 +11,17 @@ function actionHarvest(creep: Harvester) {
     const target = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
     if (target) {
       const result = creep.harvest(target)
-      if (result == OK) creep.say("🌾 harvest")
+      if (result == OK) creep.say(`${creep.memory.emoji}harvest`)
       if (result == ERR_NOT_IN_RANGE) {
-        creep.say("🌾 move")
+        creep.say(`${creep.memory.emoji}move`)
         creep.moveTo(target)
       }
     } else if (!target) {
-      creep.say("🌾 explore")
       actionExplore(creep)
     }
   } else if (isFull) {
     // Deposit if full
     creep.memory.destination = null
-    creep.say("🌾 deposit")
     actionDeposit(creep)
   }
 }

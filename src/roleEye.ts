@@ -9,6 +9,7 @@ interface EyeMemory extends CreepMemory {
   role: "eye"
   mission: "EXPLORE" | "THINK" | null
   destination: Position | null
+  emoji: "👁️"
 }
 
 const roleEye = {

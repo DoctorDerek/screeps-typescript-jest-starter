@@ -7,6 +7,7 @@ export interface Upgrader extends Creep {
 interface UpgraderMemory extends CreepMemory {
   role: "upgrader"
   upgrading: boolean
+  emoji: "⚡"
 }
 
 const roleUpgrader = {
@@ -16,21 +17,26 @@ const roleUpgrader = {
     if (isEmpty) creep.memory.upgrading = false
     if (!creep.memory.upgrading && !isFull) {
       actionFillUp(creep)
-      creep.say("⚡ pick up")
     }
     if (!creep.memory.upgrading && isFull) {
       creep.memory.upgrading = true
-      creep.say("⚡ upgrade")
     }
-
+    if (!creep.room.controller) {
+      creep.say(`${creep.memory.emoji}error`)
+      return
+    }
+    const result = creep.upgradeController(creep.room.controller)
+    if (result === OK) creep.say(`${creep.memory.emoji}upgrade`)
     if (
       creep.memory.upgrading &&
       creep.room.controller &&
-      creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE
-    )
+      result == ERR_NOT_IN_RANGE
+    ) {
+      creep.say(`${creep.memory.emoji}move`)
       creep.moveTo(creep.room.controller, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
+    }
   }
 }
 

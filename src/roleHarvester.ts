@@ -14,6 +14,7 @@ interface HarvesterMemory extends CreepMemory {
   destination: Position | null
   sourceNumber: number | null
   target: "container" | "extension" | null
+  emoji: "🌾"
 }
 
 const roleHarvester = {

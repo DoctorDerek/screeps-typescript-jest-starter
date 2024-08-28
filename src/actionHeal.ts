@@ -15,10 +15,10 @@ function actionHeal(creep: Healer, creepsToHeal: Creep[]) {
   })
   if (target) {
     const isSelf = creep.id === target.id
-    if (isSelf) creep.say("🏥 self")
-    if (!isSelf) creep.say("🏥 heal")
+    if (isSelf) creep.say(`${creep.memory.emoji}self`)
+    if (!isSelf) creep.say(`${creep.memory.emoji}heal`)
     if (creep.heal(target) === ERR_NOT_IN_RANGE) {
-      creep.say("🏥 move")
+      creep.say(`${creep.memory.emoji}move`)
       creep.moveTo(target, { visualizePathStyle: { stroke: "#33ff00" } })
     }
   } else {

@@ -14,6 +14,7 @@ interface FetcherMemory extends CreepMemory {
   destination: Position | null
   depositTargetNumber: number | null
   target: "container" | "extension" | null
+  emoji: "🛍️"
 }
 
 const roleFetcher = {
@@ -75,9 +76,10 @@ const roleFetcher = {
               // Maybe we already picked it up, or someone else did
               thisCreep.memory.destination = null
               thisCreep.memory.mission = "PICK UP"
-            } else if (result === OK) thisCreep.say("🛍️ PICKED")
+            } else if (result === OK)
+              thisCreep.say(`${thisCreep.memory.emoji}PICKUP`)
             else {
-              thisCreep.say("🛍️ ERROR")
+              thisCreep.say(`${thisCreep.memory.emoji} ERROR`)
               // Possibly out of resources
               thisCreep.memory.mission = "EXPLORE"
             }
@@ -120,7 +122,7 @@ const roleFetcher = {
             else return b
           })
           thisCreep.memory.destination = String(bestResource.pos) as Position
-          thisCreep.say(`🛍️ ${bestResource.amount}`)
+          thisCreep.say(`${thisCreep.memory.emoji} ${bestResource.amount}`)
           console.log(
             `${thisCreep.name} moving to dropped resources at ${thisCreep.memory.destination}`
           )

@@ -21,9 +21,9 @@ function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
         RESOURCE_ENERGY
       )}`
     )*/
-    if (result === OK) thisCreep.say("🚶 WITHDRAW")
+    if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}WITHDRAW`)
     if (result === ERR_NOT_IN_RANGE) {
-      thisCreep.say("🚶 FILL UP")
+      thisCreep.say(`${thisCreep.memory.emoji}FILL UP`)
       thisCreep.moveTo(targetFillUpSite, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
@@ -41,15 +41,15 @@ function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
 
     if (droppedResourceTarget != null) {
       const result = thisCreep.pickup(droppedResourceTarget)
-      if (result === OK) thisCreep.say("🚶 PICKED")
+      if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}PICKUP`)
       if (thisCreep.pickup(droppedResourceTarget) == ERR_NOT_IN_RANGE) {
-        thisCreep.say("🚶 PICK UP")
+        thisCreep.say(`${thisCreep.memory.emoji}MOVE`)
         thisCreep.moveTo(droppedResourceTarget, {
           visualizePathStyle: { stroke: "#ffaa00" }
         })
       }
     } else {
-      thisCreep.say("🚶 IDLE")
+      thisCreep.say(`${thisCreep.memory.emoji}IDLE`)
     }
   }
 }

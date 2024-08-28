@@ -12,6 +12,7 @@ interface BuilderMemory extends CreepMemory {
   buildSiteNumber: number | null
   mission: "FILL UP" | "BUILD" | "EXPLORE"
   destination: Position | null
+  emoji: "🚧"
 }
 
 const roleBuilder = {
@@ -21,13 +22,12 @@ const roleBuilder = {
     if (isEmpty) creep.memory.building = false
     if (!creep.memory.building && !isFull) {
       creep.memory.mission = "FILL UP"
-      creep.say("🚧 FILL UP")
       actionFillUp(creep)
     }
     if (!creep.memory.building && isFull) {
       creep.memory.building = true
       creep.memory.mission = "BUILD"
-      creep.say("🚧 full")
+      creep.say(`${creep.memory.emoji}full`)
     }
 
     if (creep.memory.building == true) {
@@ -38,7 +38,7 @@ const roleBuilder = {
         filter: (structure) => structure.hits / structure.hitsMax < 0.5
       })
       if (buildSites.length > 0) {
-        creep.say("🚧 build")
+        creep.say(`${creep.memory.emoji}build`)
         if (creep.memory.buildSiteNumber == null) {
           // Find the closest construction site
           let closestIndex = 0
@@ -64,7 +64,7 @@ const roleBuilder = {
           creep.build(buildSites[creep.memory.buildSiteNumber]) ==
           ERR_NOT_IN_RANGE
         ) {
-          creep.say("🚧 moveB")
+          creep.say(`${creep.memory.emoji}moveB`)
           creep.moveTo(buildSites[creep.memory.buildSiteNumber], {
             visualizePathStyle: { stroke: "#ffffff" }
           })
@@ -81,7 +81,7 @@ const roleBuilder = {
           creep.memory.buildSiteNumber = null
         }
       } else if (potentialRepairSites.length > 0) {
-        creep.say("🚧 repair")
+        creep.say(`${creep.memory.emoji}repair`)
         let closestIndex = 0
         const closestSite = potentialRepairSites.reduce((prev, current) => {
           if (creep.pos.getRangeTo(prev) < creep.pos.getRangeTo(current)) {
@@ -99,7 +99,7 @@ const roleBuilder = {
         if (
           creep.repair(potentialRepairSites[closestIndex]) == ERR_NOT_IN_RANGE
         ) {
-          creep.say("🚧 moveR")
+          creep.say(`${creep.memory.emoji}moveR`)
           creep.moveTo(potentialRepairSites[closestIndex], {
             visualizePathStyle: { stroke: "#ffffff" }
           })

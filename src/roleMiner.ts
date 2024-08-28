@@ -37,6 +37,7 @@ interface MinerMemory extends CreepMemory {
   objective: Position | null
   destination: Position | null
   home: Position | null
+  emoji: "⛏️"
 }
 
 const roleMiner = {
@@ -50,7 +51,7 @@ const roleMiner = {
       thisCreep.memory.mission = "THINK"
     }
     if (thisCreep.memory.mission === "THINK") {
-      thisCreep.say("⛏️ THINK")
+      thisCreep.say(`${thisCreep.memory.emoji}THINK`)
       thisCreep.memory.objective = null
       thisCreep.memory.destination = null
       if (availableMiningPositions.size > 0)
@@ -90,9 +91,9 @@ const roleMiner = {
         }
         const result = thisCreep.harvest(sourceObjectAtObjective)
         // console.log(`⛏️ Miner ${thisCreep.name} mining result ${result}`)
-        if (result === OK) thisCreep.say("⛏️ MINE")
+        if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}MINE`)
         else {
-          thisCreep.say("⛏️ ERROR")
+          thisCreep.say(`${thisCreep.memory.emoji}ERROR`)
           // Possibly out of resources
           thisCreep.memory.mission = "THINK"
         }
@@ -103,7 +104,7 @@ const roleMiner = {
         //     thisCreep.memory.destination
         //   ).lookFor(LOOK_CREEPS).length > 0
         // ) {
-        //   thisCreep.say("⛏️ OCCUPIED")
+        //   thisCreep.say(`${thisCreep.memory.emoji}OCCUPIED`)
         //   // Think about it if our mining site is occupied
         //   thisCreep.memory.mission = "THINK"
         // }
@@ -114,10 +115,8 @@ const roleMiner = {
       // If there are mineable positions unexploited in the room, go to them
       if (availableMiningPositions.size > 0) {
         thisCreep.memory.mission = "THINK"
-        thisCreep.say("⛏️ THINK")
         assessSources(thisCreep, availableMiningPositions)
       } else if (availableMiningPositions.size === 0) {
-        thisCreep.say("⛏️ EXPLORE")
         actionExplore(thisCreep)
       }
     }

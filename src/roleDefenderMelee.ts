@@ -11,13 +11,14 @@ interface DefenderMeleeMemory extends CreepMemory {
   destination: Position | null
   /** Once `overwhelmingForce` triggers, fury means a fight to the death. */
   fury: boolean
+  emoji: "⚔️"
 }
 
 const roleDefenderMelee = {
   run: function (thisCreep: DefenderMelee, overwhelmingForce: boolean) {
     const fury = thisCreep.memory.fury
     if (!overwhelmingForce) {
-      thisCreep.say("⚔️ rally")
+      thisCreep.say(`${thisCreep.memory.emoji}rally`)
       // Go to the rally point in the center of the room
       const x = 23 + Math.floor(Math.random() * 5)
       const y = 23 + Math.floor(Math.random() * 5)
@@ -27,9 +28,9 @@ const roleDefenderMelee = {
       thisCreep.memory.fury = true
       const target = thisCreep.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
       if (target) {
-        thisCreep.say("⚔️ melee")
+        thisCreep.say(`${thisCreep.memory.emoji}melee`)
         if (thisCreep.attack(target) == ERR_NOT_IN_RANGE) {
-          thisCreep.say("⚔️ hunt")
+          thisCreep.say(`${thisCreep.memory.emoji}hunt`)
           thisCreep.moveTo(target)
         }
       } else if (!target) {

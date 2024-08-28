@@ -26,7 +26,7 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
             exit,
             { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
           )
-          thisCreep.say("👁️ EXPLORE")
+          thisCreep.say(`${thisCreep.memory.emoji}FAR`)
         } else {
           thisCreep.memory.destination = null
           thisCreep.memory.mission = "THINK"
@@ -38,7 +38,7 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
       const roomPosition = convertRoomPositionStringBackToRoomPositionObject(
         thisCreep.memory.destination
       )
-      thisCreep.say("👁️ CLOSE")
+      thisCreep.say(`${thisCreep.memory.emoji}CLOSE`)
       const resultMove = thisCreep.moveTo(
         roomPosition,
         { visualizePathStyle: { stroke: "#FFC0CB" } } // pink

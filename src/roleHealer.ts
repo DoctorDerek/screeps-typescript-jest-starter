@@ -10,6 +10,7 @@ interface HealerMemory extends CreepMemory {
   mission: "HEAL"
   destination: Position | null
   target: "container" | "extension" | null
+  emoji: "🏥"
 }
 
 const roleHealer = {

@@ -6,7 +6,7 @@ export default function assessSources(
   thisCreep: Miner,
   availableMiningPositions: MineablePositions
 ) {
-  thisCreep.say("⛏️ ASSIGN")
+  thisCreep.say(`${thisCreep.memory.emoji}ASSESS`)
   thisCreep.memory.mission = "MINE"
   console.log("Mineable positions: " + [...availableMiningPositions.keys()])
   // Select the nearest mineable position available, with rooms estimated at 50
