@@ -260,11 +260,11 @@ function unwrappedLoop() {
     console.log("Eyes: " + eyes.length)
 
     /**
-     * Once I have 2 miners, 1 of the 2 harvesters transform into a fetcher.
-     * Then once I have n miners, the remaining harvester transforms into an
+     * Once I have 2 miners, 1 of the 3 harvesters transform into a fetcher.
+     * Then once I have n miners, the remaining 2 harvester transforms into
      * upgraders, as goal 1 is RCL 3 + 7-10 extensions to get claimers.
      * */
-    if (miners.length >= 2 && harvesters.length >= 2) {
+    if (miners.length >= 2 && harvesters.length >= 3) {
       const harvester = harvesters[0]
       const fetcher = harvester as unknown as Fetcher
       fetcher.memory.role = "fetcher"
@@ -300,7 +300,7 @@ function unwrappedLoop() {
     // NO defenders
     // x n sources across all rooms
     // Builder will only spawn if there are construction sites.
-    if (totalCreeps < 2) {
+    if (totalCreeps < 3) {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
