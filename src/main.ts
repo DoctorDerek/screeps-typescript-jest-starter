@@ -260,10 +260,18 @@ function unwrappedLoop() {
     console.log("Eyes: " + eyes.length)
 
     /**
-     * Once we have miners, the harvesters transform into upgraders, as the
-     * first goal of the game is RCL 3 + 7-10 extensions to get claimers.
+     * Once I have 2 miners, 1 of the 2 harvesters transform into a fetcher.
+     * Then once I have n miners, the remaining harvester transforms into an
+     * upgraders, as goal 1 is RCL 3 + 7-10 extensions to get claimers.
      * */
-    if (miners.length >= n && harvesters.length > 0) {
+    if (miners.length >= 2 && harvesters.length >= 2) {
+      const harvester = harvesters[0]
+      const fetcher = harvester as unknown as Fetcher
+      fetcher.memory.role = "fetcher"
+      fetcher.memory.mission = "PICK UP"
+      fetcher.memory.destination = null
+    }
+    if (miners.length >= n && harvesters.length >= 1) {
       harvesters.forEach((harvester: Harvester) => {
         const upgrader = harvester as unknown as Upgrader
         upgrader.memory.role = "upgrader"
