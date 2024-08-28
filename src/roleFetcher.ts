@@ -55,12 +55,15 @@ const roleFetcher = {
         if (droppedResources.length) {
           if (thisCreep.memory.droppedResourceNumber == null) {
             // Decide on current droppedResource assignment by dividing
-            // the amount of dropped resources by the distance to them:
+            // the square of dropped resources by the distance to them:
             let bestIndex = 0
             const bestResource = droppedResources.reduce((a, b) => {
               const aDistance = thisCreep.pos.getRangeTo(a)
               const bDistance = thisCreep.pos.getRangeTo(b)
-              if (a.amount / aDistance > b.amount / bDistance) {
+              if (
+                Math.pow(a.amount, 2) / aDistance >
+                Math.pow(b.amount, 2) / bDistance
+              ) {
                 bestIndex = droppedResources.indexOf(a)
                 return a
               } else {
@@ -157,10 +160,8 @@ const roleFetcher = {
           }
         } else {
           // Explore
-          // thisCreep.memory.mission = "EXPLORE"
-          // actionExplore(thisCreep)
-
-          thisCreep.memory.mission = "PICK UP"
+          thisCreep.memory.mission = "EXPLORE"
+          actionExplore(thisCreep)
           console.log(`${thisCreep.name} is going to check for resources`)
         }
       }
