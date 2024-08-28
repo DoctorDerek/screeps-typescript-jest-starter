@@ -1,6 +1,8 @@
 import actionDeposit from "actionDeposit"
 import actionExplore from "actionExplore"
+import actionMoveToDestination from "actionMoveToDestination"
 import type { Position } from "main"
+import parseDestination from "parseDestination"
 
 export interface Fetcher extends Creep {
   memory: FetcherMemory
@@ -8,20 +10,14 @@ export interface Fetcher extends Creep {
 
 interface FetcherMemory extends CreepMemory {
   role: "fetcher"
-  mission: "PICK UP" | "DEPOSIT" | "EXPLORE"
+  mission: "PICK UP" | "DEPOSIT" | "EXPLORE" | "THINK"
   destination: Position | null
   depositTargetNumber: number | null
-  droppedResourceNumber: number | null
-  objective: string | null
   target: "container" | "extension" | null
 }
 
 const roleFetcher = {
-  run: function (
-    thisCreep: Fetcher,
-    droppedResources: Resource[],
-    containers: StructureContainer[]
-  ) {
+  run: function (thisCreep: Fetcher, droppedResources: Resource[]) {
     // This calculates the creep's carrying capacity by multiplying the number of
     // CARRY parts times the CARRY_CAPACITY per part, which is 50
     const carryingCapacity =
@@ -39,139 +35,95 @@ const roleFetcher = {
         thisCreep.memory.mission = "PICK UP"
       }
     } else if (
-      !thisCreep?.memory.mission ||
-      thisCreep.memory.mission === "PICK UP"
+      !thisCreep?.memory?.mission ||
+      thisCreep.memory.mission === "PICK UP" ||
+      thisCreep.memory.mission === "THINK"
     ) {
       const isFull = thisCreep.store.getUsedCapacity() >= carryingCapacity
       if (isFull) {
         // We can clear our marker of which resource we were gathering
-        thisCreep.memory.droppedResourceNumber = null
-        thisCreep.memory.objective = null
+        thisCreep.memory.destination = null
         // And go to to drop off resources
         thisCreep.memory.mission = "DEPOSIT"
       } else {
         // Fetch dropped resources priority over container resources
-
+        if (thisCreep.memory.destination) {
+          const { roomName, x, y } = parseDestination(thisCreep)
+          if (!roomName || !x || !y) {
+            thisCreep.memory.mission = "EXPLORE"
+            return
+          }
+          // Try to pick up if I'm at the destination (within range 1)
+          if (
+            thisCreep.pos.roomName === roomName &&
+            thisCreep.pos.x >= x - 1 &&
+            thisCreep.pos.x <= x + 1 &&
+            thisCreep.pos.y >= y - 1 &&
+            thisCreep.pos.y <= y + 1
+          ) {
+            // In the creep's memory, the objective and destination are stored as strings, so I have to convert them
+            const droppedResourcePosition = new RoomPosition(x, y, roomName)
+            if (!droppedResourcePosition) {
+              // Shouldn't happen, but if it does, think about it
+              thisCreep.memory.mission = "EXPLORE"
+              return
+            }
+            const result = thisCreep.pickup(
+              droppedResourcePosition.lookFor(LOOK_ENERGY)[0]
+            )
+            if (result == ERR_INVALID_TARGET) {
+              // Maybe we already picked it up, or someone else did
+              thisCreep.memory.destination = null
+              thisCreep.memory.mission = "PICK UP"
+            } else if (result === OK) thisCreep.say("🛍️ PICKED")
+            else {
+              thisCreep.say("🛍️ ERROR")
+              // Possibly out of resources
+              thisCreep.memory.mission = "EXPLORE"
+            }
+          } else {
+            // Not at destination
+            actionMoveToDestination(thisCreep)
+            return
+          }
+        }
+        /**
+         * No destination, so we need to find one. Fetchers don't withdraw from
+         * containers, they only pick up energy from the ground; but fetchers
+         * do deposit energy in containers for upgraders and builders.
+         * */
         if (droppedResources.length) {
-          if (thisCreep.memory.droppedResourceNumber == null) {
-            // Decide on current droppedResource assignment by dividing
-            // the square of dropped resources by the distance to them:
-            let bestIndex = 0
-            const bestResource = droppedResources.reduce((a, b) => {
-              const roomsA = a?.room?.name
-                ? Game.map.getRoomLinearDistance(
-                    thisCreep.pos.roomName,
-                    a.room.name
-                  )
-                : 0
-              const roomsB = b?.room?.name
-                ? Game.map.getRoomLinearDistance(
-                    thisCreep.pos.roomName,
-                    b.room.name
-                  )
-                : 0
-              const rangeToA =
-                roomsA === 0 ? thisCreep.pos.getRangeTo(a) : 50 * roomsA
-              const rangeToB =
-                roomsB === 0 ? thisCreep.pos.getRangeTo(b) : 50 * roomsB
-              if (
-                Math.pow(a.amount, 2) / rangeToA >
-                Math.pow(b.amount, 2) / rangeToB
-              ) {
-                bestIndex = droppedResources.indexOf(a)
-                return a
-              } else {
-                bestIndex = droppedResources.indexOf(b)
-                return b
-              }
-            })
-            thisCreep.memory.droppedResourceNumber = bestIndex
-            // TODO Set objective:
-            // thisCreep.memory.objective = String(droppedResources[thisCreep.memory.droppedResourceNumber].pos)
-            thisCreep.say(`🛍️ ${bestResource.amount}`)
-            console.log(
-              `${thisCreep.name} assigned to @droppedResources[${thisCreep.memory.droppedResourceNumber}]`
+          // Decide on current droppedResource assignment by dividing
+          // the square of dropped resources by the distance to them:
+          const bestResource = droppedResources.reduce((a, b) => {
+            const roomsA = a?.room?.name
+              ? Game.map.getRoomLinearDistance(
+                  thisCreep.pos.roomName,
+                  a.room.name
+                )
+              : 0
+            const roomsB = b?.room?.name
+              ? Game.map.getRoomLinearDistance(
+                  thisCreep.pos.roomName,
+                  b.room.name
+                )
+              : 0
+            const rangeToA =
+              roomsA === 0 ? thisCreep.pos.getRangeTo(a) : 50 * roomsA
+            const rangeToB =
+              roomsB === 0 ? thisCreep.pos.getRangeTo(b) : 50 * roomsB
+            if (
+              Math.pow(a.amount, 2) / rangeToA >
+              Math.pow(b.amount, 2) / rangeToB
             )
-            console.log(
-              `${bestResource.amount} dropped resources at ${
-                bestResource.pos.x
-              },${
-                bestResource.pos.y
-              } with a distance of ${thisCreep.pos.getRangeTo(bestResource)}`
-            )
-          }
-          if (
-            thisCreep.pickup(
-              droppedResources[thisCreep.memory.droppedResourceNumber]
-            ) == ERR_NOT_IN_RANGE
-          ) {
-            thisCreep.say(`🛍️ moveDrop`)
-            thisCreep.moveTo(
-              droppedResources[thisCreep.memory.droppedResourceNumber],
-              { visualizePathStyle: { stroke: "#ffaa00" } }
-            )
-          }
-          if (
-            thisCreep.pickup(
-              droppedResources[thisCreep.memory.droppedResourceNumber]
-            ) == ERR_INVALID_TARGET
-          ) {
-            // Maybe we already picked it up, or someone else did
-            thisCreep.memory.droppedResourceNumber = null
-            thisCreep.memory.objective = null
-          }
-        } else if (containers.length > 0) {
-          if (thisCreep.memory.depositTargetNumber == null) {
-            // Decide on current container assignment by dividing
-            // the amount of container resources by the distance to them:
-            let bestIndex = 0
-            const bestContainer = containers.reduce((a, b) => {
-              const aDistance = thisCreep.pos.getRangeTo(a)
-              const bDistance = thisCreep.pos.getRangeTo(b)
-              if (
-                a.store.getUsedCapacity() / aDistance >
-                b.store.getUsedCapacity() / bDistance
-              ) {
-                bestIndex = containers.indexOf(a)
-                return a
-              } else {
-                bestIndex = containers.indexOf(b)
-                return b
-              }
-            })
-            thisCreep.memory.depositTargetNumber = bestIndex
-            thisCreep.say(`🛍️ ${bestContainer.store.getUsedCapacity()}`)
-            console.log(
-              `${thisCreep.name} assigned to @containers[${thisCreep.memory.depositTargetNumber}]`
-            )
-            console.log(
-              `${bestContainer.store.getUsedCapacity()} container resources at ${
-                bestContainer.pos.x
-              },${
-                bestContainer.pos.y
-              } with a distance of ${thisCreep.pos.getRangeTo(bestContainer)}`
-            )
-          }
-          if (
-            thisCreep.withdraw(
-              containers[thisCreep.memory.depositTargetNumber],
-              RESOURCE_ENERGY
-            ) == ERR_NOT_IN_RANGE
-          ) {
-            thisCreep.say(`🛍️ moveCont`)
-            thisCreep.moveTo(containers[thisCreep.memory.depositTargetNumber], {
-              visualizePathStyle: { stroke: "#ffaa00" }
-            })
-          }
-          if (
-            thisCreep.withdraw(
-              containers[thisCreep.memory.depositTargetNumber],
-              RESOURCE_ENERGY
-            ) == ERR_INVALID_TARGET
-          ) {
-            // Maybe we already picked it up, or someone else did
-            thisCreep.memory.depositTargetNumber = null
-          }
+              return a
+            else return b
+          })
+          thisCreep.memory.destination = String(bestResource.pos) as Position
+          thisCreep.say(`🛍️ ${bestResource.amount}`)
+          console.log(
+            `${thisCreep.name} moving to dropped resources at ${thisCreep.memory.destination}`
+          )
         } else {
           // Explore
           thisCreep.memory.mission = "EXPLORE"

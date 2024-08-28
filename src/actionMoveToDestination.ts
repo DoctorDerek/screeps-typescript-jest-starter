@@ -47,7 +47,8 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
       if (
         resultMove === ERR_NO_PATH ||
         (thisCreep.pos.x === roomPosition.x &&
-          thisCreep.pos.y === roomPosition.y)
+          thisCreep.pos.y === roomPosition.y) ||
+        roomPosition.lookFor(LOOK_CREEPS).length > 0
       ) {
         thisCreep.memory.mission = "THINK"
         thisCreep.memory.destination = null
