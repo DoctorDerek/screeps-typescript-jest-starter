@@ -50,12 +50,29 @@ function actionExplore(
       const rangeToB = Game.map.getRoomLinearDistance(spawn, b)
       return rangeToA > rangeToB ? a : b
     }) as RoomName
-    thisCreep.memory.destination = String(
-      new RoomPosition(25, 25, destinationRoom)
+    let proposedX = 25
+    let proposedY = 25
+    // Check for no terrain blocking, move y using a for loop
+    while (
+      Game.rooms[destinationRoom]
+        .lookAt(proposedX, proposedY)
+        .filter((object) => object.type === "terrain")[0].terrain === "wall"
+    ) {
+      // Random walk weighted 60%/40% in favor of decreasing x/y
+      if (Math.random() > 0.6) Math.random() > 0.5 ? proposedY-- : proposedX--
+      else Math.random() > 0.5 ? proposedY++ : proposedX++
+      proposedX = proposedX < 0 ? 0 : proposedX
+      proposedY = proposedY < 0 ? 0 : proposedY
+      proposedX > 49 ? 49 : proposedX
+      proposedY > 49 ? 49 : proposedY
+    }
+    const destination = String(
+      new RoomPosition(proposedX, proposedY, destinationRoom)
     ) as Position
+    thisCreep.memory.destination = destination
 
     console.log(
-      `${thisCreep.name} assigned mission to EXPLORE to Destination ${thisCreep.memory.destination}`
+      `${thisCreep.name} assigned mission to EXPLORE to Destination ${destination}`
     )
   } else {
     if (thisCreep.room.find(FIND_HOSTILE_STRUCTURES).length >= 1) {
