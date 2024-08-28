@@ -126,14 +126,11 @@ const roleFetcher = {
           console.log(
             `${thisCreep.name} moving to dropped resources at ${thisCreep.memory.destination}`
           )
-        } else {
-          // Explore
-          thisCreep.memory.mission = "EXPLORE"
-          actionExplore(thisCreep)
-          console.log(`${thisCreep.name} is going to check for resources`)
         }
       }
     }
+    // thisCreep.memory.mission === "EXPLORE"
+    else actionExplore(thisCreep)
   }
 }
 
