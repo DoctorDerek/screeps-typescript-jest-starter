@@ -182,10 +182,11 @@ export default function findMineablePositions(
           if (Math.random() > 0.6)
             Math.random() > 0.5 ? proposedY-- : proposedX--
           else Math.random() > 0.5 ? proposedY++ : proposedX++
-          if (proposedX < 0 || proposedY < 0) break
+          proposedX = proposedX < 0 ? 0 : proposedX
+          proposedY = proposedY < 0 ? 0 : proposedY
+          proposedX > 49 ? 49 : proposedX
+          proposedY > 49 ? 49 : proposedY
         }
-        proposedX = proposedX < 0 ? 0 : proposedX
-        proposedY = proposedY < 0 ? 0 : proposedY
         const proposedBuildingPosition = new RoomPosition(
           proposedX,
           proposedY,
