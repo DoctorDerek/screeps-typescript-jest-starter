@@ -45,29 +45,31 @@ function actionExplore(
     const spawn = Game.spawns["Spawn1"].room.name
     // Randomize the array in case of a tie
     exitRoomNameArray.sort(() => Math.random() - 0.5)
-    const destinationRoom = exitRoomNameArray.reduce((a, b) => {
+    const destinationRoomName = exitRoomNameArray.reduce((a, b) => {
       const rangeToA = Game.map.getRoomLinearDistance(spawn, a)
       const rangeToB = Game.map.getRoomLinearDistance(spawn, b)
       return rangeToA > rangeToB ? a : b
     }) as RoomName
+    const destinationRoom = Game.rooms[destinationRoomName]
     let proposedX = 25
     let proposedY = 25
     // Check for no terrain blocking, move y using a for loop
-    while (
-      Game.rooms[destinationRoom]
-        .lookAt(proposedX, proposedY)
-        .filter((object) => object.type === "terrain")[0].terrain === "wall"
-    ) {
-      // Random walk weighted 60%/40% in favor of decreasing x/y
-      if (Math.random() > 0.6) Math.random() > 0.5 ? proposedY-- : proposedX--
-      else Math.random() > 0.5 ? proposedY++ : proposedX++
-      proposedX = proposedX < 0 ? 0 : proposedX
-      proposedY = proposedY < 0 ? 0 : proposedY
-      proposedX > 49 ? 49 : proposedX
-      proposedY > 49 ? 49 : proposedY
-    }
+    if (destinationRoom)
+      while (
+        destinationRoom
+          .lookAt(proposedX, proposedY)
+          .filter((object) => object.type === "terrain")[0].terrain === "wall"
+      ) {
+        // Random walk weighted 60%/40% in favor of decreasing x/y
+        if (Math.random() > 0.6) Math.random() > 0.5 ? proposedY-- : proposedX--
+        else Math.random() > 0.5 ? proposedY++ : proposedX++
+        proposedX = proposedX < 0 ? 0 : proposedX
+        proposedY = proposedY < 0 ? 0 : proposedY
+        proposedX > 49 ? 49 : proposedX
+        proposedY > 49 ? 49 : proposedY
+      }
     const destination = String(
-      new RoomPosition(proposedX, proposedY, destinationRoom)
+      new RoomPosition(proposedX, proposedY, destinationRoomName)
     ) as Position
     thisCreep.memory.destination = destination
 
