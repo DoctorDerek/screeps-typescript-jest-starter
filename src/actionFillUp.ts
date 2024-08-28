@@ -9,18 +9,20 @@ function actionFillUp(thisCreep: Builder | Upgrader | Healer) {
   const targetFillUpSite = thisCreep.pos.findClosestByPath(FIND_STRUCTURES, {
     filter: (structure) =>
       (structure.structureType == STRUCTURE_CONTAINER ||
-        structure.structureType == STRUCTURE_STORAGE) &&
-      structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50
+        structure.structureType == STRUCTURE_STORAGE ||
+        structure.structureType == STRUCTURE_TERMINAL ||
+        structure.structureType == STRUCTURE_LINK ||
+        structure.structureType == STRUCTURE_TOWER ||
+        structure.structureType == STRUCTURE_EXTENSION ||
+        structure.structureType == STRUCTURE_SPAWN ||
+        structure.structureType == STRUCTURE_POWER_SPAWN ||
+        structure.structureType == STRUCTURE_NUKER ||
+        structure.structureType == STRUCTURE_LAB ||
+        structure.structureType == STRUCTURE_FACTORY) &&
+      structure?.store?.getUsedCapacity(RESOURCE_ENERGY) >= 50
   })
   if (targetFillUpSite != null) {
     const result = thisCreep.withdraw(targetFillUpSite, RESOURCE_ENERGY)
-    // There is somewhere to fill up in the current room
-    /*    console.log(
-      `${thisCreep.name} attempting withdraw with result ${thisCreep.withdraw(
-        targetFillUpSite,
-        RESOURCE_ENERGY
-      )}`
-    )*/
     if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}WITHDRAW`)
     if (result === ERR_NOT_IN_RANGE) {
       thisCreep.say(`${thisCreep.memory.emoji}FILL UP`)
