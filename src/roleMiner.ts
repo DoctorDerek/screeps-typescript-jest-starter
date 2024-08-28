@@ -91,7 +91,11 @@ const roleMiner = {
         const result = thisCreep.harvest(sourceObjectAtObjective)
         // console.log(`⛏️ Miner ${thisCreep.name} mining result ${result}`)
         if (result === OK) thisCreep.say("⛏️ MINE")
-        else thisCreep.say("⛏️ ERROR")
+        else {
+          thisCreep.say("⛏️ ERROR")
+          // Possibly out of resources
+          thisCreep.memory.mission = "THINK"
+        }
       } else {
         // if (
         //   thisCreep.pos.roomName === roomName &&
