@@ -68,9 +68,8 @@ function actionExplore(
         proposedX > 49 ? 49 : proposedX
         proposedY > 49 ? 49 : proposedY
       }
-    const destination = String(
-      new RoomPosition(proposedX, proposedY, destinationRoomName)
-    ) as Position
+    /** Calling new RoomPosition() won't work without vision, but this will */
+    const destination: Position = `[room ${destinationRoomName} pos ${proposedX},${proposedY}]`
     thisCreep.memory.destination = destination
 
     console.log(
@@ -81,14 +80,48 @@ function actionExplore(
       // Potentially a source keeper room or enemy room, leave it by walking back home
       thisCreep.moveTo(Game.spawns["Spawn1"].pos)
     } else {
-      thisCreep.say("👁️ EXPLORE")
-      // Move toward the assigned exit tile
-      thisCreep.moveTo(
-        convertRoomPositionStringBackToRoomPositionObject(
-          thisCreep.memory.destination
-        ),
-        { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
-      )
+      const groups = /room (\w+) pos/.exec(thisCreep.memory.destination)
+      const roomName = groups?.[1] ? groups[1] : null
+      if (!roomName) {
+        thisCreep.memory.destination = null
+        thisCreep.memory.mission = "THINK"
+      } else if (roomName !== thisCreep.room.name) {
+        // Move toward the assigned exit tile
+        const exitDir = Game.map.findExit(thisCreep.room, roomName)
+        if (exitDir !== -2 && exitDir !== -10) {
+          const exit = thisCreep.pos.findClosestByRange(exitDir)
+          if (exit) {
+            thisCreep.moveTo(
+              exit,
+              { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
+            )
+            thisCreep.say("👁️ EXPLORE")
+          } else {
+            thisCreep.memory.destination = null
+            thisCreep.memory.mission = "THINK"
+          }
+        } else {
+          // The following throws an error if the room is not visible
+          const roomPosition =
+            convertRoomPositionStringBackToRoomPositionObject(
+              thisCreep.memory.destination
+            )
+          thisCreep.say("👁️ CLOSE")
+          const resultMove = thisCreep.moveTo(
+            roomPosition,
+            { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
+          )
+          // If this creep has arrived, reset the mission
+          if (
+            resultMove === ERR_NO_PATH ||
+            (thisCreep.pos.x === roomPosition.x &&
+              thisCreep.pos.y === roomPosition.y)
+          ) {
+            thisCreep.memory.mission = "THINK"
+            thisCreep.memory.destination = null
+          }
+        }
+      }
     }
   }
   if (

@@ -77,26 +77,25 @@ const roleMiner = {
         return
       }
       const result = thisCreep.harvest(sourceObjectAtObjective)
+      // console.log(`⛏️ Miner ${thisCreep.name} mining result ${result}`)
       if (result === OK) thisCreep.say("⛏️ MINE")
       else if (result === ERR_NOT_IN_RANGE) {
-        /*
-          if (
-            thisCreep.harvest(sourceObjectAtObjective) < 0 &&
-            thisCreep.harvest(sourceObjectAtObjective) !== ERR_NOT_IN_RANGE
-          ) {
-            // Think about it if our mining site is giving us an error, such as because it's empty
-            thisCreep.memory.mission = "THINK"
-          }*/
-        /*if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
-              // Think about it if our mining site is occupied
-              thisCreep.memory.mission = "THINK"
-            }*/
+        if (destinationPosition.lookFor(LOOK_CREEPS).length > 0) {
+          thisCreep.say("⛏️ OCCUPIED")
+          // Think about it if our mining site is occupied
+          thisCreep.memory.mission = "THINK"
+        }
         const resultMove = thisCreep.moveTo(destinationPosition, {
           visualizePathStyle: { stroke: "#ffaa00" }
         })
+        // console.log(`⛏️ Miner ${thisCreep.name} moving result ${resultMove}`)
         if (resultMove === OK) thisCreep.say("⛏️ MOVE")
-        if (resultMove === ERR_NO_PATH) {
+        else if (resultMove === ERR_NO_PATH) {
           thisCreep.say("⛏️ NO PATH")
+          thisCreep.memory.mission = "THINK"
+        } else if (resultMove !== ERR_TIRED) {
+          thisCreep.say("⛏️ ERROR")
+          // If there was a different error, think about it
           thisCreep.memory.mission = "THINK"
         }
       } // if (result === ERR_NOT_ENOUGH_RESOURCES) // Now: catch all errors
