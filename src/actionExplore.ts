@@ -1,4 +1,5 @@
 // TODO: Refactor how destination is stored in memory with newer version (string)
+import actionMoveToDestination from "actionMoveToDestination"
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import type { Position, RoomName } from "main"
 import type { Builder } from "roleBuilder"
@@ -9,16 +10,15 @@ import type { Fetcher } from "roleFetcher"
 import type { Harvester } from "roleHarvester"
 import type { Miner } from "roleMiner"
 
-function actionExplore(
-  thisCreep:
-    | Builder
-    | DefenderMelee
-    | DefenderRanged
-    | Eye
-    | Fetcher
-    | Harvester
-    | Miner
-) {
+export type Explorer =
+  | Builder
+  | DefenderMelee
+  | DefenderRanged
+  | Eye
+  | Fetcher
+  | Harvester
+  | Miner
+function actionExplore(thisCreep: Explorer) {
   // TODO: make sure destination is getting unset
   if (
     thisCreep.memory.destination == undefined ||
@@ -76,67 +76,21 @@ function actionExplore(
       `${thisCreep.name} assigned mission to EXPLORE to Destination ${destination}`
     )
   } else {
-    if (thisCreep.room.find(FIND_HOSTILE_STRUCTURES).length >= 1) {
-      // Potentially a source keeper room or enemy room, leave it by walking back home
-      thisCreep.moveTo(Game.spawns["Spawn1"].pos)
-    } else {
-      const groups = /room (\w+) pos/.exec(thisCreep.memory.destination)
-      const roomName = groups?.[1] ? groups[1] : null
-      if (!roomName) {
-        thisCreep.memory.destination = null
-        thisCreep.memory.mission = "THINK"
-      } else if (roomName !== thisCreep.room.name) {
-        // Move toward the assigned exit tile
-        const exitDir = Game.map.findExit(thisCreep.room, roomName)
-        if (exitDir !== -2 && exitDir !== -10) {
-          const exit = thisCreep.pos.findClosestByRange(exitDir)
-          if (exit) {
-            thisCreep.moveTo(
-              exit,
-              { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
-            )
-            thisCreep.say("👁️ EXPLORE")
-          } else {
-            thisCreep.memory.destination = null
-            thisCreep.memory.mission = "THINK"
-          }
-        } else {
-          // The following throws an error if the room is not visible
-          const roomPosition =
-            convertRoomPositionStringBackToRoomPositionObject(
-              thisCreep.memory.destination
-            )
-          thisCreep.say("👁️ CLOSE")
-          const resultMove = thisCreep.moveTo(
-            roomPosition,
-            { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
-          )
-          // If this creep has arrived, reset the mission
-          if (
-            resultMove === ERR_NO_PATH ||
-            (thisCreep.pos.x === roomPosition.x &&
-              thisCreep.pos.y === roomPosition.y)
-          ) {
-            thisCreep.memory.mission = "THINK"
-            thisCreep.memory.destination = null
-          }
-        }
-      }
-    }
+    actionMoveToDestination(thisCreep)
   }
-  if (
-    thisCreep.pos.x === 0 ||
-    thisCreep.pos.x === 49 ||
-    thisCreep.pos.y === 0 ||
-    thisCreep.pos.y === 49
-  ) {
-    // At an exit on the 50x50 game board
-    // Reset mission
-    thisCreep.memory.mission = "THINK"
-    thisCreep.memory.destination = null
-    // Move off the border by 1 step
-    thisCreep.moveTo(25, 25)
-  }
+  // if (
+  //   thisCreep.pos.x === 0 ||
+  //   thisCreep.pos.x === 49 ||
+  //   thisCreep.pos.y === 0 ||
+  //   thisCreep.pos.y === 49
+  // ) {
+  //   // At an exit on the 50x50 game board
+  //   // Reset mission
+  //   thisCreep.memory.mission = "THINK"
+  //   thisCreep.memory.destination = null
+  //   // Move off the border by 1 step
+  //   thisCreep.moveTo(25, 25)
+  // }
 }
 
 export default actionExplore
