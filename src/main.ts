@@ -88,8 +88,33 @@ function unwrappedLoop() {
   // Populate the mineablePositions hash map across rooms where I have vision
   const allRooms = Object.keys(Game.rooms) as RoomName[]
   const mineablePositionsMap = new Map() as MineablePositionsMap
-  for (const roomName of allRooms)
+
+  const allDroppedResources: Resource[] = []
+  // Only target resources that have at least that many times carryingCapacity
+
+  /*const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
+    filter: function (resource) {
+      return resource.amount >= 1 * carryingCapacity
+    },
+  })*/
+  // Target 1x carryingCapacity, i.e. full loads only */
+
+  const allContainers: StructureContainer[] = []
+
+  for (const roomName of allRooms) {
+    const thisRoom = Game.rooms[roomName]
     mineablePositionsMap.set(roomName, findMineablePositions(roomName, miners))
+    thisRoom
+      .find(FIND_DROPPED_RESOURCES)
+      .forEach((resource) => allDroppedResources.push(resource))
+    thisRoom.find(FIND_STRUCTURES).forEach((structure) => {
+      if (
+        structure.structureType === STRUCTURE_CONTAINER &&
+        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= 50
+      )
+        allContainers.push(structure)
+    })
+  }
 
   // Ant-style: mark current position for a future road
   const fetchers = _.filter(
@@ -472,7 +497,8 @@ function unwrappedLoop() {
         roleDefenderRanged.run(creep as DefenderRanged, overwhelmingForce)
       if (creep.memory.role == "miner")
         roleMiner.run(creep as Miner, allAvailableMineablePositions)
-      if (creep.memory.role == "fetcher") roleFetcher.run(creep as Fetcher)
+      if (creep.memory.role == "fetcher")
+        roleFetcher.run(creep as Fetcher, allDroppedResources, allContainers)
       if (creep.memory.role == "harvester")
         roleHarvester.run(creep as Harvester)
       if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)

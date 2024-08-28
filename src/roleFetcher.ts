@@ -17,7 +17,11 @@ interface FetcherMemory extends CreepMemory {
 }
 
 const roleFetcher = {
-  run: function (thisCreep: Fetcher) {
+  run: function (
+    thisCreep: Fetcher,
+    droppedResources: Resource[],
+    containers: StructureContainer[]
+  ) {
     // This calculates the creep's carrying capacity by multiplying the number of
     // CARRY parts times the CARRY_CAPACITY per part, which is 50
     const carryingCapacity =
@@ -47,46 +51,6 @@ const roleFetcher = {
         thisCreep.memory.mission = "DEPOSIT"
       } else {
         // Fetch dropped resources priority over container resources
-
-        /* TODO: Fix fetcher competition logic, based e.g. on miner logic
-      // Get all the fetchers who have assigned objectives
-
-      const fetcherDroppedTargets = fetchers.map(
-        (creepName) => Game.creeps[creepName].memory.objective
-      )
-      // Top priority: Dropped resources
-      // - that have at least our carrying capacity
-      // - and that no other fetchers are assigned to
-      const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
-        filter: function (resource) {
-          return (
-            resource.amount >= 1 * carryingCapacity &&
-            !fetcherDroppedTargets.includes(String(resource.pos))
-          )
-        },
-      })
-      // TODO: assign a number of fetchers dynamically?
-      */
-
-        const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
-          filter: function (resource) {
-            return resource.amount >= carryingCapacity
-          }
-        })
-        // Only target resources that have at least that many times carryingCapacity
-
-        /*const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
-          filter: function (resource) {
-            return resource.amount >= 1 * carryingCapacity
-          },
-        })*/
-        // Target 1x carryingCapacity, i.e. full loads only */
-
-        const containers = thisCreep.room.find(FIND_STRUCTURES, {
-          filter: (structure) =>
-            structure.structureType == STRUCTURE_CONTAINER &&
-            structure.store.getUsedCapacity() >= carryingCapacity
-        }) as unknown as StructureContainer[]
 
         if (droppedResources.length) {
           if (thisCreep.memory.droppedResourceNumber == null) {
