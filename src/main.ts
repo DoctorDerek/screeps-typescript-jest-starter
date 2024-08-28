@@ -83,6 +83,7 @@ function unwrappedLoop() {
   ) as Miner[]
 
   const thisRoom = Game.spawns["Spawn1"].room
+  const RCL = thisRoom.controller?.level
 
   // Populate the mineablePositions hash map across rooms where I have vision
   const allRooms = Object.keys(Game.rooms) as RoomName[]
@@ -101,6 +102,8 @@ function unwrappedLoop() {
   ) as Upgrader[]
   const creepsForRoads = [...fetchers, ...upgraders]
   if (
+    RCL &&
+    RCL >= 4 && // Only build roads at RCL 4 and above
     // Limit the number of construction sites to 10 per room:
     thisRoom.find(FIND_CONSTRUCTION_SITES).length < 10
   ) {
