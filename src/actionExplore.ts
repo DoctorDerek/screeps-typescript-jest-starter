@@ -1,6 +1,4 @@
-// TODO: Refactor how destination is stored in memory with newer version (string)
 import actionMoveToDestination from "actionMoveToDestination"
-import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import type { Position, RoomName } from "main"
 import type { Builder } from "roleBuilder"
 import type { DefenderMelee } from "roleDefenderMelee"
@@ -19,7 +17,6 @@ export type Explorer =
   | Harvester
   | Miner
 function actionExplore(thisCreep: Explorer) {
-  // TODO: make sure destination is getting unset
   if (
     thisCreep.memory.destination == undefined ||
     typeof thisCreep.memory.destination != "string"
