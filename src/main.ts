@@ -228,10 +228,11 @@ function unwrappedLoop() {
     Game.spawns["Spawn1"].spawning == undefined
   ) */
   // Currently Game.spawns["Spawn1"].room.energyCapacityAvailable === 550
-  if (
-    Game.spawns["Spawn1"].room.energyAvailable >= 300 &&
-    Game.spawns["Spawn1"].spawning == undefined
-  ) {
+  const energy = Game.spawns["Spawn1"].room.energyAvailable
+  /** 300 at the beginning RCL1 then 550 at RCL2 with 5 extensions */
+  const energyMax = Game.spawns["Spawn1"].room.energyCapacityAvailable
+  const notSpawning = Game.spawns["Spawn1"].spawning == undefined
+  if (energy >= energyMax && notSpawning) {
     const harvesters = _.filter(
       Game.creeps,
       (creep) => creep.memory.role == "harvester"
@@ -302,47 +303,61 @@ function unwrappedLoop() {
       })
     }
 
+    /**
+     * [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-3
+     * [WORK, MOVE, MOVE, CARRY] // 250 -- quick creeps 4-n
+     * [WORK, MOVE, MOVE, MOVE, CARRY, CARRY], // 350
+     * [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
+     **/
+    const getHarvesterBody = () => {
+      if (totalCreeps < 3) return [WORK, WORK, MOVE, CARRY] // 300
+      if (energyMax < 350) return [WORK, MOVE, MOVE, CARRY] // 250
+      if (energyMax < 500)
+        // >= 350
+        return [WORK, MOVE, MOVE, MOVE, CARRY, CARRY] // 350
+      // if (energyMax >= 500)
+      return [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY] // 500
+    }
     const spawnHarvester = () => {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
-      // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
-      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
-      // [WORK, MOVE, MOVE, CARRY], // 250
-      // [WORK, WORK, MOVE, CARRY], // 300
-      Game.spawns["Spawn1"].spawnCreep(
-        totalCreeps < 3
-          ? [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-3
-          : [WORK, MOVE, MOVE, CARRY], // 250 -- quick creeps 4-n
-        newName,
-        { memory: { role: "harvester", emoji: "🌾" } } as Pick<
-          Harvester,
-          "memory"
-        >
-      )
+      Game.spawns["Spawn1"].spawnCreep(getHarvesterBody(), newName, {
+        memory: { role: "harvester", emoji: "🌾" }
+      } as Pick<Harvester, "memory">)
+    }
+    /**
+     * [WORK, WORK, MOVE, MOVE], // 300
+     * [WORK, WORK, WORK, MOVE, MOVE, MOVE], // 450
+     * **/
+    const getMinerBody = () => {
+      if (energyMax < 450) return [WORK, WORK, MOVE, MOVE] // 300
+      // if (energyMax >= 450)
+      return [WORK, WORK, WORK, MOVE, MOVE, MOVE] // 450
     }
     const spawnMiner = () => {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
-      // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
-      // [WORK, WORK, MOVE, MOVE], // 300
-      // [WORK, WORK, MOVE], // 250
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, MOVE], // 300
-        newName,
-        { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
-      )
+      Game.spawns["Spawn1"].spawnCreep(getMinerBody(), newName, {
+        memory: { role: "miner", emoji: "⛏️" }
+      } as Pick<Miner, "memory">)
+    }
+    /**
+     * [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
+     * [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 400
+     * [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
+     * */
+    const getFetcherBody = () => {
+      if (energyMax < 400) return [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY] // 300
+      if (energyMax < 500) return [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY] // 400
+      // if (energyMax >= 500)
+      return [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY] // 500
     }
     const spawnFetcher = () => {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
-      // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
-      // [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
-      // [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
-      Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
-        newName,
-        { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
-      )
+      Game.spawns["Spawn1"].spawnCreep(getFetcherBody(), newName, {
+        memory: { role: "fetcher", emoji: "🛍️" }
+      } as Pick<Fetcher, "memory">)
     }
     const spawnEye = () => {
       const newName = Game.time + "_" + "Eyes" + eyes.length
@@ -353,19 +368,28 @@ function unwrappedLoop() {
         { memory: { role: "eye", emoji: "👁️" } } as Pick<Eye, "memory">
       )
     }
+    /**
+     * [WORK, MOVE, MOVE, CARRY], // 250
+     * [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 400
+     * [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
+     * */
+    const getBuilderBody = () => {
+      if (energyMax < 400) return [WORK, MOVE, MOVE, CARRY] // 250
+      if (energyMax < 500) return [WORK, WORK, MOVE, MOVE, CARRY, CARRY] // 400
+      // if (energyMax >= 500)
+      return [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY] // 500
+    }
     const spawnBuilder = () => {
       const newName = Game.time + "_" + "Builder" + builders.length
       console.log("Spawning new builder: " + newName)
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
       // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
       // [WORK, MOVE, MOVE, CARRY], // 250
-      // [WORK, WORK, MOVE, CARRY], // 300
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, MOVE, MOVE, CARRY], // 250
-        newName,
-        { memory: { role: "builder", emoji: "🚧" } } as Pick<Builder, "memory">
-      )
+      Game.spawns["Spawn1"].spawnCreep(getBuilderBody(), newName, {
+        memory: { role: "builder", emoji: "🚧" }
+      } as Pick<Builder, "memory">)
     }
+    const getUpgraderBody = getBuilderBody
     const spawnUpgrader = () => {
       const newName = Game.time + "_" + "Upgrader" + upgraders.length
       console.log("Spawning new upgrader: " + newName)
@@ -373,14 +397,9 @@ function unwrappedLoop() {
       // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
       // [WORK, MOVE, MOVE, CARRY], // 250
       // [WORK, WORK, MOVE, CARRY], // 300
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, MOVE, MOVE, CARRY], // 250
-        newName,
-        { memory: { role: "upgrader", emoji: "⚡" } } as Pick<
-          Upgrader,
-          "memory"
-        >
-      )
+      Game.spawns["Spawn1"].spawnCreep(getUpgraderBody(), newName, {
+        memory: { role: "upgrader", emoji: "⚡" }
+      } as Pick<Upgrader, "memory">)
     }
     const spawnDefenderRanged = () => {
       const newName =
