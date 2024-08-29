@@ -1,6 +1,7 @@
 import actionDeposit from "actionDeposit"
 import actionExplore from "actionExplore"
 import actionMoveToDestination from "actionMoveToDestination"
+import findBestDroppedResources from "findBestDroppedResources"
 import type { Position } from "main"
 import parseDestination from "parseDestination"
 
@@ -97,30 +98,10 @@ const roleFetcher = {
         if (droppedResources.length) {
           // Decide on current droppedResource assignment by dividing the
           // square of dropped resources by the square distance to them:
-          const bestResource = droppedResources.reduce((a, b) => {
-            const roomsA = a?.room?.name
-              ? Game.map.getRoomLinearDistance(
-                  thisCreep.pos.roomName,
-                  a.room.name
-                )
-              : 0
-            const roomsB = b?.room?.name
-              ? Game.map.getRoomLinearDistance(
-                  thisCreep.pos.roomName,
-                  b.room.name
-                )
-              : 0
-            const rangeToA =
-              roomsA === 0 ? thisCreep.pos.getRangeTo(a) : 50 * roomsA
-            const rangeToB =
-              roomsB === 0 ? thisCreep.pos.getRangeTo(b) : 50 * roomsB
-            if (
-              Math.pow(a.amount, 2) / Math.pow(rangeToA, 2) >
-              Math.pow(b.amount, 2) / Math.pow(rangeToB, 2)
-            )
-              return a
-            else return b
-          })
+          const bestResource = findBestDroppedResources(
+            thisCreep,
+            droppedResources
+          )
           thisCreep.memory.destination = String(bestResource.pos) as Position
           thisCreep.say(`${thisCreep.memory.emoji} ${bestResource.amount}`)
           console.log(
