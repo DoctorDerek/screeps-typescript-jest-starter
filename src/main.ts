@@ -335,7 +335,10 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
-    } else if (fetchers.length < Math.max(Math.floor(n / 2), numberOfSources)) {
+    } else if (
+      fetchers.length <
+      Math.max(Math.floor(n / 4), Math.floor(numberOfSources / 2))
+    ) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
@@ -357,7 +360,7 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
-    } else if (fetchers.length < n) {
+    } else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources)) {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
