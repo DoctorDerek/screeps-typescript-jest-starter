@@ -99,8 +99,8 @@ function unwrappedLoop() {
   if (Game.spawns["Spawn1"].hits < Game.spawns["Spawn1"].hitsMax / 2)
     Game.spawns["Spawn1"].room.controller?.activateSafeMode()
 
-  const thisRoom = Game.spawns["Spawn1"].room
-  const RCL = thisRoom.controller?.level
+  const homeRoom = Game.spawns["Spawn1"].room
+  const RCL = homeRoom.controller?.level
 
   // Populate the mineablePositions hash map across rooms where I have vision
   const allRooms = Object.keys(Game.rooms) as RoomName[]
@@ -162,7 +162,7 @@ function unwrappedLoop() {
           (object) => object.type === "constructionSite"
         ).length === 0
       )
-        thisRoom.createConstructionSite(creep.pos, STRUCTURE_ROAD)
+        homeRoom.createConstructionSite(creep.pos, STRUCTURE_ROAD)
     })
   }
   // Create a decay effect by occasionally wiping the room clean of pending roads
