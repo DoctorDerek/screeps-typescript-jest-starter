@@ -433,11 +433,14 @@ function unwrappedLoop() {
       spawnMiner()
     else if (
       fetchers.length <
-      Math.max(Math.floor(n / 4), Math.floor(numberOfSources / 2))
+      Math.max(Math.floor(n / 6), Math.floor(numberOfSources / 3))
     )
       spawnFetcher()
     else if (miners.length < n) spawnMiner()
-    else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources))
+    else if (
+      fetchers.length <
+      Math.min(Math.floor(n / 4), Math.floor(numberOfSources / 2))
+    )
       spawnFetcher()
     else if (eyes.length < 2) spawnEye()
     else if (
