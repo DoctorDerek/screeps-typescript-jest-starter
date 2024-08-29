@@ -427,7 +427,8 @@ function unwrappedLoop() {
     // NO defenders
     // x n mining sites (and/or `numberOfSources` sources) across all rooms.
     // Builder will only spawn if there are construction sites.
-    if (harvesters.length < n) spawnHarvester()
+    if (harvesters.length < Math.max(Math.floor(n / 2), numberOfSources))
+      spawnHarvester()
     else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
     else if (
