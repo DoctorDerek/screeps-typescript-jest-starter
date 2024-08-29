@@ -142,68 +142,41 @@ export default function findMineablePositions(
           RCL && RCL >= 3 && totalContainers < 5
             ? STRUCTURE_CONTAINER
             : STRUCTURE_EXTENSION
-        /**
-         * Set a construction site for containers and extensions at a weighted
-         * average of the spawn, the controller, and the mining position, with
-         * the controller having twice the weight of the spawn or position.
-         * */
         const destinationPosition =
           convertRoomPositionStringBackToRoomPositionObject(
             destinationPositionString
           )
-        let proposedX = thisRoom?.controller
-          ? Math.floor(
-              (Game.spawns["Spawn1"].pos.x +
-                destinationPosition.x +
-                2 * thisRoom.controller.pos.x) /
-                4
-            )
-          : Math.floor(
-              (Game.spawns["Spawn1"].pos.x + destinationPosition.x) / 2
-            )
-        let proposedY = thisRoom?.controller
-          ? Math.floor(
-              (Game.spawns["Spawn1"].pos.y +
-                destinationPosition.y +
-                2 * thisRoom.controller.pos.y) /
-                4
-            )
-          : Math.floor(
-              (Game.spawns["Spawn1"].pos.y + destinationPosition.y) / 2
-            )
-        // Check for no terrain blocking, move y using a for loop
-        while (
-          thisRoom
-            .lookAt(proposedX, proposedY)
-            .filter((object) => object.type === "terrain")[0].terrain ===
-            "wall" ||
-          // Check for no obstructions
-          thisRoom.lookAt(proposedX, proposedY).filter((object) => {
-            return (
-              object.type === "creep" ||
-              object.type === "structure" ||
-              object.type === "constructionSite"
-            )
-          }).length > 0
-        ) {
-          // Random walk weighted 60%/40% in favor of decreasing x/y
-          if (Math.random() > 0.6)
-            Math.random() > 0.5 ? proposedY-- : proposedX--
-          else Math.random() > 0.5 ? proposedY++ : proposedX++
-          proposedX = proposedX < 0 ? 0 : proposedX
-          proposedY = proposedY < 0 ? 0 : proposedY
-          proposedX > 49 ? 49 : proposedX
-          proposedY > 49 ? 49 : proposedY
+        /**
+         * Set a construction site for containers and extensions by drawing a
+         * straight line on the grid from the Controller toward the Spawn.
+         * Making sure to leave empty squares between each building on the line.
+         * */
+        const origin = thisRoom.controller?.pos || Game.spawns["Spawn1"].pos
+        const goals = [destinationPosition, Game.spawns["Spawn1"].pos]
+        const path = PathFinder.search(origin, goals)
+        const proposedBuildingPosition = path.path.find((position) => {
+          const proposedBuildingPosition = new RoomPosition(
+            position.x,
+            position.y,
+            roomName
+          )
+          return (
+            proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0 &&
+            proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length ===
+              0 &&
+            proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
+          )
+        })
+        if (proposedBuildingPosition) {
+          proposedBuildingPosition.createConstructionSite(buildingType)
+          console.log(
+            `🚧 Created construction site ${buildingType} at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
+          )
+        } else {
+          console.log(
+            `🚧 No construction site ${buildingType} found for ${destinationPositionString}`
+          )
         }
-        const proposedBuildingPosition = new RoomPosition(
-          proposedX,
-          proposedY,
-          thisRoom.name
-        )
-        proposedBuildingPosition.createConstructionSite(buildingType)
-        console.log(
-          `🚧 Created construction site ${buildingType} at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
-        )
       }
     )
 
