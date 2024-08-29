@@ -1,9 +1,5 @@
-import type { Position } from "main"
-import parsePosition from "parsePosition"
-
 /**
- * Divide the square of the resources by the square of the distance, multi-room
- * without needing vision
+ * Divide square of the resources by distance, multi-room without needing vision
  * */
 export default function findBestDroppedResources(
   thisCreep: Creep,
@@ -26,7 +22,7 @@ export default function findBestDroppedResources(
       50 * rooms + (Math.abs(x - thisX) + Math.abs(y - thisY)) / 50
     const rangeToA = getRangeTo(roomsA, xA, yA)
     const rangeToB = getRangeTo(roomsB, xB, yB)
-    return amountA ** 2 / rangeToA ** 2 > amountB ** 2 / rangeToB ** 2 ? -1 : 1
+    return amountA ** 2 / rangeToA > amountB ** 2 / rangeToB ? -1 : 1
   })
   return availableSources.shift() // Remove resource from other fetchers
 }
