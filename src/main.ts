@@ -155,78 +155,84 @@ function unwrappedLoop() {
    * needs to be buildable, not obstructed, non-blocking, and not a wall.
    * */
   const homeRoomName = homeRoom.name as RoomName
-  const homeRoomMineablePositions =
-    mineablePositionsMap.get(homeRoomName)?.mineablePositions
-  const totalContainersInRoom = homeRoom.find(FIND_STRUCTURES, {
-    filter: (structure) => structure.structureType === STRUCTURE_CONTAINER
-  }).length
-  const totalContainersUnderConstruction = homeRoom.find(
-    FIND_MY_CONSTRUCTION_SITES,
-    {
+  const calculateExtensionsAndContainers = () => {
+    const homeRoomMineablePositions =
+      mineablePositionsMap.get(homeRoomName)?.mineablePositions
+    const totalContainersInRoom = homeRoom.find(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType === STRUCTURE_CONTAINER
-    }
-  ).length
-  const totalContainers =
-    totalContainersInRoom + totalContainersUnderConstruction
-  const totalExtensionsInRoom = homeRoom.find(FIND_MY_STRUCTURES, {
-    filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
-  }).length
-  const totalExtensionsUnderConstruction = homeRoom.find(
-    FIND_MY_CONSTRUCTION_SITES,
-    {
+    }).length
+    const totalContainersUnderConstruction = homeRoom.find(
+      FIND_MY_CONSTRUCTION_SITES,
+      {
+        filter: (structure) => structure.structureType === STRUCTURE_CONTAINER
+      }
+    ).length
+    const totalContainers =
+      totalContainersInRoom + totalContainersUnderConstruction
+    const totalExtensionsInRoom = homeRoom.find(FIND_MY_STRUCTURES, {
       filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
-    }
-  ).length
-  const totalExtensions =
-    totalExtensionsInRoom + totalExtensionsUnderConstruction
-  // There's an early limit of 5/room for each of containers and extensions
-  const totalSum = totalContainers + totalExtensions
-  // If the room level is less than 2, then there's a hard limit of 5/room
-  if (!RCL || RCL < 2) return
-  // If the room level is 2 or greater, then there's a hard limit of 10/room
-  if (totalSum >= 5 && RCL >= 2) return
-  if (totalSum >= 10 && RCL >= 3) return
-  // Only build containers if the room level is 3 or greater
-  const buildingType =
-    RCL && RCL >= 3 && totalContainers < 5
-      ? STRUCTURE_CONTAINER
-      : STRUCTURE_EXTENSION
-  const destinationPositions = !Array.isArray(homeRoomMineablePositions)
-    ? ([] as RoomPosition[])
-    : Array.from(homeRoomMineablePositions.keys()).map(
-        convertRoomPositionStringBackToRoomPositionObject
-      )
+    }).length
+    const totalExtensionsUnderConstruction = homeRoom.find(
+      FIND_MY_CONSTRUCTION_SITES,
+      {
+        filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
+      }
+    ).length
+    const totalExtensions =
+      totalExtensionsInRoom + totalExtensionsUnderConstruction
+    const totalSum = totalContainers + totalExtensions
+    /**
+     * There's an early limit of 5/room for each of containers and extensions.
+     * If the room level is less than 2, then there's a hard limit of 5/room.
+     * If the room level is 2 or greater, then there's a hard limit of 10/room.
+     * */
+    if (!RCL || RCL < 2) return
+    if (totalSum >= 5 && RCL >= 2) return
+    if (totalSum >= 10 && RCL >= 3) return
+    // Only build containers if the room level is 3 or greater
+    const buildingType =
+      RCL && RCL >= 3 && totalContainers < 5
+        ? STRUCTURE_CONTAINER
+        : STRUCTURE_EXTENSION
+    const destinationPositions = !Array.isArray(homeRoomMineablePositions)
+      ? ([] as RoomPosition[])
+      : Array.from(homeRoomMineablePositions.keys()).map(
+          convertRoomPositionStringBackToRoomPositionObject
+        )
 
-  /**
-   * Set a construction site for containers and extensions by drawing a
-   * straight line on the grid from the Controller toward the Spawn.
-   * Making sure to leave empty squares between each building on the line.
-   * */
-  const origin = homeRoom.controller?.pos || Game.spawns["Spawn1"].pos
-  const goals = [...destinationPositions, Game.spawns["Spawn1"].pos]
-  const path = PathFinder.search(origin, goals)
-  const proposedBuildingPosition = path.path.find((position) => {
-    const proposedBuildingPosition = new RoomPosition(
-      position.x,
-      position.y,
-      homeRoomName
-    )
-    return (
-      proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0 &&
-      proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0 &&
-      proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
-    )
-  })
-  if (proposedBuildingPosition) {
-    proposedBuildingPosition.createConstructionSite(buildingType)
-    console.log(
-      `🚧 Created construction site "${buildingType}" at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
-    )
-  } else {
-    console.log(
-      `🚧 No construction site "${buildingType}" found for ${homeRoomName}`
-    )
+    /**
+     * Set a construction site for containers and extensions by drawing a
+     * straight line on the grid from the Controller toward the Spawn.
+     * Making sure to leave empty squares between each building on the line.
+     * */
+    const origin = homeRoom.controller?.pos || Game.spawns["Spawn1"].pos
+    const goals = [...destinationPositions, Game.spawns["Spawn1"].pos]
+    const path = PathFinder.search(origin, goals)
+    const proposedBuildingPosition = path.path.find((position) => {
+      const proposedBuildingPosition = new RoomPosition(
+        position.x,
+        position.y,
+        homeRoomName
+      )
+      return (
+        proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0 &&
+        proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length ===
+          0 &&
+        proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
+      )
+    })
+    if (proposedBuildingPosition) {
+      proposedBuildingPosition.createConstructionSite(buildingType)
+      console.log(
+        `🚧 Created construction site "${buildingType}" at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
+      )
+    } else {
+      console.log(
+        `🚧 No construction site "${buildingType}" found for ${homeRoomName}`
+      )
+    }
   }
+  if (RCL && RCL >= 2) calculateExtensionsAndContainers()
 
   // Ant-style: mark current position for a future road
   const creepsForRoads = [...fetchers, ...upgraders]
