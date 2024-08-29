@@ -108,6 +108,7 @@ function unwrappedLoop() {
   const allDroppedResources: Resource[] = []
   const allContainers: StructureContainer[] = []
   const allConstructionSites: ConstructionSite[] = []
+  const allEnemies: Creep[] = []
   /** Total number of sources across all rooms */
   let numberOfSources = 0
   for (const roomName of allRooms) {
@@ -127,8 +128,12 @@ function unwrappedLoop() {
     thisRoom.find(FIND_CONSTRUCTION_SITES).forEach((site) => {
       allConstructionSites.push(site)
     })
+    thisRoom.find(FIND_HOSTILE_CREEPS).forEach((enemy) => {
+      allEnemies.push(enemy)
+    })
   }
   const totalConstructionSites = allConstructionSites.length
+  const totalEnemyHP = allEnemies.reduce((acc, enemy) => acc + enemy.hits, 0)
 
   // Remove dropped resources that are already destination of a fetcher
   fetchers.forEach((fetcher) => {
@@ -526,13 +531,10 @@ function unwrappedLoop() {
     )
 
   const creeps = Object.values(Game.creeps)
-  const overwhelmingForce =
-    creeps.filter(
-      (creep) =>
-        creep.memory.role === "defenderMelee" ||
-        creep.memory.role === "defenderRanged" ||
-        creep.memory.role === "healer"
-    ).length >= 12
+  const allies = [...defendersMelee, ...defendersRanged, ...healers]
+  const totalAlliedHP = allies.reduce((acc, ally) => acc + ally.hits, 0)
+  const FORCE_FACTOR = 3
+  const overwhelmingForce = totalAlliedHP > totalEnemyHP * FORCE_FACTOR
 
   // Run all creeps
   for (const creep of creeps) {
