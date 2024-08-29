@@ -485,7 +485,7 @@ function unwrappedLoop() {
         "%",
       Game.spawns["Spawn1"].pos.x + 1,
       Game.spawns["Spawn1"].pos.y,
-      { align: "left", opacity: 0.8 }
+      { align: "left", opacity: 1 }
     )
   } else if (!spawnObject) {
     // Show n and energy avaiable
@@ -493,7 +493,7 @@ function unwrappedLoop() {
       `n ${n} | ⚡ ${homeRoom.energyAvailable}/${homeRoom.energyCapacityAvailable}`,
       Game.spawns["Spawn1"].pos.x + 1,
       Game.spawns["Spawn1"].pos.y,
-      { align: "left", opacity: 0.8 }
+      { align: "left", opacity: 1 }
     )
   }
 
