@@ -67,48 +67,32 @@ declare global {
   }
 }
 function unwrappedLoop() {
-  const harvesters = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "harvester"
-  ) as Harvester[]
-  const miners = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "miner"
-  ) as Miner[]
-  const fetchers = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "fetcher"
-  ) as Fetcher[]
-  const upgraders = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "upgrader"
-  ) as Upgrader[]
-  const builders = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "builder"
-  ) as Builder[]
-  const defendersRanged = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "defenderRanged"
-  ) as DefenderRanged[]
-  const defendersMelee = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "defenderMelee"
-  ) as DefenderMelee[]
-  const healers = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "healer"
-  ) as Healer[]
-  const eyes = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "eye"
-  ) as Eye[]
+  const harvesters = [] as Harvester[]
+  const miners = [] as Miner[]
+  const fetchers = [] as Fetcher[]
+  const upgraders = [] as Upgrader[]
+  const builders = [] as Builder[]
+  const defendersRanged = [] as DefenderRanged[]
+  const defendersMelee = [] as DefenderMelee[]
+  const healers = [] as Healer[]
+  const eyes = [] as Eye[]
   for (const name in Memory.creeps) {
     if (!Game.creeps[name]) {
       delete Memory.creeps[name]
       // Housekeeping: Delete dead creeps from memory
       console.log("Clearing non-existing creep memory:", name)
     }
+    const creep = Game.creeps[name]
+    const role = creep.memory.role
+    if (role === "harvester") harvesters.push(creep as Harvester)
+    if (role === "miner") miners.push(creep as Miner)
+    if (role === "fetcher") fetchers.push(creep as Fetcher)
+    if (role === "upgrader") upgraders.push(creep as Upgrader)
+    if (role === "builder") builders.push(creep as Builder)
+    if (role === "defenderRanged") defendersRanged.push(creep as DefenderRanged)
+    if (role === "defenderMelee") defendersMelee.push(creep as DefenderMelee)
+    if (role === "healer") healers.push(creep as Healer)
+    if (role === "eye") eyes.push(creep as Eye)
   }
 
   // Trigger safe mode if spawn is under half health (last resort)
@@ -121,7 +105,6 @@ function unwrappedLoop() {
   // Populate the mineablePositions hash map across rooms where I have vision
   const allRooms = Object.keys(Game.rooms) as RoomName[]
   const mineablePositionsMap = new Map() as MineablePositionsMap
-
   const allDroppedResources: Resource[] = []
   const allContainers: StructureContainer[] = []
   const allConstructionSites: ConstructionSite[] = []
