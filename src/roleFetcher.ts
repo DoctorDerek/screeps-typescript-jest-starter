@@ -102,6 +102,10 @@ const roleFetcher = {
             thisCreep,
             droppedResources
           )
+          if (!bestResource) {
+            thisCreep.memory.mission = "EXPLORE"
+            return
+          }
           thisCreep.memory.destination = String(bestResource.pos) as Position
           thisCreep.say(`${thisCreep.memory.emoji} ${bestResource.amount}`)
           console.log(
