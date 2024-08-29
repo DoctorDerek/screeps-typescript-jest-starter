@@ -142,9 +142,9 @@ export default function findMineablePositions(
             ? STRUCTURE_CONTAINER
             : STRUCTURE_EXTENSION
         /**
-         * Set a construction site for a container at this location if available
-         * because resources dropped on the ground will decay after 300 ticks.
-         * Builders will auto-build the container once the miners set the sites.
+         * Set a construction site for containers and extensions at a weighted
+         * average of the spawn, the controller, and the mining position, with
+         * the controller having twice the weight of the spawn or position.
          * */
         const destinationPosition =
           convertRoomPositionStringBackToRoomPositionObject(
@@ -154,8 +154,8 @@ export default function findMineablePositions(
           ? Math.floor(
               (Game.spawns["Spawn1"].pos.x +
                 destinationPosition.x +
-                thisRoom.controller.pos.x) /
-                3
+                2 * thisRoom.controller.pos.x) /
+                4
             )
           : Math.floor(
               (Game.spawns["Spawn1"].pos.x + destinationPosition.x) / 2
@@ -164,8 +164,8 @@ export default function findMineablePositions(
           ? Math.floor(
               (Game.spawns["Spawn1"].pos.y +
                 destinationPosition.y +
-                thisRoom.controller.pos.y) /
-                3
+                2 * thisRoom.controller.pos.y) /
+                4
             )
           : Math.floor(
               (Game.spawns["Spawn1"].pos.y + destinationPosition.y) / 2
