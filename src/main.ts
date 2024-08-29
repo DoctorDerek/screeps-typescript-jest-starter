@@ -302,14 +302,7 @@ function unwrappedLoop() {
       })
     }
 
-    // About n harvesters to start, dropping off as vision expands
-    // n/2 miner, n/2 fetcher, n miner, n fetcher, n/4 builder, n/4 upgrader,
-    // NO defenders
-    // x n mining sites (and/or `numberOfSources` sources) across all rooms.
-    // Builder will only spawn if there are construction sites.
-    if (
-      totalCreeps < Math.max(Math.floor(n / allRooms.length), numberOfSources)
-    ) {
+    const spawnHarvester = () => {
       const newName = Game.time + "_" + "Harvester" + harvesters.length
       console.log("Spawning new harvester: " + newName)
       // [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 500
@@ -324,7 +317,8 @@ function unwrappedLoop() {
           "memory"
         >
       )
-    } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
+    }
+    const spawnMiner = () => {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
       // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
@@ -335,10 +329,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
       )
-    } else if (
-      fetchers.length <
-      Math.max(Math.floor(n / 4), Math.floor(numberOfSources / 2))
-    ) {
+    }
+    const spawnFetcher = () => {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
       // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
@@ -349,29 +341,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
       )
-    } else if (miners.length < n) {
-      const newName = Game.time + "_" + "Miner" + miners.length
-      console.log("Spawning new miner: " + newName)
-      // [WORK, WORK, WORK, WORK, MOVE, MOVE], // 500
-      // [WORK, WORK, MOVE, MOVE], // 300
-      // [WORK, WORK, MOVE], // 250
-      Game.spawns["Spawn1"].spawnCreep(
-        [WORK, WORK, MOVE, MOVE], // 300
-        newName,
-        { memory: { role: "miner", emoji: "⛏️" } } as Pick<Miner, "memory">
-      )
-    } else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources)) {
-      const newName = Game.time + "_" + "Fetcher" + fetchers.length
-      console.log("Spawning new fetcher: " + newName)
-      // [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
-      // [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
-      // [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 300
-      Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
-        newName,
-        { memory: { role: "fetcher", emoji: "🛍️" } } as Pick<Fetcher, "memory">
-      )
-    } else if (eyes.length < 2) {
+    }
+    const spawnEye = () => {
       const newName = Game.time + "_" + "Eyes" + eyes.length
       console.log("Spawning new eye: " + newName)
       Game.spawns["Spawn1"].spawnCreep(
@@ -379,15 +350,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "eye", emoji: "👁️" } } as Pick<Eye, "memory">
       )
-    } else if (
-      builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
-      // Sum construction sites in all spawns to make sure there is at least 1:
-      Object.values(Game.spawns).reduce(
-        (acc, spawn) =>
-          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
-        0
-      ) > 0
-    ) {
+    }
+    const spawnBuilder = () => {
       const newName = Game.time + "_" + "Builder" + builders.length
       console.log("Spawning new builder: " + newName)
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
@@ -399,9 +363,8 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "builder", emoji: "🚧" } } as Pick<Builder, "memory">
       )
-    } else if (
-      upgraders.length < Math.max(Math.floor(n / 4), numberOfSources)
-    ) {
+    }
+    const spawnUpgrader = () => {
       const newName = Game.time + "_" + "Upgrader" + upgraders.length
       console.log("Spawning new upgrader: " + newName)
       // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
@@ -416,36 +379,37 @@ function unwrappedLoop() {
           "memory"
         >
       )
-    } else if (defendersRanged.length < 0) {
-      // off
-      const newName = Game.time + "_" + "DefRanged" + defendersRanged.length
+    }
+    const spawnDefenderRanged = () => {
+      const newName =
+        Game.time + "_" + "DefenderRanged" + defendersRanged.length
       console.log("Spawning new defender ranged: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
       // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
       Game.spawns["Spawn1"].spawnCreep(
-        [TOUGH, MOVE, MOVE, RANGED_ATTACK], // 260
+        [MOVE, MOVE, RANGED_ATTACK], // 260
         newName,
         { memory: { role: "defenderRanged", emoji: "🏹" } } as Pick<
           DefenderRanged,
           "memory"
         >
       )
-    } else if (defendersMelee.length < 0) {
-      // off
-      const newName = Game.time + "_" + "DefMelee" + defendersMelee.length
+    }
+    const spawnDefenderMelee = () => {
+      const newName = Game.time + "_" + "DefenderMelee" + defendersMelee.length
       console.log("Spawning new defender melee: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
       // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
       Game.spawns["Spawn1"].spawnCreep(
-        [TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK], // 250
+        [TOUGH, MOVE, MOVE, ATTACK], // 250
         newName,
         { memory: { role: "defenderMelee", emoji: "⚔️" } } as Pick<
           DefenderMelee,
           "memory"
         >
       )
-    } else if (healers.length < 0) {
-      // off
+    }
+    const spawnHealer = () => {
       const newName = Game.time + "_" + "Healer" + healers.length
       console.log("Spawning new healer: " + newName)
       // [ATTACK, ATTACK, MOVE, MOVE], // 260
@@ -455,6 +419,49 @@ function unwrappedLoop() {
         newName,
         { memory: { role: "healer", emoji: "🏥" } } as Pick<Healer, "memory">
       )
+    }
+    // About n harvesters to start, dropping off as vision expands
+    // n/2 miner, n/2 fetcher, n miner, n fetcher, n/4 builder, n/4 upgrader,
+    // NO defenders
+    // x n mining sites (and/or `numberOfSources` sources) across all rooms.
+    // Builder will only spawn if there are construction sites.
+    if (
+      totalCreeps < Math.max(Math.floor(n / allRooms.length), numberOfSources)
+    ) {
+      spawnHarvester()
+    } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
+      spawnMiner()
+    } else if (
+      fetchers.length <
+      Math.max(Math.floor(n / 4), Math.floor(numberOfSources / 2))
+    ) {
+      spawnFetcher()
+    } else if (miners.length < n) {
+      spawnMiner()
+    } else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources)) {
+      spawnFetcher()
+    } else if (eyes.length < 2) {
+      spawnEye()
+    } else if (
+      builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
+      // Sum construction sites in all spawns to make sure there is at least 1:
+      Object.values(Game.spawns).reduce(
+        (acc, spawn) =>
+          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
+        0
+      ) > 0
+    ) {
+      spawnBuilder()
+    } else if (
+      upgraders.length < Math.max(Math.floor(n / 4), numberOfSources)
+    ) {
+      spawnUpgrader()
+    } else if (defendersRanged.length < 0) {
+      spawnDefenderRanged() // off
+    } else if (defendersMelee.length < 0) {
+      spawnDefenderMelee() // off
+    } else if (healers.length < 0) {
+      spawnHealer() // off
     }
     // The fallback role is off
     else {
