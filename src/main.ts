@@ -370,14 +370,14 @@ function unwrappedLoop() {
     }
     /**
      * [WORK, MOVE, MOVE, CARRY], // 250
-     * [WORK, WORK, MOVE, MOVE, CARRY, CARRY], // 400
-     * [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
+     * [WORK, WORK, MOVE, MOVE, MOVE, CARRY], // 400
+     * [WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY], // 500
      * */
     const getBuilderBody = () => {
       if (energyMax < 400) return [WORK, MOVE, MOVE, CARRY] // 250
-      if (energyMax < 500) return [WORK, WORK, MOVE, MOVE, CARRY, CARRY] // 400
+      if (energyMax < 500) return [WORK, WORK, MOVE, MOVE, MOVE, CARRY] // 400
       // if (energyMax >= 500)
-      return [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY] // 500
+      return [WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY] // 500
     }
     const spawnBuilder = () => {
       const newName = Game.time + "_" + "Builder" + builders.length
