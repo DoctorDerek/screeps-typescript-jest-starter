@@ -67,10 +67,46 @@ declare global {
   }
 }
 function unwrappedLoop() {
-  // Housekeeping: Delete dead creeps from memory
+  const harvesters = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "harvester"
+  ) as Harvester[]
+  const miners = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "miner"
+  ) as Miner[]
+  const fetchers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "fetcher"
+  ) as Fetcher[]
+  const upgraders = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "upgrader"
+  ) as Upgrader[]
+  const builders = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "builder"
+  ) as Builder[]
+  const defendersRanged = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "defenderRanged"
+  ) as DefenderRanged[]
+  const defendersMelee = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "defenderMelee"
+  ) as DefenderMelee[]
+  const healers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "healer"
+  ) as Miner[]
+  const eyes = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "eye"
+  ) as Miner[]
   for (const name in Memory.creeps) {
     if (!Game.creeps[name]) {
       delete Memory.creeps[name]
+      // Housekeeping: Delete dead creeps from memory
       console.log("Clearing non-existing creep memory:", name)
     }
   }
@@ -78,11 +114,6 @@ function unwrappedLoop() {
   // Trigger safe mode if spawn is under half health (last resort)
   if (Game.spawns["Spawn1"].hits < Game.spawns["Spawn1"].hitsMax / 2)
     Game.spawns["Spawn1"].room.controller?.activateSafeMode()
-
-  const miners = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "miner"
-  ) as Miner[]
 
   const thisRoom = Game.spawns["Spawn1"].room
   const RCL = thisRoom.controller?.level
@@ -116,10 +147,6 @@ function unwrappedLoop() {
   }
   const totalConstructionSites = allConstructionSites.length
 
-  const fetchers = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "fetcher"
-  ) as Fetcher[]
   // Remove dropped resources that are already destination of a fetcher
   fetchers.forEach((fetcher) => {
     const { roomName, x, y } = parseDestination(fetcher)
@@ -132,10 +159,6 @@ function unwrappedLoop() {
   })
 
   // Ant-style: mark current position for a future road
-  const upgraders = _.filter(
-    Game.creeps,
-    (creep) => creep.memory.role == "upgrader"
-  ) as Upgrader[]
   const creepsForRoads = [...fetchers, ...upgraders]
   if (
     RCL &&
@@ -229,41 +252,14 @@ function unwrappedLoop() {
   const energyMax = Game.spawns["Spawn1"].room.energyCapacityAvailable
   const notSpawning = Game.spawns["Spawn1"].spawning == undefined
   if (energy >= energyMax && notSpawning) {
-    const harvesters = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "harvester"
-    ) as Harvester[]
     console.log("Harvesters: " + harvesters.length)
-    // Moved up
     console.log("Upgraders: " + upgraders.length)
-    const builders = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "builder"
-    ) as Builder[]
     console.log("Builders: " + builders.length)
-    const defendersRanged = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "defenderRanged"
-    ) as DefenderRanged[]
     console.log("Defenders Ranged: " + defendersRanged.length)
-    const defendersMelee = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "defenderMelee"
-    ) as DefenderMelee[]
     console.log("Defenders Melee: " + defendersMelee.length)
-    // Moved up
     console.log("Fetchers: " + fetchers.length)
-    // Moved up
     console.log("Miners: " + miners.length)
-    const healers = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "healer"
-    ) as Miner[]
     console.log("Healers: " + healers.length)
-    const eyes = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role == "eye"
-    ) as Miner[]
     console.log("Eyes: " + eyes.length)
 
     /**
