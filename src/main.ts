@@ -420,33 +420,25 @@ function unwrappedLoop() {
         { memory: { role: "healer", emoji: "🏥" } } as Pick<Healer, "memory">
       )
     }
-    // About n harvesters to start, dropping off as vision expands
+    // About 3 harvesters to start, dropping off as vision expands
     // n/2 miner, n/2 fetcher, n miner, n fetcher, n/4 builder, n/4 upgrader,
     // NO defenders
     // x n mining sites (and/or `numberOfSources` sources) across all rooms.
     // Builder will only spawn if there are construction sites.
-    if (
-      totalCreeps < Math.max(Math.floor(n / allRooms.length), numberOfSources)
-    ) {
-      // 1st n creeps 1st room: 1 harvester, 1 miner, 1 fetcher, n-3 harvesters
-      if (totalCreeps === 0) spawnHarvester()
-      else if (totalCreeps === 1) spawnMiner()
-      else if (totalCreeps === 2) spawnFetcher()
-      else spawnHarvester()
-    } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
+    if (totalCreeps < Math.max(Math.floor(n / numberOfSources)))
+      spawnHarvester()
+    else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
-    } else if (
+    else if (
       fetchers.length <
       Math.max(Math.floor(n / 4), Math.floor(numberOfSources / 2))
-    ) {
+    )
       spawnFetcher()
-    } else if (miners.length < n) {
-      spawnMiner()
-    } else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources)) {
+    else if (miners.length < n) spawnMiner()
+    else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources))
       spawnFetcher()
-    } else if (eyes.length < 2) {
-      spawnEye()
-    } else if (
+    else if (eyes.length < 2) spawnEye()
+    else if (
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
       // Sum construction sites in all spawns to make sure there is at least 1:
       Object.values(Game.spawns).reduce(
@@ -454,21 +446,15 @@ function unwrappedLoop() {
           acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
         0
       ) > 0
-    ) {
+    )
       spawnBuilder()
-    } else if (
-      upgraders.length < Math.max(Math.floor(n / 4), numberOfSources)
-    ) {
+    else if (upgraders.length < Math.max(Math.floor(n / 4), numberOfSources))
       spawnUpgrader()
-    } else if (defendersRanged.length < 0) {
-      spawnDefenderRanged() // off
-    } else if (defendersMelee.length < 0) {
-      spawnDefenderMelee() // off
-    } else if (healers.length < 0) {
-      spawnHealer() // off
-    }
-    // The fallback role is off
+    else if (defendersRanged.length < 0) spawnDefenderRanged() // off
+    else if (defendersMelee.length < 0) spawnDefenderMelee() // off
+    else if (healers.length < 0) spawnHealer() // off
     else {
+      // The fallback role is off
     }
   }
 
