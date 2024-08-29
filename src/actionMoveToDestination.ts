@@ -52,11 +52,15 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
       if (exitDir !== -2 && exitDir !== -10) {
         const exit = thisCreep.pos.findClosestByRange(exitDir)
         if (exit) {
-          thisCreep.moveTo(
+          const moveResult = thisCreep.moveTo(
             exit,
             { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
           )
-          thisCreep.say(`${thisCreep.memory.emoji}FAR`)
+          if (moveResult === OK) thisCreep.say(`${thisCreep.memory.emoji}FAR`)
+          if (moveResult === ERR_NO_PATH || moveResult === ERR_INVALID_TARGET) {
+            thisCreep.memory.destination = null
+            thisCreep.memory.mission = "THINK"
+          }
         } else {
           thisCreep.memory.destination = null
           thisCreep.memory.mission = "THINK"
