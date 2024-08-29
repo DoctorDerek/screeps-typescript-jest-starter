@@ -89,15 +89,12 @@ const roleFetcher = {
             actionMoveToDestination(thisCreep)
             return
           }
-        }
-        /**
-         * No destination, so we need to find one. Fetchers don't withdraw from
-         * containers, they only pick up energy from the ground; but fetchers
-         * do deposit energy in containers for upgraders and builders.
-         * */
-        if (droppedResources.length) {
-          // Decide on current droppedResource assignment by dividing the
-          // square of dropped resources by the square distance to them:
+        } else if (droppedResources.length) {
+          /**
+           * No destination, so I find one. Fetchers don't withdraw from
+           * containers, they only pick up energy from the ground; but fetchers
+           * do deposit energy in containers for upgraders and builders.
+           * */
           const bestResource = findBestDroppedResources(
             thisCreep,
             droppedResources
@@ -113,11 +110,12 @@ const roleFetcher = {
           console.log(
             `${thisCreep.name} go on ${bestResource.amount} dropped resources at ${destination} from ${pos}`
           )
+        } else {
+          thisCreep.memory.mission === "EXPLORE"
+          return
         }
       }
-    }
-    // thisCreep.memory.mission === "EXPLORE"
-    else actionExplore(thisCreep)
+    } else if (thisCreep.memory.mission === "EXPLORE") actionExplore(thisCreep)
   }
 }
 
