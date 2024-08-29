@@ -646,7 +646,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "fetcher")
         roleFetcher.run(creep as Fetcher, allDroppedResources)
       if (creep.memory.role == "harvester")
-        roleHarvester.run(creep as Harvester)
+        roleHarvester.run(creep as Harvester, totalCreeps)
       if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)
       if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
       if (creep.memory.role == "healer")

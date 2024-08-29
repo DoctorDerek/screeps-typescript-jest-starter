@@ -18,8 +18,8 @@ interface HarvesterMemory extends CreepMemory {
 }
 
 const roleHarvester = {
-  run: function (creep: Harvester) {
-    actionHarvest(creep)
+  run: function (creep: Harvester, totalCreeps: number) {
+    actionHarvest(creep, totalCreeps)
   }
 }
 
