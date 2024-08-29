@@ -310,7 +310,9 @@ function unwrappedLoop() {
       // [WORK, MOVE, MOVE, CARRY], // 250
       // [WORK, WORK, MOVE, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        [WORK, MOVE, MOVE, CARRY], // 250
+        totalCreeps === 0
+          ? [WORK, WORK, MOVE, CARRY] // 300 -- fat 1st creep
+          : [WORK, MOVE, MOVE, CARRY], // 250 -- quick 2nd creep
         newName,
         { memory: { role: "harvester", emoji: "🌾" } } as Pick<
           Harvester,
