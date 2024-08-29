@@ -276,15 +276,15 @@ function unwrappedLoop() {
      * With n harvesters at the beginning, there's no need for extra fetchers;
      * harvesters have WORK parts and thus make better upgraders anyway.
      * */
-    if (miners.length >= n && harvesters.length >= 1) {
-      harvesters.forEach((harvester: Harvester) => {
-        const upgrader = harvester as unknown as Upgrader
-        upgrader.memory.role = "upgrader"
-        upgrader.memory.emoji = "⚡"
-        upgrader.memory.upgrading = false
-        upgrader.memory.destination = null
-      })
-    }
+    // if (miners.length >= n && harvesters.length >= 1) {
+    //   harvesters.forEach((harvester: Harvester) => {
+    //     const upgrader = harvester as unknown as Upgrader
+    //     upgrader.memory.role = "upgrader"
+    //     upgrader.memory.emoji = "⚡"
+    //     upgrader.memory.upgrading = false
+    //     upgrader.memory.destination = null
+    //   })
+    // }
     // If there are no construction sites, the builders transform into upgraders
     if (
       Object.values(Game.spawns).reduce(
@@ -310,9 +310,9 @@ function unwrappedLoop() {
       // [WORK, MOVE, MOVE, CARRY], // 250
       // [WORK, WORK, MOVE, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(
-        totalCreeps === 0
-          ? [WORK, WORK, MOVE, CARRY] // 300 -- fat 1st creep
-          : [WORK, MOVE, MOVE, CARRY], // 250 -- quick 2nd creep
+        totalCreeps < 3
+          ? [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-3
+          : [WORK, MOVE, MOVE, CARRY], // 250 -- quick creeps 4-n
         newName,
         { memory: { role: "harvester", emoji: "🌾" } } as Pick<
           Harvester,
@@ -422,13 +422,12 @@ function unwrappedLoop() {
         { memory: { role: "healer", emoji: "🏥" } } as Pick<Healer, "memory">
       )
     }
-    // About 3 harvesters to start, dropping off as vision expands
+    // About n harvesters to start, dropping off as vision expands
     // n/2 miner, n/2 fetcher, n miner, n fetcher, n/4 builder, n/4 upgrader,
     // NO defenders
     // x n mining sites (and/or `numberOfSources` sources) across all rooms.
     // Builder will only spawn if there are construction sites.
-    if (totalCreeps < Math.max(Math.floor(n / numberOfSources)))
-      spawnHarvester()
+    if (harvesters.length < n) spawnHarvester()
     else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
     else if (
