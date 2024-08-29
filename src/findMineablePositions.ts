@@ -174,7 +174,16 @@ export default function findMineablePositions(
         while (
           thisRoom
             .lookAt(proposedX, proposedY)
-            .filter((object) => object.type === "terrain")[0].terrain === "wall"
+            .filter((object) => object.type === "terrain")[0].terrain ===
+            "wall" ||
+          // Check for no obstructions
+          thisRoom.lookAt(proposedX, proposedY).filter((object) => {
+            return (
+              object.type === "creep" ||
+              object.type === "structure" ||
+              object.type === "constructionSite"
+            )
+          }).length > 0
         ) {
           // Random walk weighted 60%/40% in favor of decreasing x/y
           if (Math.random() > 0.6)
@@ -190,25 +199,10 @@ export default function findMineablePositions(
           proposedY,
           thisRoom.name
         )
-        const noConstructionSite =
-          proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length === 0
-        const noBuildingCurrently =
-          proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0
-        const noTerrainBlocking =
-          proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
-        const noObstructions =
-          proposedBuildingPosition.lookFor(LOOK_CREEPS).length === 0
-        const validBuildingPosition =
-          noTerrainBlocking &&
-          noObstructions &&
-          noBuildingCurrently &&
-          noConstructionSite
-        if (validBuildingPosition) {
-          proposedBuildingPosition.createConstructionSite(buildingType)
-          console.log(
-            `🚧 Created construction site ${buildingType} at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
-          )
-        }
+        proposedBuildingPosition.createConstructionSite(buildingType)
+        console.log(
+          `🚧 Created construction site ${buildingType} at ${proposedBuildingPosition.x},${proposedBuildingPosition.y}`
+        )
       }
     )
 
