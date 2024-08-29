@@ -304,6 +304,10 @@ function unwrappedLoop() {
         builder.memory.mission = "FILL UP"
       })
     }
+    // console.log(`🚧 There are ${totalConstructionSites} construction sites:
+    // ${allConstructionSites
+    //   .map((site) => `${site.structureType}${site.pos}`)
+    //   .join(", ")}`)
 
     /**
      * [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-3
