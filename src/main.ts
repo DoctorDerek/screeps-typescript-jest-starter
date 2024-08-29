@@ -182,18 +182,15 @@ function unwrappedLoop() {
       totalExtensionsInRoom + totalExtensionsUnderConstruction
     const totalSum = totalContainers + totalExtensions
     /**
-     * There's an early limit of 5/room for each of containers and extensions.
-     * If the room level is less than 2, then there's a hard limit of 5/room.
-     * If the room level is 2 or greater, then there's a hard limit of 10/room.
+     * RCL 1: nothing
+     * RCL 2: 5/extensions and 5/containers
+     * RCL 3: 10/extensions and 5/containers
      * */
     if (!RCL || RCL < 2) return
-    if (totalSum >= 5 && RCL >= 2) return
-    if (totalSum >= 10 && RCL >= 3) return
-    // Only build containers if the room level is 3 or greater
+    if (totalSum >= 10 && RCL >= 2) return
+    if (totalSum >= 15 && RCL >= 3) return
     const buildingType =
-      RCL && RCL >= 3 && totalContainers < 5
-        ? STRUCTURE_CONTAINER
-        : STRUCTURE_EXTENSION
+      totalContainers < 5 ? STRUCTURE_CONTAINER : STRUCTURE_EXTENSION
     const destinationPositions = !Array.isArray(homeRoomMineablePositions)
       ? ([] as RoomPosition[])
       : Array.from(homeRoomMineablePositions.keys()).map(
