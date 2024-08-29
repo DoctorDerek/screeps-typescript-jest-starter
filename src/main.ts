@@ -98,11 +98,11 @@ function unwrappedLoop() {
   const healers = _.filter(
     Game.creeps,
     (creep) => creep.memory.role == "healer"
-  ) as Miner[]
+  ) as Healer[]
   const eyes = _.filter(
     Game.creeps,
     (creep) => creep.memory.role == "eye"
-  ) as Miner[]
+  ) as Eye[]
   for (const name in Memory.creeps) {
     if (!Game.creeps[name]) {
       delete Memory.creeps[name]
