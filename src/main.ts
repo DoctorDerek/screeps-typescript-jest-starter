@@ -158,31 +158,23 @@ function unwrappedLoop() {
   const homeRoomMineablePositions =
     mineablePositionsMap.get(homeRoomName)?.mineablePositions
   const totalContainersInRoom = homeRoom.find(FIND_STRUCTURES, {
-    filter: (structure) => {
-      return structure.structureType === STRUCTURE_CONTAINER
-    }
+    filter: (structure) => structure.structureType === STRUCTURE_CONTAINER
   }).length
   const totalContainersUnderConstruction = homeRoom.find(
     FIND_MY_CONSTRUCTION_SITES,
     {
-      filter: (structure) => {
-        return structure.structureType === STRUCTURE_CONTAINER
-      }
+      filter: (structure) => structure.structureType === STRUCTURE_CONTAINER
     }
   ).length
   const totalContainers =
     totalContainersInRoom + totalContainersUnderConstruction
   const totalExtensionsInRoom = homeRoom.find(FIND_MY_STRUCTURES, {
-    filter: (structure) => {
-      return structure.structureType === STRUCTURE_EXTENSION
-    }
+    filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
   }).length
   const totalExtensionsUnderConstruction = homeRoom.find(
     FIND_MY_CONSTRUCTION_SITES,
     {
-      filter: (structure) => {
-        return structure.structureType === STRUCTURE_EXTENSION
-      }
+      filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
     }
   ).length
   const totalExtensions =
