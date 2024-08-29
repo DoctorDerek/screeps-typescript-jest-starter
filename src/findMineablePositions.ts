@@ -135,10 +135,11 @@ export default function findMineablePositions(
         // If the room level is less than 2, then there's a hard limit of 5/room
         if (!RCL || RCL < 2) return
         // If the room level is 2 or greater, then there's a hard limit of 10/room
+        if (totalSum >= 5 && RCL >= 2) return
         if (totalSum >= 10 && RCL >= 3) return
-        // Only build containers if the room level is 4 or greater
+        // Only build containers if the room level is 3 or greater
         const buildingType =
-          RCL && RCL >= 4 && totalContainers < 5
+          RCL && RCL >= 3 && totalContainers < 5
             ? STRUCTURE_CONTAINER
             : STRUCTURE_EXTENSION
         /**
