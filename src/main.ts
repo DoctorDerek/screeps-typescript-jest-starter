@@ -92,16 +92,8 @@ function unwrappedLoop() {
   const mineablePositionsMap = new Map() as MineablePositionsMap
 
   const allDroppedResources: Resource[] = []
-  // Only target resources that have at least that many times carryingCapacity
-
-  /*const droppedResources = thisCreep.room.find(FIND_DROPPED_RESOURCES, {
-    filter: function (resource) {
-      return resource.amount >= 1 * carryingCapacity
-    },
-  })*/
-  // Target 1x carryingCapacity, i.e. full loads only */
-
   const allContainers: StructureContainer[] = []
+  const allConstructionSites: ConstructionSite[] = []
   /** Total number of sources across all rooms */
   let numberOfSources = 0
   for (const roomName of allRooms) {
@@ -118,7 +110,11 @@ function unwrappedLoop() {
       )
         allContainers.push(structure)
     })
+    thisRoom.find(FIND_CONSTRUCTION_SITES).forEach((site) => {
+      allConstructionSites.push(site)
+    })
   }
+  const totalConstructionSites = allConstructionSites.length
 
   const fetchers = _.filter(
     Game.creeps,
@@ -144,8 +140,8 @@ function unwrappedLoop() {
   if (
     RCL &&
     RCL >= 4 && // Only build roads at RCL 4 and above
-    // Limit the number of construction sites to 10 per room:
-    thisRoom.find(FIND_CONSTRUCTION_SITES).length < 10
+    // Limit the number of construction sites to 10 across all rooms:
+    totalConstructionSites < 10
   ) {
     creepsForRoads.forEach((creep) => {
       // Check there's no construction site in the current tile already:
@@ -287,19 +283,25 @@ function unwrappedLoop() {
     //   })
     // }
     // If there are no construction sites, the builders transform into upgraders
-    if (
-      Object.values(Game.spawns).reduce(
-        (acc, spawn) =>
-          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
-        0
-      ) === 0 &&
-      builders.length > 0
-    ) {
+    if (totalConstructionSites === 0 && builders.length > 0) {
       builders.forEach((builder: Builder) => {
         const upgrader = builder as unknown as Upgrader
         upgrader.memory.role = "upgrader"
         upgrader.memory.emoji = "⚡"
         upgrader.memory.destination = null
+        upgrader.memory.upgrading = false
+      })
+    }
+    // If there are construction sites, the upgraders transform into builders
+    if (totalConstructionSites > 0 && upgraders.length > 0) {
+      upgraders.forEach((upgrader: Upgrader) => {
+        const builder = upgrader as unknown as Builder
+        builder.memory.role = "builder"
+        builder.memory.emoji = "🚧"
+        builder.memory.destination = null
+        builder.memory.building = false
+        builder.memory.buildSiteNumber = null
+        builder.memory.mission = "FILL UP"
       })
     }
 
@@ -466,14 +468,13 @@ function unwrappedLoop() {
     else if (
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
       // Sum construction sites in all spawns to make sure there is at least 1:
-      Object.values(Game.spawns).reduce(
-        (acc, spawn) =>
-          acc + spawn.room.find(FIND_MY_CONSTRUCTION_SITES).length,
-        0
-      ) > 0
+      totalConstructionSites > 0
     )
       spawnBuilder()
-    else if (upgraders.length < Math.max(Math.floor(n / 4), numberOfSources))
+    else if (
+      upgraders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
+      totalConstructionSites === 0
+    )
       spawnUpgrader()
     else if (defendersRanged.length < 0) spawnDefenderRanged() // off
     else if (defendersMelee.length < 0) spawnDefenderMelee() // off
