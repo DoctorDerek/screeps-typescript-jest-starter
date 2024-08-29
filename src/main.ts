@@ -428,7 +428,11 @@ function unwrappedLoop() {
     if (
       totalCreeps < Math.max(Math.floor(n / allRooms.length), numberOfSources)
     ) {
-      spawnHarvester()
+      // 1st n creeps 1st room: 1 harvester, 1 miner, 1 fetcher, n-3 harvesters
+      if (totalCreeps === 0) spawnHarvester()
+      else if (totalCreeps === 1) spawnMiner()
+      else if (totalCreeps === 2) spawnFetcher()
+      else spawnHarvester()
     } else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources)) {
       spawnMiner()
     } else if (
