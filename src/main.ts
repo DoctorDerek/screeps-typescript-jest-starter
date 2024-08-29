@@ -62,7 +62,7 @@ export type MineablePositionsMap = Map<
 declare global {
   interface CreepMemory {
     role: string
-    destination?: Position | null | { x: number; y: number }
+    destination?: Position | null
     emoji: string
   }
 }

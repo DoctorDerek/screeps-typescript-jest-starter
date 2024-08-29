@@ -1,11 +1,41 @@
 import type { Explorer } from "actionExplore"
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import parseDestination from "parseDestination"
+import type { Position } from "main"
 
 export default function actionMoveToDestination(thisCreep: Explorer) {
-  if (thisCreep.room.find(FIND_HOSTILE_STRUCTURES).length >= 1) {
-    // Potentially a source keeper room or enemy room, leave it by walking back home
-    thisCreep.moveTo(Game.spawns["Spawn1"].pos)
+  // Remove hostile structures that I can't dismantle, like a source keeper lair
+  const structuresToDismantle = thisCreep.room.find(FIND_STRUCTURES, {
+    filter: (structure) => {
+      return (
+        structure.room.name != Game.spawns["Spawn1"].room.name &&
+        structure.structureType !== STRUCTURE_KEEPER_LAIR &&
+        structure.structureType !== STRUCTURE_CONTROLLER
+      )
+    }
+  })
+  const hasWorkPart = thisCreep.getActiveBodyparts(WORK) > 0
+  const canDismantle = structuresToDismantle.length > 0 && hasWorkPart
+  if (canDismantle) {
+    // Dismantling time!
+    const closestStructure = thisCreep.pos.findClosestByRange(
+      structuresToDismantle
+    )
+    if (!closestStructure) return // Shouldn't happen, but type safe
+    thisCreep.memory.destination = String(closestStructure.pos) as Position
+    const result = thisCreep.dismantle(closestStructure)
+    if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}DISMANTLE`)
+    if (result === ERR_NOT_IN_RANGE) {
+      const moveResult = thisCreep.moveTo(
+        closestStructure,
+        { visualizePathStyle: { stroke: "#000000" } } // black
+      )
+      if (moveResult === OK) thisCreep.say(`${thisCreep.memory.emoji}DISMOVE`)
+      if (moveResult === ERR_NO_PATH) {
+        thisCreep.memory.destination = null
+        thisCreep.memory.mission = "THINK"
+      }
+    }
   } else {
     if (!thisCreep.memory.destination) {
       thisCreep.memory.destination = null
