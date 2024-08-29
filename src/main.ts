@@ -11,6 +11,7 @@ import roleDefenderMelee from "roleDefenderMelee"
 import roleDefenderRanged from "roleDefenderRanged"
 import findMineablePositions from "findMineablePositions"
 import roleEye, { type Eye } from "roleEye"
+import parseDestination from "parseDestination"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
 export type X = number
@@ -119,11 +120,22 @@ function unwrappedLoop() {
     })
   }
 
-  // Ant-style: mark current position for a future road
   const fetchers = _.filter(
     Game.creeps,
     (creep) => creep.memory.role == "fetcher"
   ) as Fetcher[]
+  // Remove dropped resources that are already destination of a fetcher
+  fetchers.forEach((fetcher) => {
+    const { roomName, x, y } = parseDestination(fetcher)
+    if (!(roomName && x && y)) return
+    const destinationPosition = `[room ${roomName} pos ${x},${y}]`
+    allDroppedResources.forEach((resource, resourceIndex) => {
+      if (String(resource.pos) === destinationPosition)
+        allDroppedResources.splice(resourceIndex, 1)
+    })
+  })
+
+  // Ant-style: mark current position for a future road
   const upgraders = _.filter(
     Game.creeps,
     (creep) => creep.memory.role == "upgrader"
