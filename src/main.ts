@@ -3,6 +3,7 @@ import roleBuilder, { type Builder } from "roleBuilder"
 import roleFetcher, { type Fetcher } from "roleFetcher"
 import roleHarvester, { type Harvester } from "roleHarvester"
 import roleUpgrader, { type Upgrader } from "roleUpgrader"
+import ErrorMapper from "ErrorMapper"
 import roleHealer, { type Healer } from "roleHealer"
 import type { DefenderRanged } from "roleDefenderRanged"
 import type { DefenderMelee } from "roleDefenderMelee"
@@ -653,7 +654,6 @@ function unwrappedLoop() {
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
-// const loop = ErrorMapper.wrapLoop(unwrappedLoop)
-const loop = unwrappedLoop
-// export { loop, unwrappedLoop }
-export { loop }
+const loop = ErrorMapper.wrapLoop(unwrappedLoop)
+
+export { loop, unwrappedLoop }
