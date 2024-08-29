@@ -207,19 +207,46 @@ function unwrappedLoop() {
      * */
     const origin = homeRoom.controller?.pos || Game.spawns["Spawn1"].pos
     const goals = [...destinationPositions, Game.spawns["Spawn1"].pos]
-    const path = PathFinder.search(origin, goals)
-    const proposedBuildingPosition = path.path.find((position) => {
-      const proposedBuildingPosition = new RoomPosition(
-        position.x,
-        position.y,
-        homeRoomName
-      )
-      return (
-        proposedBuildingPosition.lookFor(LOOK_STRUCTURES).length === 0 &&
-        proposedBuildingPosition.lookFor(LOOK_CONSTRUCTION_SITES).length ===
-          0 &&
-        proposedBuildingPosition.lookFor(LOOK_TERRAIN)[0] !== "wall"
-      )
+    const path: RoomPosition[] = PathFinder.search(origin, goals)?.path || []
+    /** I reorder the path so that the middle elements are first. */
+    const reorderedPath: RoomPosition[] = []
+    const popFromMiddle = () => path.splice(Math.floor(path.length / 2), 1)?.[0]
+    let p: RoomPosition
+    while ((p = popFromMiddle())) {
+      reorderedPath.push(p)
+      if (!path.length) break
+    }
+
+    const proposedBuildingPosition = reorderedPath.find((pos) => {
+      // Search the adjacent area for structures, construction sites, and walls
+      for (let xDelta = -1; xDelta <= 1; xDelta++) {
+        for (let yDelta = -1; yDelta <= 1; yDelta++) {
+          const getX = () => {
+            const x = pos.x + xDelta
+            if (x < 0) return 0
+            if (x > 49) return 49
+            return x
+          }
+          const getY = () => {
+            const y = pos.y + yDelta
+            if (y < 0) return 0
+            if (y > 49) return 49
+            return y
+          }
+          const proposedPosition = new RoomPosition(
+            getX(),
+            getY(),
+            homeRoomName
+          )
+          if (
+            proposedPosition.lookFor(LOOK_STRUCTURES).length > 0 ||
+            proposedPosition.lookFor(LOOK_CONSTRUCTION_SITES).length > 0 ||
+            proposedPosition.lookFor(LOOK_TERRAIN)[0] === "wall"
+          )
+            return false
+        }
+      }
+      return true
     })
     if (proposedBuildingPosition) {
       proposedBuildingPosition.createConstructionSite(buildingType)
