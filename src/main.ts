@@ -187,14 +187,20 @@ function unwrappedLoop() {
     const totalSum = totalContainers + totalExtensions
     /**
      * RCL 1: nothing
-     * RCL 2: 5/extensions and 5/containers
-     * RCL 3: 10/extensions and 5/containers
+     * RCL 2: 5/extensions and 5/containers -- But I don't build containers.
+     * RCL 3: 10/extensions and 5/containers -- I wait to build the containers;
+     * I don't build containers until there are at least 7 extensions (300
+     * spawn + 7 * 50 extensions = 650 energy for MOVE + CLAIM claimers).
+     * RCL 4: 20/extensions, 5/containers, storage -- not implemented yet
      * */
     if (!RCL || RCL < 2) return
-    if (totalSum >= 10 && RCL >= 2) return
+    if (totalSum >= 5 && RCL >= 2) return
     if (totalSum >= 15 && RCL >= 3) return
     const buildingType =
-      totalContainers < 5 ? STRUCTURE_CONTAINER : STRUCTURE_EXTENSION
+      // Don't build containers until there are at least 7 extensions
+      totalExtensions >= 7 && totalContainers < 5
+        ? STRUCTURE_CONTAINER
+        : STRUCTURE_EXTENSION
     const destinationPositions = !Array.isArray(homeRoomMineablePositions)
       ? ([] as RoomPosition[])
       : Array.from(homeRoomMineablePositions.keys()).map(
