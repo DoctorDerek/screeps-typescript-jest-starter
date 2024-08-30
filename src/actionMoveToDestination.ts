@@ -5,8 +5,9 @@ import type { Position } from "main"
 
 export default function actionMoveToDestination(thisCreep: Explorer) {
   /**
-   * Remove hostile structures I can't dismantle, like a source keeper lair;
-   * invader cores are also considered source keeper lairs (but have HP).
+   * Remove hostile structures I can't dismantle: controllers, source keeper
+   * lairs, and invader cores, which need to be attacked not dismantled.
+   * I also remove my own structures, roads, walls, and containers.
    * */
   const structuresToDismantle = thisCreep.room.find(FIND_STRUCTURES, {
     filter: (structure) => {
@@ -14,7 +15,11 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
         if ("my" in structure && structure.my) return false
         return (
           structure.structureType !== STRUCTURE_CONTROLLER &&
-          Number(structure?.hits) > 0
+          structure.structureType !== STRUCTURE_KEEPER_LAIR &&
+          structure.structureType !== STRUCTURE_INVADER_CORE &&
+          structure.structureType !== STRUCTURE_ROAD &&
+          structure.structureType !== STRUCTURE_WALL &&
+          structure.structureType !== STRUCTURE_CONTAINER
         )
       }
     }
@@ -26,11 +31,13 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
     const closestStructure = thisCreep.pos.findClosestByRange(
       structuresToDismantle
     )
+    const closestPosition = String(closestStructure?.pos) as Position
+    console.log(`⛓️‍💥${thisCreep.name} dismantling at ${closestPosition}`)
     if (!closestStructure) return // Shouldn't happen, but type safe
-    thisCreep.memory.destination = String(closestStructure.pos) as Position
+    thisCreep.memory.destination = closestPosition
     const result = thisCreep.dismantle(closestStructure)
     if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}DISMANTLE`)
-    if (result === ERR_NOT_IN_RANGE) {
+    else {
       const moveResult = thisCreep.moveTo(
         closestStructure,
         { visualizePathStyle: { stroke: "#000000" } } // black
@@ -40,7 +47,9 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
         thisCreep.memory.destination = null
         thisCreep.memory.mission = "THINK"
       }
+      console.log(`moveResult${String(moveResult)}`)
     }
+    console.log(`⛓️‍💥result${String(result)}`)
   } else {
     if (!thisCreep.memory.destination) {
       thisCreep.memory.destination = null
