@@ -24,16 +24,24 @@ const roleClaimer = {
         const allRooms = Object.values(Game.rooms)
         const allControllers = allRooms
           .map((room) => room.controller)
-          .filter(
-            (controller) =>
-              controller?.my === false &&
-              (controller?.reservation?.username !== "Mapachito" ||
-                (controller?.reservation?.username === "Mapachito" &&
-                  controller?.reservation?.ticksToEnd < 4999))
-          )
+          .filter((controller) => {
+            const isMyController = Boolean(controller?.my)
+            if (isMyController) return false
+            const { username, ticksToEnd } = controller?.reservation || {}
+            const hasReservation = Boolean(ticksToEnd)
+            if (!hasReservation) return true
+            const isMyReservation = username === "Mapachito"
+            const notMyReservation = !isMyReservation
+            if (hasReservation && notMyReservation) return false
+            const myReservationButNotFull =
+              isMyReservation && ticksToEnd && ticksToEnd < 3000
+            if (myReservationButNotFull) return true
+            return false
+          })
         const allPositions = allControllers
           .map((controller) => controller?.pos)
           .filter(Boolean)
+        if (allPositions.length === 0) creep.memory.mission = "EXPLORE"
         // @ts-expect-error This can't be undefined due to .filter(Boolean):
         const closestPosition = findNearestPositionByRange(creep, allPositions)
         if (closestPosition)
