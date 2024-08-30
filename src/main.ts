@@ -362,6 +362,29 @@ function unwrappedLoop() {
     console.log("Healers: " + healers.length)
     console.log("Eyes: " + eyes.length)
 
+    /**
+     * Filter the harvesters into the "fat" early game ones that are too slow;
+     * these make better upgraders than harvesters so get transformed ASAP.
+     * The main goal is RCL 3 + 7-10 extensions to get claimers ASAP.
+     * */
+    const fatHarvesters =
+      totalCreeps >= n && totalCreeps <= 20
+        ? harvesters.filter(
+            (harvester) =>
+              harvester.getActiveBodyparts(WORK) === 2 &&
+              harvester.getActiveBodyparts(MOVE) === 1
+          )
+        : []
+    if (fatHarvesters.length >= 1) {
+      fatHarvesters.forEach((harvester: Harvester) => {
+        const upgrader = harvester as unknown as Upgrader
+        upgrader.memory.role = "upgrader"
+        upgrader.memory.emoji = "⚡"
+        upgrader.memory.upgrading = false
+        upgrader.memory.destination = null
+      })
+    }
+
     // If there are no construction sites, the builders transform into upgraders
     if (totalConstructionSites === 0 && builders.length > 0) {
       builders.forEach((builder: Builder) => {
