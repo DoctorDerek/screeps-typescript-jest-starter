@@ -224,17 +224,19 @@ function unwrappedLoop() {
           const room = Game.rooms[roomName]
           if (!room) return false
           const costs = new PathFinder.CostMatrix()
+          const blockRoomPosition = (pos: RoomPosition) =>
+            costs.set(pos.x, pos.y, 0xff)
           room.find(FIND_STRUCTURES).forEach((struct) => {
             // Don't build over existing buildings
-            costs.set(struct.pos.x, struct.pos.y, 0xff)
+            blockRoomPosition(struct.pos)
           })
           // Avoid creeps in the room
           room.find(FIND_CREEPS).forEach((creep) => {
-            costs.set(creep.pos.x, creep.pos.y, 0xff)
+            blockRoomPosition(creep.pos)
           })
           // Avoid construction sites in the room
           room.find(FIND_CONSTRUCTION_SITES).forEach((site) => {
-            costs.set(site.pos.x, site.pos.y, 0xff)
+            blockRoomPosition(site.pos)
           })
           return costs
         }
