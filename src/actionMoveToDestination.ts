@@ -5,13 +5,9 @@ import type { Position } from "main"
 
 export default function actionMoveToDestination(thisCreep: Explorer) {
   // Remove hostile structures that I can't dismantle, like a source keeper lair
-  const structuresToDismantle = thisCreep.room.find(FIND_STRUCTURES, {
+  const structuresToDismantle = thisCreep.room.find(FIND_HOSTILE_STRUCTURES, {
     filter: (structure) => {
-      return (
-        structure.room.name != Game.spawns["Spawn1"].room.name &&
-        structure.structureType !== STRUCTURE_KEEPER_LAIR &&
-        structure.structureType !== STRUCTURE_CONTROLLER
-      )
+      structure.structureType !== STRUCTURE_KEEPER_LAIR
     }
   })
   const hasWorkPart = thisCreep.getActiveBodyparts(WORK) > 0

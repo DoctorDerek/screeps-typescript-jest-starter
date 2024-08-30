@@ -25,6 +25,23 @@ export default function findMineablePositions(
    * so this is the list sent to the miners themselves.
    * */
   const availableMineablePositions = new Map() as MineablePositions
+
+  // Remove rooms that have at least 10K of hit points in enemies in the room
+  // to avoid sending miners to their death (i.e. invaders, source keepers)
+  const enemies = thisRoom.find(FIND_HOSTILE_CREEPS)
+  const totalEnemyHP = enemies.reduce((total, enemy) => total + enemy.hits, 0)
+  // Invader cores don't count as enemies (just structures), so check for them
+  const invaderCores = thisRoom.find(FIND_HOSTILE_STRUCTURES, {
+    filter: (structure) => structure.structureType === STRUCTURE_INVADER_CORE
+  })
+  const totalInvaderCoreHP = invaderCores.reduce(
+    (total, core) => total + core.hits,
+    0
+  )
+  const totalAxisHP = totalEnemyHP + totalInvaderCoreHP
+  if (totalAxisHP > 10000)
+    return { mineablePositions, availableMineablePositions }
+
   activeSources.forEach((source) => {
     const sourcePositionString = String(source.pos) as SourcePosition
     const sourceX = source.pos.x
