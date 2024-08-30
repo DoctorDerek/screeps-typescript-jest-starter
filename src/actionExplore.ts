@@ -1,6 +1,7 @@
 import actionMoveToDestination from "actionMoveToDestination"
 import type { Position, RoomName } from "main"
 import type { Builder } from "roleBuilder"
+import type { Claimer } from "roleClaimer"
 import type { DefenderMelee } from "roleDefenderMelee"
 import type { DefenderRanged } from "roleDefenderRanged"
 import type { Eye } from "roleEye"
@@ -16,6 +17,7 @@ export type Explorer =
   | Fetcher
   | Harvester
   | Miner
+  | Claimer
 function actionExplore(thisCreep: Explorer) {
   if (
     thisCreep.memory.destination == undefined ||

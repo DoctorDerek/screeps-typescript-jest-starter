@@ -13,6 +13,8 @@ import findMineablePositions from "findMineablePositions"
 import roleEye, { type Eye } from "roleEye"
 import parseDestination from "parseDestination"
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
+import type { Claimer } from "roleClaimer"
+import roleClaimer from "roleClaimer"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
 export type X = number
@@ -77,6 +79,7 @@ function unwrappedLoop() {
   const defendersMelee = [] as DefenderMelee[]
   const healers = [] as Healer[]
   const eyes = [] as Eye[]
+  const claimers = [] as Claimer[]
   for (const name in Memory.creeps) {
     if (!Game.creeps[name]) {
       delete Memory.creeps[name]
@@ -94,6 +97,7 @@ function unwrappedLoop() {
     if (role === "defenderMelee") defendersMelee.push(creep as DefenderMelee)
     if (role === "healer") healers.push(creep as Healer)
     if (role === "eye") eyes.push(creep as Eye)
+    if (role === "claimer") claimers.push(creep as Claimer)
   }
 
   // Trigger safe mode if spawn is under half health (last resort)
@@ -383,6 +387,8 @@ function unwrappedLoop() {
     console.log("Miners: " + miners.length)
     console.log("Healers: " + healers.length)
     console.log("Eyes: " + eyes.length)
+    console.log("Claimers: " + claimers.length)
+    console.log("Total creeps: " + totalCreeps)
 
     /**
      * Filter the harvesters into the "fat" early game ones that are too slow;
@@ -584,6 +590,15 @@ function unwrappedLoop() {
         { memory: { role: "healer", emoji: "🏥" } } as Pick<Healer, "memory">
       )
     }
+    const spawnClaimer = () => {
+      const newName = Game.time + "_" + "Claimers" + claimers.length
+      console.log("Spawning new claimer: " + newName)
+      Game.spawns["Spawn1"].spawnCreep(
+        [MOVE, CLAIM], // 650
+        newName,
+        { memory: { role: "claimer", emoji: "🛄" } } as Pick<Claimer, "memory">
+      )
+    }
     /**
      * 3 then n/4 harvester, n/2 miner, n/2 fetcher, n miner, n fetcher, 2 eye,
      * n/4 builder, n/4 upgrader, NO defenders x n mining sites in all rooms.
@@ -605,6 +620,7 @@ function unwrappedLoop() {
     else if (miners.length < n) spawnMiner()
     else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources))
       spawnFetcher()
+    else if (energyMax >= 650 && claimers.length < n) spawnClaimer()
     else if (eyes.length < 2) spawnEye()
     else if (
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
@@ -717,6 +733,7 @@ function unwrappedLoop() {
       if (creep.memory.role == "healer")
         roleHealer.run(creep as Healer, creepsToHeal)
       if (creep.memory.role == "eye") roleEye.run(creep as Eye)
+      if (creep.memory.role == "claimer") roleClaimer.run(creep as Claimer)
     } catch (e) {
       console.log(`${creep.name} threw a ${e}`)
     }
