@@ -649,13 +649,11 @@ function unwrappedLoop() {
   const spawnObject = Game.spawns["Spawn1"].spawning
   if (spawnObject) {
     const spawningCreep = Game.creeps[spawnObject.name]
+    const percent = `${Math.floor(
+      100 - (100 * spawnObject.remainingTime) / spawnObject.needTime
+    )}%`
     homeRoom.visual.text(
-      spawningCreep.memory.emoji +
-        spawningCreep.memory.role +
-        +Math.floor(
-          100 - (100 * spawnObject.remainingTime) / spawnObject.needTime
-        ) +
-        "%",
+      spawningCreep.memory.emoji + spawningCreep.memory.role + percent,
       Game.spawns["Spawn1"].pos.x + 1,
       Game.spawns["Spawn1"].pos.y,
       { align: "left", opacity: 1 }
