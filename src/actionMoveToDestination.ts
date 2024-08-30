@@ -4,10 +4,19 @@ import parseDestination from "parseDestination"
 import type { Position } from "main"
 
 export default function actionMoveToDestination(thisCreep: Explorer) {
-  // Remove hostile structures that I can't dismantle, like a source keeper lair
-  const structuresToDismantle = thisCreep.room.find(FIND_HOSTILE_STRUCTURES, {
+  /**
+   * Remove hostile structures I can't dismantle, like a source keeper lair;
+   * invader cores are also considered source keeper lairs (but have HP).
+   * */
+  const structuresToDismantle = thisCreep.room.find(FIND_STRUCTURES, {
     filter: (structure) => {
-      structure.structureType !== STRUCTURE_KEEPER_LAIR
+      {
+        if ("my" in structure && structure.my) return false
+        return (
+          structure.structureType !== STRUCTURE_CONTROLLER &&
+          Number(structure?.hits) > 0
+        )
+      }
     }
   })
   const hasWorkPart = thisCreep.getActiveBodyparts(WORK) > 0
