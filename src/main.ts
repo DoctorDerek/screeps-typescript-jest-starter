@@ -218,6 +218,12 @@ function unwrappedLoop() {
     const goals = [...destinationPositions, Game.spawns["Spawn1"].pos].map(
       (pos) => ({ pos, maxRooms: 1, range: 2 }) // Range 1+ recommended in docs
     )
+    type X = number
+    type Y = number
+    const obstacleCountMapAllRooms = new Map<
+      RoomName,
+      Map<`${X},${Y}`, number>
+    >()
     const path: RoomPosition[] =
       PathFinder.search(origin, goals, {
         roomCallback: (roomName: RoomName) => {
@@ -230,12 +236,12 @@ function unwrappedLoop() {
             ...room.find(FIND_CREEPS).map((creep) => creep.pos),
             ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
           ]
-          type X = number
-          type Y = number
           const obstacleMap = new Map<`${X},${Y}`, boolean>()
           positionsToBlock.forEach((pos) => {
             obstacleMap.set(`${pos.x},${pos.y}`, true)
           })
+
+          const obstacleCountMap = new Map<`${X},${Y}`, number>()
           for (let roomX = 0; roomX < 50; roomX++) {
             for (let roomY = 0; roomY < 50; roomY++) {
               const terrain = room.getTerrain().get(roomX, roomY)
@@ -260,12 +266,12 @@ function unwrappedLoop() {
                   if (hasObstacle) cost += 1
                 }
               }
+              const posString: `${X},${Y}` = `${roomX},${roomY}`
+              obstacleCountMap.set(posString, cost)
               costs.set(roomX, roomY, cost)
             }
           }
-          const blockRoomPosition = (pos: RoomPosition) =>
-            costs.set(pos.x, pos.y, 0xff)
-          positionsToBlock.forEach(blockRoomPosition)
+          obstacleCountMapAllRooms.set(roomName, obstacleCountMap)
           return costs
         }
       })?.path || []
@@ -284,24 +290,9 @@ function unwrappedLoop() {
      * */
     const reorderedPathWithObstacleCount = reorderedPath
       .map((pos) => {
-        const hasObstacle = (position: RoomPosition) =>
-          position.lookFor(LOOK_STRUCTURES).length > 0 ||
-          position.lookFor(LOOK_CONSTRUCTION_SITES).length > 0 ||
-          position.lookFor(LOOK_TERRAIN)[0] === "wall"
-        let obstacleCount = hasObstacle(pos) ? 9 : 0
-
-        for (let xDelta = -1; xDelta <= 1; xDelta++) {
-          for (let yDelta = -1; yDelta <= 1; yDelta++) {
-            let x = pos.x + xDelta
-            if (x < 0) x = 0
-            if (x > 49) x = 49
-            let y = pos.y + yDelta
-            if (y < 0) y = 0
-            if (y > 49) y = 49
-            const proposedPosition = new RoomPosition(x, y, homeRoomName)
-            if (hasObstacle(proposedPosition)) obstacleCount++
-          }
-        }
+        const roomName = pos.roomName as RoomName
+        const obstacleCountMap = obstacleCountMapAllRooms.get(roomName)
+        const obstacleCount = obstacleCountMap?.get(`${pos.x},${pos.y}`) || 0
         return { pos, obstacleCount }
       })
       .sort((a, b) => a.obstacleCount - b.obstacleCount)
