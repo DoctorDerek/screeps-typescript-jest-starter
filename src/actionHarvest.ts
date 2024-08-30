@@ -27,9 +27,9 @@ function actionHarvest(creep: Harvester, totalCreeps: number) {
         const target = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
         if (target) {
           const result = creep.harvest(target)
-          if (result == OK) creep.say(`${creep.memory.emoji}harvest`)
+          if (result == OK) creep.say(`${creep.memory.emoji}🌾👨‍🌾`)
           if (result == ERR_NOT_IN_RANGE) {
-            creep.say(`${creep.memory.emoji}move`)
+            creep.say(`${creep.memory.emoji}🌾🧺`)
             const moveResult = creep.moveTo(target, {
               visualizePathStyle: { stroke: "#FCE850" }
             })

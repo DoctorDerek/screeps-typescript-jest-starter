@@ -37,12 +37,12 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     const result = thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY)
     // There is somewhere to drop it off in the current room
     if (result === ERR_NOT_IN_RANGE) {
-      thisCreep.say(`${thisCreep.memory.emoji}movedrop`)
+      thisCreep.say(`${thisCreep.memory.emoji}⚡🔛`)
       thisCreep.moveTo(targetDropOffSite, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
     } else {
-      thisCreep.say(`${thisCreep.memory.emoji}dropoff`)
+      thisCreep.say(`${thisCreep.memory.emoji}⚡⤵️`)
       thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY)
     }
   } else if (targetDropOffSite == null) {
@@ -53,19 +53,19 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     if (targetConstructionSite != null) {
       // Drop it off by the construction site
       if (thisCreep.pos.getRangeTo(targetConstructionSite) > 3) {
-        thisCreep.say(`${thisCreep.memory.emoji}movesite`)
+        thisCreep.say(`${thisCreep.memory.emoji}🏗️🔛`)
         thisCreep.moveTo(targetConstructionSite, {
           visualizePathStyle: { stroke: "#ffffff" }
         })
       } else {
-        thisCreep.say(`${thisCreep.memory.emoji}dropsite`)
+        thisCreep.say(`${thisCreep.memory.emoji}🏗️⤵️`)
         thisCreep.drop(RESOURCE_ENERGY)
         targetConstructionSite = null
       }
     } else if (targetConstructionSite == null) {
       // There is nowhere to drop it off in the current room
       // Move to within 5 tiles of the spawn. Then we drop it if all is full
-      thisCreep.say(`${thisCreep.memory.emoji}movehome`)
+      thisCreep.say(`${thisCreep.memory.emoji}🏡🔛`)
       thisCreep.moveTo(Game.spawns["Spawn1"].pos, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
@@ -73,7 +73,7 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
         thisCreep.room === Game.spawns["Spawn1"].room &&
         thisCreep.pos.getRangeTo(Game.spawns["Spawn1"].pos) < 3
       ) {
-        thisCreep.say(`${thisCreep.memory.emoji}drophome`)
+        thisCreep.say(`${thisCreep.memory.emoji}🏡⤵️`)
         console.log("Drop it! There are 0 available targets in the home room.")
         // There's an issue, so let's drop our resources and mosey on
         thisCreep.drop(RESOURCE_ENERGY)
