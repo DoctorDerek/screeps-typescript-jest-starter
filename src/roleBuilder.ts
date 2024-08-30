@@ -75,18 +75,22 @@ const roleBuilder = {
           LOOK_CONSTRUCTION_SITES,
           new RoomPosition(x, y, roomName)
         )?.[0]
-        const closestRepair = creep.room.lookForAt(
+        let closestRepair: Structure | null = creep.room.lookForAt(
           LOOK_STRUCTURES,
           new RoomPosition(x, y, roomName)
         )?.[0]
+        // Make sure building is <50% HP
+        if (closestRepair?.hits / closestRepair?.hitsMax > 0.5)
+          closestRepair = null
         if (!(closestSite || closestRepair)) {
           creep.memory.destination = null
           creep.memory.mission = "THINK"
           return
         }
-        const isRepair = closestRepair?.hits < closestRepair?.hitsMax
+        const isRepair =
+          (closestRepair?.hits || 0) < (closestRepair?.hitsMax || 0)
         const isBuild = closestSite
-        if (isBuild) {
+        if (isBuild && closestSite) {
           const result = creep.build(closestSite)
           if (result === OK) creep.say(`${creep.memory.emoji}build`)
           else if (result == ERR_NOT_IN_RANGE) {
@@ -98,7 +102,7 @@ const roleBuilder = {
             creep.memory.destination = null
             creep.memory.mission = "THINK"
           }
-        } else if (isRepair) {
+        } else if (isRepair && closestRepair) {
           const result = creep.repair(closestRepair)
           if (result === OK) creep.say(`${creep.memory.emoji}repair`)
           else if (result === ERR_NOT_IN_RANGE) {
