@@ -220,39 +220,52 @@ function unwrappedLoop() {
     )
     const path: RoomPosition[] =
       PathFinder.search(origin, goals, {
-        plainCost: 2,
-        swampCost: 10,
         roomCallback: (roomName: RoomName) => {
           const room = Game.rooms[roomName]
           if (!room) return false
           const costs = new PathFinder.CostMatrix()
           // Completely block a position as being unpathable
-          const blockRoomPosition = (pos: RoomPosition) =>
-            costs.set(pos.x, pos.y, 0xff)
-          // Make a position more expensive to move through
-          const lockRoomPosition = (pos: RoomPosition) =>
-            costs.set(pos.x, pos.y, 7)
           const positionsToBlock = [
             ...room.find(FIND_STRUCTURES).map((struct) => struct.pos),
             ...room.find(FIND_CREEPS).map((creep) => creep.pos),
             ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
           ]
-          positionsToBlock.forEach(blockRoomPosition)
-          // Add positions within 1 tile of each blocked position to leave a gap
+          type X = number
+          type Y = number
+          const obstacleMap = new Map<`${X},${Y}`, boolean>()
           positionsToBlock.forEach((pos) => {
-            for (let xDelta = -1; xDelta <= 1; xDelta++) {
-              for (let yDelta = -1; yDelta <= 1; yDelta++) {
-                if (xDelta === 0 && yDelta === 0) continue
-                const x = pos.x + xDelta
-                if (x < 0) continue
-                if (x > 49) continue
-                const y = pos.y + yDelta
-                if (y < 0) continue
-                if (y > 49) continue
-                lockRoomPosition(new RoomPosition(x, y, roomName))
-              }
-            }
+            obstacleMap.set(`${pos.x},${pos.y}`, true)
           })
+          for (let roomX = 0; roomX < 50; roomX++) {
+            for (let roomY = 0; roomY < 50; roomY++) {
+              const terrain = room.getTerrain().get(roomX, roomY)
+              let cost = 0
+              if (terrain === TERRAIN_MASK_WALL) cost = 0xff
+              else if (terrain === TERRAIN_MASK_SWAMP) cost = 5
+              else if (terrain === 0) cost = 1 // Plains
+              for (let xDelta = -1; xDelta <= 1 && cost < 0xff; xDelta++) {
+                for (let yDelta = -1; yDelta <= 1 && cost < 0xff; yDelta++) {
+                  let x = roomX + xDelta
+                  if (x < 0) x = 0
+                  if (x > 49) x = 49
+                  let y = roomY + yDelta
+                  if (y < 0) y = 0
+                  if (y > 49) y = 49
+                  const posString: `${X},${Y}` = `${x},${y}`
+                  const hasObstacle =
+                    obstacleMap.has(posString) && obstacleMap.get(posString)
+                  // Blocked
+                  if (xDelta === 0 && yDelta === 0 && hasObstacle) cost = 0xff
+                  // Has an obstacle surrounding it
+                  if (hasObstacle) cost += 1
+                }
+              }
+              costs.set(roomX, roomY, cost)
+            }
+          }
+          const blockRoomPosition = (pos: RoomPosition) =>
+            costs.set(pos.x, pos.y, 0xff)
+          positionsToBlock.forEach(blockRoomPosition)
           return costs
         }
       })?.path || []
