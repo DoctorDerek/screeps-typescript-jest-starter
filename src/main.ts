@@ -608,7 +608,7 @@ function unwrappedLoop() {
       )
     }
     /**
-     * 3 harvester, n/2 miner, n/2 fetcher, n miner, n fetcher, 2 eye,
+     * 3 harvester, n/2 miner, n/4 fetcher, n miner, n/2 fetcher, 2 eye,
      * n/4 builder, n/4 upgrader, NO defenders x n mining sites in all rooms.
      * Builder only spawns if there are construction sites.
      * */
