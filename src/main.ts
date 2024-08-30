@@ -198,7 +198,7 @@ function unwrappedLoop() {
     if (totalSum >= 15 && RCL >= 3) return
     const buildingType =
       // Don't build containers until there are at least 7 extensions
-      totalExtensions >= 7 && totalContainers < 5
+      totalExtensionsInRoom >= 7 && totalContainers < 5
         ? STRUCTURE_CONTAINER
         : STRUCTURE_EXTENSION
     const destinationPositions = !Array.isArray(homeRoomMineablePositions)
