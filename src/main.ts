@@ -226,18 +226,12 @@ function unwrappedLoop() {
           const costs = new PathFinder.CostMatrix()
           const blockRoomPosition = (pos: RoomPosition) =>
             costs.set(pos.x, pos.y, 0xff)
-          room.find(FIND_STRUCTURES).forEach((struct) => {
-            // Don't build over existing buildings
-            blockRoomPosition(struct.pos)
-          })
-          // Avoid creeps in the room
-          room.find(FIND_CREEPS).forEach((creep) => {
-            blockRoomPosition(creep.pos)
-          })
-          // Avoid construction sites in the room
-          room.find(FIND_CONSTRUCTION_SITES).forEach((site) => {
-            blockRoomPosition(site.pos)
-          })
+          const positionsToBlock = [
+            ...room.find(FIND_STRUCTURES).map((struct) => struct.pos),
+            ...room.find(FIND_CREEPS).map((creep) => creep.pos),
+            ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
+          ]
+          positionsToBlock.forEach(blockRoomPosition)
           return costs
         }
       })?.path || []
