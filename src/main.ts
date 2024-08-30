@@ -203,8 +203,30 @@ function unwrappedLoop() {
      * Making sure to leave empty squares between each building on the line.
      * */
     const origin = homeRoom.controller?.pos || Game.spawns["Spawn1"].pos
-    const goals = [...destinationPositions, Game.spawns["Spawn1"].pos]
-    const path: RoomPosition[] = PathFinder.search(origin, goals)?.path || []
+    const goals = [...destinationPositions, Game.spawns["Spawn1"].pos].map(
+      (pos) => ({ pos, range: 1 }) // Range 1 recommended in docs
+    )
+    const path: RoomPosition[] =
+      PathFinder.search(origin, goals, {
+        roomCallback: (roomName: RoomName) => {
+          const room = Game.rooms[roomName]
+          if (!room) return false
+          const costs = new PathFinder.CostMatrix()
+          room.find(FIND_STRUCTURES).forEach((struct) => {
+            // Don't build over existing buildings
+            costs.set(struct.pos.x, struct.pos.y, 0xff)
+          })
+          // Avoid creeps in the room
+          room.find(FIND_CREEPS).forEach((creep) => {
+            costs.set(creep.pos.x, creep.pos.y, 0xff)
+          })
+          // Avoid construction sites in the room
+          room.find(FIND_CONSTRUCTION_SITES).forEach((site) => {
+            costs.set(site.pos.x, site.pos.y, 0xff)
+          })
+          return costs
+        }
+      })?.path || []
     /** I reorder the path so that the middle elements are first. */
     const reorderedPath: RoomPosition[] = []
     const popFromMiddle = () => path.splice(Math.floor(path.length / 2), 1)?.[0]
