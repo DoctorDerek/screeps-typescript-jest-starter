@@ -77,8 +77,9 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
         roomPosition,
         { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
       )
-      // If this creep has arrived, reset the mission
+      // Reset if I arrive, if I can't get there, or if there's a creep there.
       if (
+        roomPosition.lookFor(LOOK_TERRAIN)?.[0] === "wall" ||
         resultMove === ERR_NO_PATH ||
         (thisCreep.pos.x === roomPosition.x &&
           thisCreep.pos.y === roomPosition.y) ||
