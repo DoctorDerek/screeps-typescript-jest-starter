@@ -75,14 +75,19 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
         roomPosition,
         { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
       )
+      const haveArrivedWithinRange = thisCreep.pos.inRangeTo(roomPosition, 1)
+      const buildingsAtDestination = roomPosition.lookFor(LOOK_STRUCTURES)
+      const foundBuildingsAtDestination = buildingsAtDestination.length > 0
+      const creepsAtDestination = roomPosition.lookFor(LOOK_CREEPS)
+      const foundCreepsAtDestination = creepsAtDestination.length > 0
       // Reset if I arrive, if I can't get there, or if there's a creep there.
-      if (
-        roomPosition.lookFor(LOOK_TERRAIN)?.[0] === "wall" ||
-        resultMove === ERR_NO_PATH ||
-        (thisCreep.pos.x === roomPosition.x &&
-          thisCreep.pos.y === roomPosition.y) ||
-        roomPosition.lookFor(LOOK_CREEPS).length > 0
-      ) {
+      const haveArrivedAtPos = thisCreep.pos.inRangeTo(roomPosition, 0)
+      const haveArrived =
+        haveArrivedAtPos ||
+        ((foundBuildingsAtDestination || foundCreepsAtDestination) &&
+          haveArrivedWithinRange)
+      const foundWallAtPos = roomPosition.lookFor(LOOK_TERRAIN)[0] === "wall"
+      if (foundWallAtPos || resultMove === ERR_NO_PATH || haveArrived) {
         thisCreep.memory.mission = "THINK"
         thisCreep.memory.destination = null
       }
