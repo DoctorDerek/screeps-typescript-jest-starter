@@ -196,7 +196,7 @@ function unwrappedLoop() {
      * RCL 4: 20/extensions, 5/containers, storage -- not implemented yet
      * */
     if (!RCL || RCL < 2) return
-    if (totalSum >= 5 && RCL >= 2) return
+    if (totalSum >= 5 && RCL === 2) return
     if (totalSum >= 15 && RCL >= 3) return
     const buildingType =
       // Don't build containers until there are at least 7 extensions
