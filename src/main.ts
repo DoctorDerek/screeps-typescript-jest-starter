@@ -248,37 +248,34 @@ function unwrappedLoop() {
       if (!path.length) break
     }
 
-    const proposedBuildingPosition = reorderedPath.find((pos) => {
-      // Search the adjacent area for structures, construction sites, and walls
-      for (let xDelta = -1; xDelta <= 1; xDelta++) {
-        for (let yDelta = -1; yDelta <= 1; yDelta++) {
-          const getX = () => {
-            const x = pos.x + xDelta
-            if (x < 0) return 0
-            if (x > 49) return 49
-            return x
+    /**
+     * Search the adjacent area for structures, construction sites, and walls;
+     * less obstacles are better, but some obstacles are tolerable.
+     * */
+    const reorderedPathWithObstacleCount = reorderedPath
+      .map((pos) => {
+        const hasObstacle = (position: RoomPosition) =>
+          position.lookFor(LOOK_STRUCTURES).length > 0 ||
+          position.lookFor(LOOK_CONSTRUCTION_SITES).length > 0 ||
+          position.lookFor(LOOK_TERRAIN)[0] === "wall"
+        let obstacleCount = hasObstacle(pos) ? 9 : 0
+
+        for (let xDelta = -1; xDelta <= 1; xDelta++) {
+          for (let yDelta = -1; yDelta <= 1; yDelta++) {
+            let x = pos.x + xDelta
+            if (x < 0) x = 0
+            if (x > 49) x = 49
+            let y = pos.y + yDelta
+            if (y < 0) y = 0
+            if (y > 49) y = 49
+            const proposedPosition = new RoomPosition(x, y, homeRoomName)
+            if (hasObstacle(proposedPosition)) obstacleCount++
           }
-          const getY = () => {
-            const y = pos.y + yDelta
-            if (y < 0) return 0
-            if (y > 49) return 49
-            return y
-          }
-          const proposedPosition = new RoomPosition(
-            getX(),
-            getY(),
-            homeRoomName
-          )
-          if (
-            proposedPosition.lookFor(LOOK_STRUCTURES).length > 0 ||
-            proposedPosition.lookFor(LOOK_CONSTRUCTION_SITES).length > 0 ||
-            proposedPosition.lookFor(LOOK_TERRAIN)[0] === "wall"
-          )
-            return false
         }
-      }
-      return true
-    })
+        return { pos, obstacleCount }
+      })
+      .sort((a, b) => a.obstacleCount - b.obstacleCount)
+    const proposedBuildingPosition = reorderedPathWithObstacleCount[0].pos
     if (proposedBuildingPosition) {
       proposedBuildingPosition.createConstructionSite(buildingType)
       console.log(
