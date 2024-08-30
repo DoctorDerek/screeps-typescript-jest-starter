@@ -608,16 +608,11 @@ function unwrappedLoop() {
       )
     }
     /**
-     * 3 then n/4 harvester, n/2 miner, n/2 fetcher, n miner, n fetcher, 2 eye,
+     * 3 harvester, n/2 miner, n/2 fetcher, n miner, n fetcher, 2 eye,
      * n/4 builder, n/4 upgrader, NO defenders x n mining sites in all rooms.
      * Builder only spawns if there are construction sites.
      * */
-    if (
-      totalCreeps < 3 ||
-      harvesters.length <
-        Math.max(Math.floor(n / 4), Math.floor(numberOfSources / 2))
-    )
-      spawnHarvester()
+    if (totalCreeps < 3) spawnHarvester()
     else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
     else if (
