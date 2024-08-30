@@ -216,22 +216,43 @@ function unwrappedLoop() {
      * */
     const origin = homeRoom.controller?.pos || Game.spawns["Spawn1"].pos
     const goals = [...destinationPositions, Game.spawns["Spawn1"].pos].map(
-      (pos) => ({ pos, range: 2 }) // Range 1+ recommended in docs
+      (pos) => ({ pos, maxRooms: 1, range: 2 }) // Range 1+ recommended in docs
     )
     const path: RoomPosition[] =
       PathFinder.search(origin, goals, {
+        plainCost: 2,
+        swampCost: 10,
         roomCallback: (roomName: RoomName) => {
           const room = Game.rooms[roomName]
           if (!room) return false
           const costs = new PathFinder.CostMatrix()
+          // Completely block a position as being unpathable
           const blockRoomPosition = (pos: RoomPosition) =>
             costs.set(pos.x, pos.y, 0xff)
+          // Make a position more expensive to move through
+          const lockRoomPosition = (pos: RoomPosition) =>
+            costs.set(pos.x, pos.y, 7)
           const positionsToBlock = [
             ...room.find(FIND_STRUCTURES).map((struct) => struct.pos),
             ...room.find(FIND_CREEPS).map((creep) => creep.pos),
             ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
           ]
           positionsToBlock.forEach(blockRoomPosition)
+          // Add positions within 1 tile of each blocked position to leave a gap
+          positionsToBlock.forEach((pos) => {
+            for (let xDelta = -1; xDelta <= 1; xDelta++) {
+              for (let yDelta = -1; yDelta <= 1; yDelta++) {
+                if (xDelta === 0 && yDelta === 0) continue
+                const x = pos.x + xDelta
+                if (x < 0) continue
+                if (x > 49) continue
+                const y = pos.y + yDelta
+                if (y < 0) continue
+                if (y > 49) continue
+                lockRoomPosition(new RoomPosition(x, y, roomName))
+              }
+            }
+          })
           return costs
         }
       })?.path || []
@@ -271,7 +292,7 @@ function unwrappedLoop() {
         return { pos, obstacleCount }
       })
       .sort((a, b) => a.obstacleCount - b.obstacleCount)
-    const proposedBuildingPosition = reorderedPathWithObstacleCount[0].pos
+    const proposedBuildingPosition = reorderedPathWithObstacleCount?.[0]?.pos
     if (proposedBuildingPosition) {
       proposedBuildingPosition.createConstructionSite(buildingType)
       console.log(
