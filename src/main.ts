@@ -608,7 +608,7 @@ function unwrappedLoop() {
       )
     }
     /**
-     * 3 harvester, n/2 miner, n/4 fetcher, n miner, n/2 fetcher, 2 eye,
+     * 3 harvester, n/2 miner, n/4 fetcher, n miner, n/2 fetcher, n/2 eye,
      * n/4 builder, n/4 upgrader, NO defenders x n mining sites in all rooms.
      * Builder only spawns if there are construction sites.
      * */
@@ -624,7 +624,8 @@ function unwrappedLoop() {
     else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources))
       spawnFetcher()
     else if (energyMax >= 650 && claimers.length < n) spawnClaimer()
-    else if (eyes.length < 2) spawnEye()
+    else if (eyes.length < Math.min(Math.floor(n / 2), numberOfSources))
+      spawnEye()
     else if (
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
       // Sum construction sites in all spawns to make sure there is at least 1:
