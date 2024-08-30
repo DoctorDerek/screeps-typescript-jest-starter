@@ -368,11 +368,9 @@ function unwrappedLoop() {
      * The main goal is RCL 3 + 7-10 extensions to get claimers ASAP.
      * */
     const fatHarvesters =
-      totalCreeps >= n && totalCreeps <= 20
+      totalCreeps >= 6 && totalCreeps <= 20
         ? harvesters.filter(
-            (harvester) =>
-              harvester.getActiveBodyparts(WORK) === 2 &&
-              harvester.getActiveBodyparts(MOVE) === 1
+            (harvester) => harvester.getActiveBodyparts(MOVE) === 1
           )
         : []
     if (fatHarvesters.length >= 1) {
