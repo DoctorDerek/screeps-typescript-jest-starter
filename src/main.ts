@@ -362,22 +362,6 @@ function unwrappedLoop() {
     console.log("Healers: " + healers.length)
     console.log("Eyes: " + eyes.length)
 
-    /**
-     * Once I have n miners, the all harvesters transform into upgraders,
-     * as the main goal is RCL 3 + 7-10 extensions to get claimers ASAP.
-     *
-     * With n harvesters at the beginning, there's no need for extra fetchers;
-     * harvesters have WORK parts and thus make better upgraders anyway.
-     * */
-    // if (miners.length >= n && harvesters.length >= 1) {
-    //   harvesters.forEach((harvester: Harvester) => {
-    //     const upgrader = harvester as unknown as Upgrader
-    //     upgrader.memory.role = "upgrader"
-    //     upgrader.memory.emoji = "⚡"
-    //     upgrader.memory.upgrading = false
-    //     upgrader.memory.destination = null
-    //   })
-    // }
     // If there are no construction sites, the builders transform into upgraders
     if (totalConstructionSites === 0 && builders.length > 0) {
       builders.forEach((builder: Builder) => {
@@ -395,9 +379,7 @@ function unwrappedLoop() {
         builder.memory.role = "builder"
         builder.memory.emoji = "🚧"
         builder.memory.destination = null
-        builder.memory.building = false
-        builder.memory.buildSiteNumber = null
-        builder.memory.mission = "FILL UP"
+        builder.memory.mission = "THINK"
       })
     }
     // console.log(`🚧 There are ${totalConstructionSites} construction sites:
