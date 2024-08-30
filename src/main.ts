@@ -81,23 +81,25 @@ function unwrappedLoop() {
   const eyes = [] as Eye[]
   const claimers = [] as Claimer[]
   for (const name in Memory.creeps) {
-    if (!Game.creeps[name]) {
+    const creep = Game.creeps[name]
+    if (!creep) {
       delete Memory.creeps[name]
       // Housekeeping: Delete dead creeps from memory
       console.log("Clearing non-existing creep memory:", name)
+    } else if (creep) {
+      const role = creep.memory.role
+      if (role === "harvester") harvesters.push(creep as Harvester)
+      if (role === "miner") miners.push(creep as Miner)
+      if (role === "fetcher") fetchers.push(creep as Fetcher)
+      if (role === "upgrader") upgraders.push(creep as Upgrader)
+      if (role === "builder") builders.push(creep as Builder)
+      if (role === "defenderRanged")
+        defendersRanged.push(creep as DefenderRanged)
+      if (role === "defenderMelee") defendersMelee.push(creep as DefenderMelee)
+      if (role === "healer") healers.push(creep as Healer)
+      if (role === "eye") eyes.push(creep as Eye)
+      if (role === "claimer") claimers.push(creep as Claimer)
     }
-    const creep = Game.creeps[name]
-    const role = creep.memory.role
-    if (role === "harvester") harvesters.push(creep as Harvester)
-    if (role === "miner") miners.push(creep as Miner)
-    if (role === "fetcher") fetchers.push(creep as Fetcher)
-    if (role === "upgrader") upgraders.push(creep as Upgrader)
-    if (role === "builder") builders.push(creep as Builder)
-    if (role === "defenderRanged") defendersRanged.push(creep as DefenderRanged)
-    if (role === "defenderMelee") defendersMelee.push(creep as DefenderMelee)
-    if (role === "healer") healers.push(creep as Healer)
-    if (role === "eye") eyes.push(creep as Eye)
-    if (role === "claimer") claimers.push(creep as Claimer)
   }
 
   // Trigger safe mode if spawn is under half health (last resort)
