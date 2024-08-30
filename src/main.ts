@@ -474,22 +474,26 @@ function unwrappedLoop() {
       )
     }
     /**
+     * old (fast):
      * [WORK, MOVE, MOVE, CARRY], // 250
      * [WORK, WORK, MOVE, MOVE, MOVE, CARRY], // 400
-     * [WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY], // 500
+     *
+     * new (slow):
+     * [WORK, WORK, MOVE, CARRY], // 300
+     * [WORK, WORK, WORK, MOVE, CARRY], // 400
+     * [WORK, WORK, WORK, WORK, MOVE, CARRY], // 500
+     * [WORK, WORK, WORK, WORK, WORK, MOVE, CARRY], // 600
      * */
     const getBuilderBody = () => {
-      if (energyMax < 400) return [WORK, MOVE, MOVE, CARRY] // 250
-      if (energyMax < 500) return [WORK, WORK, MOVE, MOVE, MOVE, CARRY] // 400
-      // if (energyMax >= 500)
-      return [WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY] // 500
+      if (energyMax < 400) return [WORK, WORK, MOVE, CARRY] // 300
+      if (energyMax < 500) return [WORK, WORK, WORK, MOVE, CARRY] // 400
+      if (energyMax < 600) return [WORK, WORK, WORK, WORK, MOVE, CARRY] // 500
+      // if (energyMax >= 600)
+      return [WORK, WORK, WORK, WORK, WORK, MOVE, CARRY] // 600
     }
     const spawnBuilder = () => {
       const newName = Game.time + "_" + "Builder" + builders.length
       console.log("Spawning new builder: " + newName)
-      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
-      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
-      // [WORK, MOVE, MOVE, CARRY], // 250
       Game.spawns["Spawn1"].spawnCreep(getBuilderBody(), newName, {
         memory: { role: "builder", emoji: "🚧" }
       } as Pick<Builder, "memory">)
@@ -498,10 +502,6 @@ function unwrappedLoop() {
     const spawnUpgrader = () => {
       const newName = Game.time + "_" + "Upgrader" + upgraders.length
       console.log("Spawning new upgrader: " + newName)
-      // [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
-      // [WORK, WORK, WORK, MOVE, CARRY, CARRY, CARRY, CARRY], // 550
-      // [WORK, MOVE, MOVE, CARRY], // 250
-      // [WORK, WORK, MOVE, CARRY], // 300
       Game.spawns["Spawn1"].spawnCreep(getUpgraderBody(), newName, {
         memory: { role: "upgrader", emoji: "⚡" }
       } as Pick<Upgrader, "memory">)
