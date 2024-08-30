@@ -655,9 +655,9 @@ function unwrappedLoop() {
       totalConstructionSites === 0
     )
       spawnUpgrader()
-    else if (defendersRanged.length < 0) spawnDefenderRanged() // off
-    else if (defendersMelee.length < 0) spawnDefenderMelee() // off
-    else if (healers.length < 0) spawnHealer() // off
+    else if (defendersRanged.length < n) spawnDefenderRanged()
+    else if (defendersMelee.length < n) spawnDefenderMelee()
+    else if (healers.length < n) spawnHealer()
     else {
       // The fallback role is off
     }
