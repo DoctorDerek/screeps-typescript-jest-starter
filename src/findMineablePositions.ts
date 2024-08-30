@@ -88,6 +88,7 @@ export default function findMineablePositions(
       )
       const positionString = String(position) as MineablePosition
       mineablePositions.delete(positionString)
+      availableMineablePositions.delete(positionString)
     })
   })
 
