@@ -50,7 +50,9 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
       // Move toward the assigned exit tile
       const exitDir = Game.map.findExit(thisCreep.room, roomName)
       if (exitDir !== -2 && exitDir !== -10) {
-        const exit = thisCreep.pos.findClosestByRange(exitDir)
+        const exit = thisCreep.pos.findClosestByPath(exitDir, {
+          range: 1
+        })
         if (exit) {
           const moveResult = thisCreep.moveTo(
             exit,

@@ -726,22 +726,32 @@ function unwrappedLoop() {
     try {
       // Don't run creeps that are spawning
       if (creep.spawning) continue
-      if (creep.memory.role == "defenderMelee")
+      // At an exit on the 50x50 game board
+      // Move off the border by 1 step to avoid getting stuck
+      else if (
+        creep.pos.x === 0 ||
+        creep.pos.x === 49 ||
+        creep.pos.y === 0 ||
+        creep.pos.y === 49
+      )
+        creep.move(creep.pos.getDirectionTo(25, 25))
+      else if (creep.memory.role == "defenderMelee")
         roleDefenderMelee.run(creep as DefenderMelee, overwhelmingForce)
-      if (creep.memory.role == "defenderRanged")
+      else if (creep.memory.role == "defenderRanged")
         roleDefenderRanged.run(creep as DefenderRanged, overwhelmingForce)
-      if (creep.memory.role == "miner")
+      else if (creep.memory.role == "miner")
         roleMiner.run(creep as Miner, allAvailableMineablePositions)
-      if (creep.memory.role == "fetcher")
+      else if (creep.memory.role == "fetcher")
         roleFetcher.run(creep as Fetcher, allDroppedResources)
-      if (creep.memory.role == "harvester")
+      else if (creep.memory.role == "harvester")
         roleHarvester.run(creep as Harvester, totalCreeps)
-      if (creep.memory.role == "upgrader") roleUpgrader.run(creep as Upgrader)
-      if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
-      if (creep.memory.role == "healer")
+      else if (creep.memory.role == "upgrader")
+        roleUpgrader.run(creep as Upgrader)
+      else if (creep.memory.role == "builder") roleBuilder.run(creep as Builder)
+      else if (creep.memory.role == "healer")
         roleHealer.run(creep as Healer, creepsToHeal)
-      if (creep.memory.role == "eye") roleEye.run(creep as Eye)
-      if (creep.memory.role == "claimer") roleClaimer.run(creep as Claimer)
+      else if (creep.memory.role == "eye") roleEye.run(creep as Eye)
+      else if (creep.memory.role == "claimer") roleClaimer.run(creep as Claimer)
     } catch (e) {
       console.log(`${creep.name} threw a ${e}`)
     }
