@@ -65,18 +65,21 @@ const roleMiner = {
       thisCreep.memory.destination = null
       if (availableMiningPositions.size > 0)
         assessSources(thisCreep, availableMiningPositions)
-      else if (availableMiningPositions.size === 0) {
+      else if (availableMiningPositions.size === 0)
         thisCreep.memory.mission = "EXPLORE"
-        thisCreep.memory.destination = null
-      }
     }
     if (thisCreep.memory.mission === "MINE") {
       if (!thisCreep.memory.objective || !thisCreep.memory.destination) {
         thisCreep.memory.mission = "THINK"
+        roleMiner.run(thisCreep, availableMiningPositions) // Run again
         return
       }
       const { roomName, x, y } = parseDestination(thisCreep)
-      // Try to harvest if I'm at the destination
+      if (!(roomName && x && y)) {
+        thisCreep.memory.mission = "THINK"
+        roleMiner.run(thisCreep, availableMiningPositions) // Run again
+        return
+      }
       if (
         thisCreep.pos.roomName === roomName &&
         thisCreep.pos.x === x &&
@@ -87,38 +90,25 @@ const roleMiner = {
           convertRoomPositionStringBackToRoomPositionObject(
             thisCreep.memory.objective
           )
-        const destinationPosition =
-          convertRoomPositionStringBackToRoomPositionObject(
-            thisCreep.memory.destination
-          )
         const sourceObjectAtObjective =
           sourcePosition.findClosestByRange(FIND_SOURCES)
         if (!sourceObjectAtObjective) {
           // Shouldn't happen, but if it does, think about it
           thisCreep.memory.mission = "THINK"
+          roleMiner.run(thisCreep, availableMiningPositions) // Run again
           return
         }
         const result = thisCreep.harvest(sourceObjectAtObjective)
         // console.log(`⛏️ Miner ${thisCreep.name} mining result ${result}`)
         if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}MINE`)
-        else {
+        else if (result === ERR_NOT_ENOUGH_RESOURCES)
           thisCreep.say(`${thisCreep.memory.emoji}ERROR`)
-          // Possibly out of resources
+        else thisCreep.say(`${thisCreep.memory.emoji}ERROR`)
+        if (result !== OK) {
           thisCreep.memory.mission = "THINK"
+          roleMiner.run(thisCreep, availableMiningPositions) // Run again
         }
-      } else {
-        // if (
-        //   thisCreep.pos.roomName === roomName &&
-        //   convertRoomPositionStringBackToRoomPositionObject(
-        //     thisCreep.memory.destination
-        //   ).lookFor(LOOK_CREEPS).length > 0
-        // ) {
-        //   thisCreep.say(`${thisCreep.memory.emoji}OCCUPIED`)
-        //   // Think about it if our mining site is occupied
-        //   thisCreep.memory.mission = "THINK"
-        // }
-        actionMoveToDestination(thisCreep)
-      }
+      } else actionMoveToDestination(thisCreep)
     }
   }
 }
