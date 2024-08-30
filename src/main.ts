@@ -216,7 +216,7 @@ function unwrappedLoop() {
      * */
     const origin = homeRoom.controller?.pos || Game.spawns["Spawn1"].pos
     const goals = [...destinationPositions, Game.spawns["Spawn1"].pos].map(
-      (pos) => ({ pos, range: 1 }) // Range 1 recommended in docs
+      (pos) => ({ pos, range: 2 }) // Range 1+ recommended in docs
     )
     const path: RoomPosition[] =
       PathFinder.search(origin, goals, {
