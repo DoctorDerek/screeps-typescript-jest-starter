@@ -28,22 +28,39 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     if (Math.random() > 0.5) thisCreep.memory.target = "container"
     else thisCreep.memory.target = "extension"
   }
+  /** Nuestros amiguitos are always preferred to transfer to 🥳🦜*/
+  const closestAmiguito = thisCreep.pos.findClosestByPath(FIND_MY_CREEPS, {
+    filter: (creep) => {
+      return (
+        (creep.memory.role === "builder" ||
+          creep.memory.role === "upgrader" ||
+          creep.memory.role === "healer") &&
+        creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+      )
+    }
+  })
   const targetDropOffSite =
-    thisCreep?.memory?.target === "container"
+    closestAmiguito || thisCreep?.memory?.target === "container"
       ? closestContainer || closestExtension
       : closestExtension || closestContainer
+  const emoji = closestAmiguito
+    ? "🧑‍🤝‍🧑"
+    : thisCreep?.memory?.target === "container"
+    ? "📦"
+    : "🔌"
 
   if (targetDropOffSite != null) {
-    const result = thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY)
     // There is somewhere to drop it off in the current room
-    if (result === ERR_NOT_IN_RANGE) {
-      thisCreep.say(`${thisCreep.memory.emoji}⚡🔛`)
-      thisCreep.moveTo(targetDropOffSite, {
+    const result = thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY)
+    if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}${emoji}⤵️`)
+    else if (result === ERR_NOT_IN_RANGE) {
+      const moveResult = thisCreep.moveTo(targetDropOffSite, {
         visualizePathStyle: { stroke: "#ffffff" }
       })
+      if (moveResult === OK) thisCreep.say(`${thisCreep.memory.emoji}⚡🚶‍➡️`)
+      else thisCreep.say(`${thisCreep.memory.emoji}⚡${String(moveResult)}`)
     } else {
-      thisCreep.say(`${thisCreep.memory.emoji}⚡⤵️`)
-      thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY)
+      thisCreep.say(`${thisCreep.memory.emoji}${emoji}${String(result)}`)
     }
   } else if (targetDropOffSite == null) {
     // Find the closest construction site
