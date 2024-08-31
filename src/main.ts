@@ -233,7 +233,14 @@ function unwrappedLoop() {
           const costs = new PathFinder.CostMatrix()
           // Completely block a position as being unpathable
           const positionsToBlock = [
-            ...room.find(FIND_STRUCTURES).map((struct) => struct.pos),
+            ...room
+              .find(FIND_STRUCTURES, {
+                filter: (structure) =>
+                  structure.structureType !== STRUCTURE_ROAD &&
+                  structure.structureType !== STRUCTURE_CONTAINER
+                // Roads and containers are walkable
+              })
+              .map((struct) => struct.pos),
             ...room.find(FIND_CREEPS).map((creep) => creep.pos),
             ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
           ]
