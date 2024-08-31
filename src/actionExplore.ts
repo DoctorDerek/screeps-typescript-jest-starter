@@ -1,5 +1,5 @@
 import actionMoveToDestination from "actionMoveToDestination"
-import type { Position, RoomName } from "main"
+import type { Position } from "main"
 import type { Builder } from "roleBuilder"
 import type { Claimer } from "roleClaimer"
 import type { DefenderMelee } from "roleDefenderMelee"
@@ -40,15 +40,28 @@ function actionExplore(thisCreep: Explorer) {
         "7": "W9N3"     // LEFT
     } */
 
-    // Select an exit to move to that is moving away from our spawn
-    const spawn = Game.spawns["Spawn1"].room.name
-    // Randomize the array in case of a tie
-    exitRoomNameArray.sort(() => Math.random() - 0.5)
-    const destinationRoomName = exitRoomNameArray.reduce((a, b) => {
-      const rangeToA = Game.map.getRoomLinearDistance(spawn, a)
-      const rangeToB = Game.map.getRoomLinearDistance(spawn, b)
-      return rangeToA > rangeToB ? a : b
-    }) as RoomName
+    // Select an exit to move randomly as long as it is not the closest exit
+    const getClosestExit = () => {
+      const x = thisCreep.pos.x
+      const y = thisCreep.pos.y
+      // Find direction with minimum distance
+      const distanceArray = [
+        { distance: y, direction: TOP },
+        { distance: 49 - x, direction: RIGHT },
+        { distance: 49 - y, direction: BOTTOM },
+        { distance: x, direction: LEFT }
+      ]
+      const minDistanceDirection = distanceArray.sort(
+        (a, b) => a.distance - b.distance
+      )[0].direction
+      return String(minDistanceDirection) // "1", "3", "5", or "7"
+    }
+    const closestExit = getClosestExit()
+    const exitRoomNameFiltered = exitRoomNameArray.filter(
+      (a) => a !== closestExit
+    )
+    const destinationRoomName =
+      exitRoomNameFiltered[Math.floor(Math.random() * exitRoomNameArray.length)]
     const destinationRoom = Game.rooms[destinationRoomName]
     let proposedX = 25
     let proposedY = 25
@@ -68,7 +81,8 @@ function actionExplore(thisCreep: Explorer) {
         proposedY > 49 ? 49 : proposedY
       }
     /** Calling new RoomPosition() won't work without vision, but this will */
-    const destination: Position = `[room ${destinationRoomName} pos ${proposedX},${proposedY}]`
+    const destination =
+      `[room ${destinationRoomName} pos ${proposedX},${proposedY}]` as Position
     thisCreep.memory.destination = destination
 
     console.log(
