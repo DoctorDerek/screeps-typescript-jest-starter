@@ -15,6 +15,7 @@ import parseDestination from "parseDestination"
 import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositionStringBackToRoomPositionObject"
 import type { Claimer } from "roleClaimer"
 import roleClaimer from "roleClaimer"
+import parsePosition from "parsePosition"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
 export type X = number
@@ -361,9 +362,20 @@ function unwrappedLoop() {
   )
   /** Total mineable positions across all rooms */
   const totalMineablePositions = allMineablePositions.size
+  let adjustedMineablePositions = 0
+  /** Divide room yield by linear distance from source to spawn */
+  Array.from(allMineablePositions.keys()).forEach((mineablePosition) => {
+    const { roomName } = parsePosition(mineablePosition)
+    if (!roomName) return
+    const distance = Game.map.getRoomLinearDistance(homeRoomName, roomName)
+    const range = distance + 1
+    const adjustedYield = 1 / range
+    adjustedMineablePositions += adjustedYield
+  })
+  adjustedMineablePositions = Math.round(adjustedMineablePositions)
 
   /** `n` is how many miners and used as the factor for priority order */
-  const n = totalMineablePositions
+  const n = adjustedMineablePositions
 
   const totalCreeps = Object.values(Game.creeps).length
 
