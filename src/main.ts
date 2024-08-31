@@ -322,7 +322,7 @@ function unwrappedLoop() {
   const creepsForRoads = [...builders, ...upgraders]
   if (
     RCL &&
-    RCL >= 2 && // Only build roads at RCL 2 and above
+    RCL >= 4 && // Only build roads at RCL 4 and above
     // Limit the number of construction sites to 10 across all rooms:
     totalConstructionSites < 10
   ) {
