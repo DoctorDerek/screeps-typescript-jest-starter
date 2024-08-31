@@ -418,37 +418,13 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].room.energyCapacityAvailable &&
     Game.spawns["Spawn1"].spawning == undefined
   ) */
-  // Currently Game.spawns["Spawn1"].room.energyCapacityAvailable === 550
-  const energy = Game.spawns["Spawn1"].room.energyAvailable
-  /** 300 at the beginning RCL1 then 550 at RCL2 with 5 extensions */
-  const energyMax = Game.spawns["Spawn1"].room.energyCapacityAvailable
-  const notSpawning = Game.spawns["Spawn1"].spawning == undefined
-  if (energy >= energyMax && notSpawning) {
-    console.log("Harvesters: " + harvesters.length)
-    console.log("Upgraders: " + upgraders.length)
-    console.log("Builders: " + builders.length)
-    console.log("Defenders Ranged: " + defendersRanged.length)
-    console.log("Defenders Melee: " + defendersMelee.length)
-    console.log("Fetchers: " + fetchers.length)
-    console.log("Miners: " + miners.length)
-    console.log("Healers: " + healers.length)
-    console.log("Eyes: " + eyes.length)
-    console.log("Claimers: " + claimers.length)
-    console.log("Total creeps: " + totalCreeps)
-
+  const transformCreeps = () => {
     /**
-     * Filter the harvesters into the "fat" early game ones that are too slow;
-     * these make better upgraders than harvesters so get transformed ASAP.
+     * Transform harvesters to upgraders ASAP to hit RCL 2 and get extensions.
      * The main goal is RCL 3 + 7-10 extensions to get claimers ASAP.
      * */
-    const fatHarvesters =
-      fetchers.length >= 1 && totalCreeps <= 20
-        ? harvesters.filter(
-            (harvester) => harvester.getActiveBodyparts(MOVE) === 1
-          )
-        : []
-    if (fatHarvesters.length >= 1) {
-      fatHarvesters.forEach((harvester: Harvester) => {
+    if (harvesters.length >= 1 && fetchers.length >= 1) {
+      harvesters.forEach((harvester: Harvester) => {
         const upgrader = harvester as unknown as Upgrader
         upgrader.memory.role = "upgrader"
         upgrader.memory.emoji = "⚡"
@@ -481,15 +457,35 @@ function unwrappedLoop() {
     // ${allConstructionSites
     //   .map((site) => `${site.structureType}${site.pos}`)
     //   .join(", ")}`)
+  }
+  transformCreeps()
+
+  // Currently Game.spawns["Spawn1"].room.energyCapacityAvailable === 550
+  const energy = Game.spawns["Spawn1"].room.energyAvailable
+  /** 300 at the beginning RCL1 then 550 at RCL2 with 5 extensions */
+  const energyMax = Game.spawns["Spawn1"].room.energyCapacityAvailable
+  const notSpawning = Game.spawns["Spawn1"].spawning == undefined
+  if (energy >= energyMax && notSpawning) {
+    console.log("Harvesters: " + harvesters.length)
+    console.log("Upgraders: " + upgraders.length)
+    console.log("Builders: " + builders.length)
+    console.log("Defenders Ranged: " + defendersRanged.length)
+    console.log("Defenders Melee: " + defendersMelee.length)
+    console.log("Fetchers: " + fetchers.length)
+    console.log("Miners: " + miners.length)
+    console.log("Healers: " + healers.length)
+    console.log("Eyes: " + eyes.length)
+    console.log("Claimers: " + claimers.length)
+    console.log("Total creeps: " + totalCreeps)
 
     /**
-     * [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-3
-     * [WORK, MOVE, MOVE, CARRY] // 250 -- quick creeps 4-n
+     * [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-4
+     * [WORK, MOVE, MOVE, CARRY] // 250 -- quick creeps 5-n
      * [WORK, MOVE, MOVE, MOVE, CARRY, CARRY], // 350
      * [WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY], // 500
      **/
     const getHarvesterBody = () => {
-      if (totalCreeps < 3) return [WORK, WORK, MOVE, CARRY] // 300
+      if (totalCreeps < 4) return [WORK, WORK, MOVE, CARRY] // 300
       if (energyMax < 350) return [WORK, MOVE, MOVE, CARRY] // 250
       if (energyMax < 500)
         // >= 350
