@@ -550,14 +550,17 @@ function unwrappedLoop() {
         memory: { role: "fetcher", emoji: "🛍️" }
       } as Pick<Fetcher, "memory">)
     }
+    /**
+     * [MOVE,MOVE,MOVE,MOVE,MOVE] // 250
+     * Eyes need 5 MOVE so that walking through swamps doesn't slow them down.
+     * */
+    const getEyeBody = () => [MOVE, MOVE, MOVE, MOVE, MOVE] // 250
     const spawnEye = () => {
       const newName = Game.time + "_" + "Eyes" + eyes.length
       console.log("Spawning new eye: " + newName)
-      Game.spawns["Spawn1"].spawnCreep(
-        [MOVE], // 50
-        newName,
-        { memory: { role: "eye", emoji: "👁️" } } as Pick<Eye, "memory">
-      )
+      Game.spawns["Spawn1"].spawnCreep(getEyeBody(), newName, {
+        memory: { role: "eye", emoji: "👁️" }
+      } as Pick<Eye, "memory">)
     }
     /**
      * old (fast):
