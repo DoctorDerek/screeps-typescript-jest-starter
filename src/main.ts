@@ -337,15 +337,16 @@ function unwrappedLoop() {
         homeRoom.createConstructionSite(creep.pos, STRUCTURE_ROAD)
     })
   }
-  // Create a decay effect by occasionally wiping the room clean of pending roads
-  // if (Math.random() < 0.01) {
-  //   const pendingRoadSites = thisCreep.room.find(FIND_CONSTRUCTION_SITES, {
-  //     filter: { structureType: STRUCTURE_ROAD }
-  //   })
-  //   for (const pendingRoadSite of pendingRoadSites) {
-  //     pendingRoadSite.remove()
-  //   }
-  // }
+  // Create a decay effect by sometimes wiping the room clean of pending roads
+  if (Game.time % 100 === 0) {
+    allRooms.forEach((roomName) =>
+      Game.rooms[roomName]
+        .find(FIND_CONSTRUCTION_SITES, {
+          filter: { structureType: STRUCTURE_ROAD }
+        })
+        .forEach((site) => site.remove())
+    )
+  }
 
   // The hash map mineablePositions now only includes available positions
   const { allMineablePositions, allAvailableMineablePositions } = Array.from(
