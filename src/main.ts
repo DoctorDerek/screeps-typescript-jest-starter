@@ -312,10 +312,10 @@ function unwrappedLoop() {
   if (RCL && RCL >= 2) calculateExtensionsAndContainers()
 
   // Ant-style: mark current position for a future road
-  const creepsForRoads = [...fetchers, ...upgraders]
+  const creepsForRoads = [...builders, ...upgraders]
   if (
     RCL &&
-    RCL >= 4 && // Only build roads at RCL 4 and above
+    RCL >= 2 && // Only build roads at RCL 2 and above
     // Limit the number of construction sites to 10 across all rooms:
     totalConstructionSites < 10
   ) {
