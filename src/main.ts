@@ -649,6 +649,7 @@ function unwrappedLoop() {
      * n/4 builder, n/4 upgrader, NO defenders x n mining sites in all rooms.
      * Builder only spawns if there are construction sites.
      * */
+    const buildArmy = (RCL || 0) >= 3
     if (totalCreeps < 3) spawnHarvester()
     else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
@@ -660,23 +661,29 @@ function unwrappedLoop() {
     else if (miners.length < n) spawnMiner()
     else if (fetchers.length < Math.min(Math.floor(n / 2), numberOfSources))
       spawnFetcher()
-    else if (energyMax >= 650 && claimers.length < n) spawnClaimer()
+    else if (
+      energyMax >= 650 &&
+      claimers.length < Math.min(Math.floor(n / 2), numberOfSources)
+    )
+      spawnClaimer()
     else if (eyes.length < Math.min(Math.floor(n / 2), numberOfSources))
       spawnEye()
     else if (
+      !buildArmy &&
       builders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
       // Sum construction sites in all spawns to make sure there is at least 1:
       totalConstructionSites > 0
     )
       spawnBuilder()
     else if (
+      !buildArmy &&
       upgraders.length < Math.max(Math.floor(n / 4), numberOfSources) &&
       totalConstructionSites === 0
     )
       spawnUpgrader()
-    else if (defendersRanged.length < n) spawnDefenderRanged()
-    else if (defendersMelee.length < n) spawnDefenderMelee()
-    else if (healers.length < n) spawnHealer()
+    else if (buildArmy && defendersRanged.length < n) spawnDefenderRanged()
+    else if (buildArmy && defendersMelee.length < n) spawnDefenderMelee()
+    else if (buildArmy && healers.length < n) spawnHealer()
     else {
       // The fallback role is off
     }
