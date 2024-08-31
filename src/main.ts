@@ -646,12 +646,15 @@ function unwrappedLoop() {
       )
     }
     /**
-     * 3 harvester, n/2 miner, n/4 fetcher, n miner, n fetcher, n/2 eye,
+     * 4 harvester, n/2 miner, n/4 fetcher, n miner, n fetcher, n/2 eye,
      * n/4 builder, n/4 upgrader, NO defenders x n mining sites in all rooms.
-     * Builder only spawns if there are construction sites.
+     * 4 harvesters at the beginning all transform into 4 upgraders when the
+     * 2nd fetcher is made, and 4 is enough to reach RCL 2 in one go.
+     * Builders only spawns if there are construction sites / upgraders if not.
+     * Claimers only spawn if there are at least 7 extensions.
      * */
     const buildArmy = (RCL || 0) >= 3
-    if (totalCreeps < 3) spawnHarvester()
+    if (totalCreeps < 4) spawnHarvester()
     else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
     else if (
