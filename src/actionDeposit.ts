@@ -49,7 +49,8 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     ? "📦"
     : "🔌"
 
-  if (targetDropOffSite != null) {
+  const isEmpty = thisCreep.store.getUsedCapacity() === 0
+  if (targetDropOffSite != null && !isEmpty) {
     // There is somewhere to drop it off in the current room
     const result = thisCreep.transfer(targetDropOffSite, RESOURCE_ENERGY)
     if (result === OK) thisCreep.say(`${thisCreep.memory.emoji}${emoji}⤵️`)
@@ -62,7 +63,7 @@ function actionDeposit(thisCreep: Harvester | Fetcher | Healer) {
     } else {
       thisCreep.say(`${thisCreep.memory.emoji}${emoji}${String(result)}`)
     }
-  } else if (targetDropOffSite == null) {
+  } else if (targetDropOffSite == null || isEmpty) {
     // Find the closest construction site
     let targetConstructionSite = thisCreep.pos.findClosestByPath(
       FIND_MY_CONSTRUCTION_SITES
