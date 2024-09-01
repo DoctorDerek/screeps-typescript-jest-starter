@@ -277,26 +277,26 @@ function unwrappedLoop() {
       obstacleCountMapAllRooms.set(roomName, obstacleCountMap)
     })
 
-    const path: RoomPosition[] =
-      PathFinder.search(origin, goals, {
-        roomCallback: (roomName: RoomName) => {
-          const room = Game.rooms[roomName]
-          const costs = new PathFinder.CostMatrix()
-          if (!room) return costs
-          const obstacleMap = obstacleCountMapAllRooms.get(roomName)
-          if (!obstacleMap) return costs
-          for (let x = 0; x < 50; x++) {
-            for (let y = 0; y < 50; y++) {
-              const posString: `${X},${Y}` = `${x},${y}`
-              const hasObstacle =
-                obstacleMap.has(posString) && obstacleMap.get(posString)
-              // Completely block a position as being unpathable
-              if (hasObstacle) costs.set(x, y, 0xff)
-            }
-          }
-          return costs
+    const getRoomCallback = () => (roomName: RoomName) => {
+      const room = Game.rooms[roomName]
+      const costs = new PathFinder.CostMatrix()
+      if (!room) return costs
+      const obstacleMap = obstacleCountMapAllRooms.get(roomName)
+      if (!obstacleMap) return costs
+      for (let x = 0; x < 50; x++) {
+        for (let y = 0; y < 50; y++) {
+          const posString: `${X},${Y}` = `${x},${y}`
+          const hasObstacle =
+            obstacleMap.has(posString) && obstacleMap.get(posString)
+          // Completely block a position as being unpathable
+          if (hasObstacle) costs.set(x, y, 0xff)
         }
-      })?.path || []
+      }
+      return costs
+    }
+    const roomCallback = getRoomCallback()
+    const path: RoomPosition[] =
+      PathFinder.search(origin, goals, { roomCallback })?.path || []
     /** I reorder the path so that the middle elements are first. */
     const reorderedPath: RoomPosition[] = []
     const popFromMiddle = () => path.splice(Math.floor(path.length / 2), 1)?.[0]
