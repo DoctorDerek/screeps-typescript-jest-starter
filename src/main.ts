@@ -225,61 +225,75 @@ function unwrappedLoop() {
       RoomName,
       Map<`${X},${Y}`, number>
     >()
+    allRooms.forEach((roomName) => {
+      const room = Game.rooms[roomName]
+      if (!room) return
+      const positionsToBlock = [
+        ...room
+          .find(FIND_STRUCTURES, {
+            filter: (structure) =>
+              structure.structureType !== STRUCTURE_ROAD &&
+              structure.structureType !== STRUCTURE_CONTAINER
+            // Roads and containers are walkable
+          })
+          .map((struct) => struct.pos),
+        ...room.find(FIND_CREEPS).map((creep) => creep.pos),
+        ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
+      ]
+      const obstacleMap = new Map<`${X},${Y}`, boolean>()
+      positionsToBlock.forEach((pos) => {
+        obstacleMap.set(`${pos.x},${pos.y}`, true)
+      })
+
+      const obstacleCountMap = new Map<`${X},${Y}`, number>()
+      for (let roomX = 0; roomX < 50; roomX++) {
+        for (let roomY = 0; roomY < 50; roomY++) {
+          const terrain = room.getTerrain().get(roomX, roomY)
+          let cost = 0
+          if (terrain === TERRAIN_MASK_WALL) cost = 0xff
+          else if (terrain === TERRAIN_MASK_SWAMP) cost = 5
+          else if (terrain === 0) cost = 1 // Plains
+          for (let xDelta = -1; xDelta <= 1 && cost < 0xff; xDelta++) {
+            for (let yDelta = -1; yDelta <= 1 && cost < 0xff; yDelta++) {
+              let x = roomX + xDelta
+              if (x < 0) x = 0
+              if (x > 49) x = 49
+              let y = roomY + yDelta
+              if (y < 0) y = 0
+              if (y > 49) y = 49
+              const posString: `${X},${Y}` = `${x},${y}`
+              const hasObstacle =
+                obstacleMap.has(posString) && obstacleMap.get(posString)
+              // Blocked
+              if (xDelta === 0 && yDelta === 0 && hasObstacle) cost = 0xff
+              // Has an obstacle surrounding it
+              if (hasObstacle) cost += 1
+            }
+          }
+          const posString: `${X},${Y}` = `${roomX},${roomY}`
+          obstacleCountMap.set(posString, cost)
+        }
+      }
+      obstacleCountMapAllRooms.set(roomName, obstacleCountMap)
+    })
+
     const path: RoomPosition[] =
       PathFinder.search(origin, goals, {
         roomCallback: (roomName: RoomName) => {
           const room = Game.rooms[roomName]
-          if (!room) return false
           const costs = new PathFinder.CostMatrix()
-          // Completely block a position as being unpathable
-          const positionsToBlock = [
-            ...room
-              .find(FIND_STRUCTURES, {
-                filter: (structure) =>
-                  structure.structureType !== STRUCTURE_ROAD &&
-                  structure.structureType !== STRUCTURE_CONTAINER
-                // Roads and containers are walkable
-              })
-              .map((struct) => struct.pos),
-            ...room.find(FIND_CREEPS).map((creep) => creep.pos),
-            ...room.find(FIND_CONSTRUCTION_SITES).map((site) => site.pos)
-          ]
-          const obstacleMap = new Map<`${X},${Y}`, boolean>()
-          positionsToBlock.forEach((pos) => {
-            obstacleMap.set(`${pos.x},${pos.y}`, true)
-          })
-
-          const obstacleCountMap = new Map<`${X},${Y}`, number>()
-          for (let roomX = 0; roomX < 50; roomX++) {
-            for (let roomY = 0; roomY < 50; roomY++) {
-              const terrain = room.getTerrain().get(roomX, roomY)
-              let cost = 0
-              if (terrain === TERRAIN_MASK_WALL) cost = 0xff
-              else if (terrain === TERRAIN_MASK_SWAMP) cost = 5
-              else if (terrain === 0) cost = 1 // Plains
-              for (let xDelta = -1; xDelta <= 1 && cost < 0xff; xDelta++) {
-                for (let yDelta = -1; yDelta <= 1 && cost < 0xff; yDelta++) {
-                  let x = roomX + xDelta
-                  if (x < 0) x = 0
-                  if (x > 49) x = 49
-                  let y = roomY + yDelta
-                  if (y < 0) y = 0
-                  if (y > 49) y = 49
-                  const posString: `${X},${Y}` = `${x},${y}`
-                  const hasObstacle =
-                    obstacleMap.has(posString) && obstacleMap.get(posString)
-                  // Blocked
-                  if (xDelta === 0 && yDelta === 0 && hasObstacle) cost = 0xff
-                  // Has an obstacle surrounding it
-                  if (hasObstacle) cost += 1
-                }
-              }
-              const posString: `${X},${Y}` = `${roomX},${roomY}`
-              obstacleCountMap.set(posString, cost)
-              costs.set(roomX, roomY, cost)
+          if (!room) return costs
+          const obstacleMap = obstacleCountMapAllRooms.get(roomName)
+          if (!obstacleMap) return costs
+          for (let x = 0; x < 50; x++) {
+            for (let y = 0; y < 50; y++) {
+              const posString: `${X},${Y}` = `${x},${y}`
+              const hasObstacle =
+                obstacleMap.has(posString) && obstacleMap.get(posString)
+              // Completely block a position as being unpathable
+              if (hasObstacle) costs.set(x, y, 0xff)
             }
           }
-          obstacleCountMapAllRooms.set(roomName, obstacleCountMap)
           return costs
         }
       })?.path || []
