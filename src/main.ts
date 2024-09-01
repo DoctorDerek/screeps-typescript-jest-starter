@@ -376,7 +376,8 @@ function unwrappedLoop() {
     const { roomName } = parsePosition(mineablePosition)
     if (!roomName) return
     const distance = Game.map.getRoomLinearDistance(homeRoomName, roomName)
-    const range = distance + 1
+    // Home room and 1 range rooms are gold (full yield), then drop off linearly
+    const range = Math.max(1, distance)
     const adjustedYield = 1 / range
     adjustedMineablePositions += adjustedYield
   })
