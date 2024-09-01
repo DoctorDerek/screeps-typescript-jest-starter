@@ -574,14 +574,9 @@ function unwrappedLoop() {
       } as Pick<Harvester, "memory">)
     }
     /**
-     * [WORK, WORK, MOVE, MOVE], // 300
-     * [WORK, WORK, WORK, MOVE, MOVE, MOVE], // 450
+     * [WORK, MOVE], // 100 x unit
      * **/
-    const getMinerBody = () => {
-      if (energyMax < 450) return [WORK, WORK, MOVE, MOVE] // 300
-      // if (energyMax >= 450)
-      return [WORK, WORK, WORK, MOVE, MOVE, MOVE] // 450
-    }
+    const getMinerBody = () => getBodyByUnit([WORK, MOVE])
     const spawnMiner = () => {
       const newName = Game.time + "_" + "Miner" + miners.length
       console.log("Spawning new miner: " + newName)
@@ -622,13 +617,14 @@ function unwrappedLoop() {
      * [WORK, WORK, WORK, MOVE, CARRY], // 400
      * [WORK, WORK, WORK, WORK, MOVE, CARRY], // 500
      * [WORK, WORK, WORK, WORK, WORK, MOVE, CARRY], // 600
+     * [WORK], // 100 x unit + [MOVE, CARRY] // 100
      * */
     const getBuilderBody = () => {
-      if (energyMax < 400) return [WORK, WORK, MOVE, CARRY] // 300
-      if (energyMax < 500) return [WORK, WORK, WORK, MOVE, CARRY] // 400
-      if (energyMax < 600) return [WORK, WORK, WORK, WORK, MOVE, CARRY] // 500
-      // if (energyMax >= 600)
-      return [WORK, WORK, WORK, WORK, WORK, MOVE, CARRY] // 600
+      const unit = [WORK]
+      const body = getBodyByUnit(unit)
+      body.pop() // Need 100 back (1 WORK) for MOVE and CARRY (50 each)
+      body.push(MOVE, CARRY)
+      return body
     }
     const spawnBuilder = () => {
       const newName = Game.time + "_" + "Builder" + builders.length
@@ -645,54 +641,52 @@ function unwrappedLoop() {
         memory: { role: "upgrader", emoji: "⚡" }
       } as Pick<Upgrader, "memory">)
     }
+    /**
+     * [TOUGH,MOVE,MOVE,RANGED_ATTACK] 260 x unit (idea for tougher ones)
+     * [MOVE,RANGED_ATTACK] 200 x unit (current preference for cost efficiency)
+     * */
+    const getDefenderRangedBody = () => getBodyByUnit([MOVE, RANGED_ATTACK])
     const spawnDefenderRanged = () => {
       const newName =
         Game.time + "_" + "DefenderRanged" + defendersRanged.length
       console.log("Spawning new defender ranged: " + newName)
-      // [ATTACK, ATTACK, MOVE, MOVE], // 260
-      // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
-      Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, MOVE, RANGED_ATTACK], // 260
-        newName,
-        { memory: { role: "defenderRanged", emoji: "🏹" } } as Pick<
-          DefenderRanged,
-          "memory"
-        >
-      )
+      Game.spawns["Spawn1"].spawnCreep(getDefenderRangedBody(), newName, {
+        memory: { role: "defenderRanged", emoji: "🏹" }
+      } as Pick<DefenderRanged, "memory">)
     }
+    /**
+     * [TOUGH,MOVE,MOVE,ATTACK] 190 x unit
+     * [MOVE,ATTACK] 130 x unit
+     * */
+    const getDefenderMeleeBody = () => getBodyByUnit([MOVE, ATTACK])
     const spawnDefenderMelee = () => {
       const newName = Game.time + "_" + "DefenderMelee" + defendersMelee.length
       console.log("Spawning new defender melee: " + newName)
-      // [ATTACK, ATTACK, MOVE, MOVE], // 260
-      // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
-      Game.spawns["Spawn1"].spawnCreep(
-        [TOUGH, MOVE, MOVE, ATTACK], // 250
-        newName,
-        { memory: { role: "defenderMelee", emoji: "⚔️" } } as Pick<
-          DefenderMelee,
-          "memory"
-        >
-      )
+      Game.spawns["Spawn1"].spawnCreep(getDefenderMeleeBody(), newName, {
+        memory: { role: "defenderMelee", emoji: "⚔️" }
+      } as Pick<DefenderMelee, "memory">)
     }
+    /**
+     * [TOUGH,MOVE,MOVE,HEAL] 360 x unit
+     * [MOVE,HEAL] 300 x unit
+     * */
     const spawnHealer = () => {
       const newName = Game.time + "_" + "Healer" + healers.length
       console.log("Spawning new healer: " + newName)
-      // [ATTACK, ATTACK, MOVE, MOVE], // 260
-      // [ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE ], // 520
       Game.spawns["Spawn1"].spawnCreep(
-        [HEAL, MOVE], // 300
+        [MOVE, HEAL], // 300
         newName,
         { memory: { role: "healer", emoji: "🏥" } } as Pick<Healer, "memory">
       )
     }
+    /** [MOVE, CLAIM] 650 x unit */
+    const getClaimerBody = () => getBodyByUnit([MOVE, CLAIM])
     const spawnClaimer = () => {
       const newName = Game.time + "_" + "Claimers" + claimers.length
       console.log("Spawning new claimer: " + newName)
-      Game.spawns["Spawn1"].spawnCreep(
-        [MOVE, CLAIM], // 650
-        newName,
-        { memory: { role: "claimer", emoji: "🛄" } } as Pick<Claimer, "memory">
-      )
+      Game.spawns["Spawn1"].spawnCreep(getClaimerBody(), newName, {
+        memory: { role: "claimer", emoji: "🛄" }
+      } as Pick<Claimer, "memory">)
     }
     /**
      * 4 harvester, n/2 miner, n/4 fetcher, n miner, n fetcher, n/4 claimer,
