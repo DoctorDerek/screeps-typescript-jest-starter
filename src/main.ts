@@ -221,10 +221,11 @@ function unwrappedLoop() {
     )
     type X = number
     type Y = number
-    const obstacleCountMapAllRooms = new Map<
-      RoomName,
-      Map<`${X},${Y}`, number>
-    >()
+    type ObstacleCountMap = Map<
+      `${X},${Y}`,
+      { obstacleCount: number; terrain: number }
+    >
+    const obstacleCountMapAllRooms = new Map<RoomName, ObstacleCountMap>()
     allRooms.forEach((roomName) => {
       const room = Game.rooms[roomName]
       if (!room) return
@@ -245,16 +246,21 @@ function unwrappedLoop() {
         obstacleMap.set(`${pos.x},${pos.y}`, true)
       })
 
-      const obstacleCountMap = new Map<`${X},${Y}`, number>()
+      const allTerrain = room.getTerrain()
+      const obstacleCountMap = new Map() as ObstacleCountMap
       for (let roomX = 0; roomX < 50; roomX++) {
         for (let roomY = 0; roomY < 50; roomY++) {
-          const terrain = room.getTerrain().get(roomX, roomY)
-          let cost = 0
-          if (terrain === TERRAIN_MASK_WALL) cost = 0xff
-          else if (terrain === TERRAIN_MASK_SWAMP) cost = 5
-          else if (terrain === 0) cost = 1 // Plains
-          for (let xDelta = -1; xDelta <= 1 && cost < 0xff; xDelta++) {
-            for (let yDelta = -1; yDelta <= 1 && cost < 0xff; yDelta++) {
+          const terrain = allTerrain.get(roomX, roomY)
+          let obstacleCount = 0
+          if (terrain === TERRAIN_MASK_WALL) obstacleCount = 0xff
+          else if (terrain === TERRAIN_MASK_SWAMP) obstacleCount = 5
+          else if (terrain === 0) obstacleCount = 1 // Plains
+          for (let xDelta = -1; xDelta <= 1 && obstacleCount < 0xff; xDelta++) {
+            for (
+              let yDelta = -1;
+              yDelta <= 1 && obstacleCount < 0xff;
+              yDelta++
+            ) {
               let x = roomX + xDelta
               if (x < 0) x = 0
               if (x > 49) x = 49
@@ -262,22 +268,24 @@ function unwrappedLoop() {
               if (y < 0) y = 0
               if (y > 49) y = 49
               const posString: `${X},${Y}` = `${x},${y}`
-              const hasObstacle =
-                obstacleMap.has(posString) && obstacleMap.get(posString)
+              if (!obstacleMap.has(posString)) continue
+              const hasObstacle = obstacleMap.get(posString)
               // Blocked
-              if (xDelta === 0 && yDelta === 0 && hasObstacle) cost = 0xff
+              if (xDelta === 0 && yDelta === 0 && hasObstacle)
+                obstacleCount = 0xff
               // Has an obstacle surrounding it
-              if (hasObstacle) cost += 1
+              if (hasObstacle) obstacleCount += 1
             }
           }
           const posString: `${X},${Y}` = `${roomX},${roomY}`
-          obstacleCountMap.set(posString, cost)
+          obstacleCountMap.set(posString, { obstacleCount, terrain })
         }
       }
       obstacleCountMapAllRooms.set(roomName, obstacleCountMap)
     })
 
-    const getRoomCallback = () => (roomName: RoomName) => {
+    /** The `alt` version is "wide" from controller, not "tall". */
+    const getRoomCallback = (alt?: boolean) => (roomName: RoomName) => {
       const room = Game.rooms[roomName]
       const costs = new PathFinder.CostMatrix()
       if (!room) return costs
@@ -286,39 +294,81 @@ function unwrappedLoop() {
       for (let x = 0; x < 50; x++) {
         for (let y = 0; y < 50; y++) {
           const posString: `${X},${Y}` = `${x},${y}`
-          const hasObstacle =
-            obstacleMap.has(posString) && obstacleMap.get(posString)
+          if (!obstacleMap.has(posString)) continue
+          const { obstacleCount, terrain } = obstacleMap.get(posString) || {}
+          if (!(obstacleCount && terrain)) continue
+          if (obstacleCount === 0xff) costs.set(x, y, 0xff)
+          else if (obstacleCount !== 0xff && alt) costs.set(x, y, obstacleCount)
           // Completely block a position as being unpathable
-          if (hasObstacle) costs.set(x, y, 0xff)
+          costs.set(x, y, terrain === TERRAIN_MASK_SWAMP ? 5 : 1)
         }
       }
       return costs
     }
     const roomCallback = getRoomCallback()
+    const altRoomCallback = getRoomCallback(true)
+    // Remove all positions from each path with >= 1 obstacles
     const path: RoomPosition[] =
       PathFinder.search(origin, goals, { roomCallback })?.path || []
+    const altPath: RoomPosition[] =
+      PathFinder.search(origin, goals, {
+        roomCallback: altRoomCallback
+      })?.path || []
     /** I reorder the path so that the middle elements are first. */
     const reorderedPath: RoomPosition[] = []
-    const popFromMiddle = () => path.splice(Math.floor(path.length / 2), 1)?.[0]
-    let p: RoomPosition
-    while ((p = popFromMiddle())) {
-      reorderedPath.push(p)
+    const popFromMiddle = (p: RoomPosition[]) =>
+      p.splice(Math.floor(p.length / 2), 1)?.[0]
+    let popcorn: RoomPosition
+    while ((popcorn = popFromMiddle(path))) {
+      reorderedPath.push(popcorn)
       if (!path.length) break
     }
 
     /**
-     * Search the adjacent area for structures, construction sites, and walls;
-     * less obstacles are better, but some obstacles are tolerable.
+     * Before I filter out the obstructed paths, I need to increase the search
+     * to include all tiles within 10 tiles of each step of each of the paths.
      * */
-    const reorderedPathWithObstacleCount = reorderedPath
-      .map((pos) => {
-        const roomName = pos.roomName as RoomName
-        const obstacleCountMap = obstacleCountMapAllRooms.get(roomName)
-        const obstacleCount = obstacleCountMap?.get(`${pos.x},${pos.y}`) || 0
-        return { pos, obstacleCount }
+    const expandSearch = (path: RoomPosition[]) => {
+      const expandedPath = [] as RoomPosition[]
+      path.forEach((pos, index) => {
+        const D = 5
+        for (let xDelta = -D; xDelta <= D; xDelta++) {
+          for (let yDelta = -D; yDelta <= D; yDelta++) {
+            const x = pos.x + xDelta
+            const y = pos.y + yDelta
+            // The exit tiles at 0's and 49's are not buildable:
+            if (x < 1 || x > 48 || y < 1 || y > 48) continue
+            const newPos = new RoomPosition(x, y, pos.roomName)
+            // If the delta is small, then add it near the current index:
+            if (Math.abs(xDelta) <= 1 && Math.abs(yDelta) <= 1)
+              expandedPath.splice(index, 0, newPos)
+            else expandedPath.push(newPos) // Otherwise, push to end.
+          }
+        }
       })
-      .sort((a, b) => a.obstacleCount - b.obstacleCount)
-    const proposedBuildingPosition = reorderedPathWithObstacleCount?.[0]?.pos
+      return expandedPath
+    }
+    /** Check for no obstructions so I can build without blocking traffic */
+    const filterOutBlocking = (pos: RoomPosition) => {
+      const roomName = pos.roomName as RoomName
+      const obstacleCountMap = obstacleCountMapAllRooms.get(roomName)
+      const obstacleCount = obstacleCountMap?.get(
+        `${pos.x},${pos.y}`
+      )?.obstacleCount
+      return Number(obstacleCount) < 2
+    }
+    const pathReady = expandSearch(reorderedPath).filter(filterOutBlocking)
+    const altReorderedPath: RoomPosition[] = []
+    let altPopcorn: RoomPosition
+    while ((altPopcorn = popFromMiddle(altPath))) {
+      altReorderedPath.push(altPopcorn)
+      if (!altPath.length) break
+    }
+    const altPathReady =
+      expandSearch(altReorderedPath).filter(filterOutBlocking)
+
+    const whichPath = reorderedPath.length ? pathReady : altPathReady
+    const proposedBuildingPosition = whichPath?.[0]
     if (proposedBuildingPosition) {
       proposedBuildingPosition.createConstructionSite(buildingType)
       console.log(
