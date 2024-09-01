@@ -18,8 +18,8 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
           structure.structureType !== STRUCTURE_KEEPER_LAIR &&
           structure.structureType !== STRUCTURE_INVADER_CORE &&
           structure.structureType !== STRUCTURE_ROAD &&
-          structure.structureType !== STRUCTURE_WALL &&
-          structure.structureType !== STRUCTURE_CONTAINER
+          structure.structureType !== STRUCTURE_CONTAINER &&
+          structure.structureType !== STRUCTURE_POWER_BANK
         )
       }
     }
