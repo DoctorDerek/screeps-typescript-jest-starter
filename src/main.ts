@@ -652,8 +652,9 @@ function unwrappedLoop() {
      * 2nd fetcher is made, and 4 is enough to reach RCL 2 in one go.
      * Builders only spawns if there are construction sites / upgraders if not.
      * Claimers only spawn if there are at least 7 extensions.
+     * Don't build army until RCL 4; then max it to farm Source Keeper rooms.
      * */
-    const buildArmy = (RCL || 0) >= 3
+    const buildArmy = (RCL || 0) >= 4
     if (totalCreeps < 4) spawnHarvester()
     else if (miners.length < Math.max(Math.floor(n / 2), numberOfSources))
       spawnMiner()
