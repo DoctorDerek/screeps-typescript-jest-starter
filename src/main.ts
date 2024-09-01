@@ -835,15 +835,6 @@ function unwrappedLoop() {
     try {
       // Don't run creeps that are spawning
       if (creep.spawning) continue
-      // At an exit on the 50x50 game board
-      // Move off the border by 1 step to avoid getting stuck
-      else if (
-        creep.pos.x === 0 ||
-        creep.pos.x === 49 ||
-        creep.pos.y === 0 ||
-        creep.pos.y === 49
-      )
-        creep.move(creep.pos.getDirectionTo(25, 25))
       else if (creep.memory.role == "defenderMelee")
         roleDefenderMelee.run(creep as DefenderMelee, overwhelmingForce)
       else if (creep.memory.role == "defenderRanged")
