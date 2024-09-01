@@ -581,19 +581,17 @@ function unwrappedLoop() {
         memory: { role: "miner", emoji: "⛏️" }
       } as Pick<Miner, "memory">)
     }
-    /**
-     * [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY], // 300
-     * [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY], // 400
-     * [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], // 500
-     * [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY], // 600
-     * */
-    const getFetcherBody = () => {
-      const times = Math.floor(energyMax / 100)
-      const unit = [MOVE, CARRY]
+    const getBodyByUnit = (unit: BodyPartConstant[]) => {
+      const cost = unit.reduce((acc, part) => acc + BODYPART_COST[part], 0)
+      const times = Math.floor(energyMax / cost)
       const body: BodyPartConstant[] = []
       for (let i = 0; i < times; i++) body.push(...unit)
       return body
     }
+    /**
+     * [MOVE, CARRY], // 100 x unit
+     * */
+    const getFetcherBody = () => getBodyByUnit([MOVE, CARRY])
     const spawnFetcher = () => {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
       console.log("Spawning new fetcher: " + newName)
