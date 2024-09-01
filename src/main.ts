@@ -588,25 +588,11 @@ function unwrappedLoop() {
      * [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY], // 600
      * */
     const getFetcherBody = () => {
-      if (energyMax < 400) return [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY] // 300
-      if (energyMax < 500) return [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY] // 400
-      if (energyMax < 600)
-        return [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY] // 500
-      // if (energyMax >= 600)
-      return [
-        MOVE,
-        MOVE,
-        MOVE,
-        MOVE,
-        MOVE,
-        MOVE,
-        CARRY,
-        CARRY,
-        CARRY,
-        CARRY,
-        CARRY,
-        CARRY
-      ] // 600
+      const times = Math.floor(energyMax / 100)
+      const unit = [MOVE, CARRY]
+      const body: BodyPartConstant[] = []
+      for (let i = 0; i < times; i++) body.push(...unit)
+      return body
     }
     const spawnFetcher = () => {
       const newName = Game.time + "_" + "Fetcher" + fetchers.length
