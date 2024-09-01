@@ -83,7 +83,12 @@ export default function actionMoveToDestination(thisCreep: Explorer) {
     thisCreep.say(`${thisCreep.memory.emoji}CLOSE`)
     const resultMove = thisCreep.moveTo(
       roomPosition,
-      { visualizePathStyle: { stroke: "#FFC0CB" } } // pink
+      {
+        plainCost: 1,
+        // Eyes with 5x MOVE parts ignore swamps so should path as such
+        swampCost: thisCreep.memory.role === "eye" ? 1 : 5,
+        visualizePathStyle: { stroke: "#FFC0CB" }
+      } // pink
     )
     const haveArrivedWithinRange = thisCreep.pos.inRangeTo(roomPosition, 1)
     const buildingsAtDestination = roomPosition.lookFor(LOOK_STRUCTURES)
