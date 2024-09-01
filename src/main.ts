@@ -543,6 +543,14 @@ function unwrappedLoop() {
     console.log("Claimers: " + claimers.length)
     console.log("Total creeps: " + totalCreeps)
 
+    /** Finds the max body of a given repeatable unit at current `energyMax` */
+    const getBodyByUnit = (unit: BodyPartConstant[]) => {
+      const cost = unit.reduce((acc, part) => acc + BODYPART_COST[part], 0)
+      const times = Math.floor(energyMax / cost)
+      const body: BodyPartConstant[] = []
+      for (let i = 0; i < times; i++) body.push(...unit)
+      return body
+    }
     /**
      * [WORK, WORK, MOVE, CARRY] // 300 -- fat creeps 1-4
      * [WORK, MOVE, MOVE, CARRY] // 250 -- quick creeps 5-n
@@ -580,14 +588,6 @@ function unwrappedLoop() {
       Game.spawns["Spawn1"].spawnCreep(getMinerBody(), newName, {
         memory: { role: "miner", emoji: "⛏️" }
       } as Pick<Miner, "memory">)
-    }
-    /** Finds the max body of a given repeatable unit at current `energyMax` */
-    const getBodyByUnit = (unit: BodyPartConstant[]) => {
-      const cost = unit.reduce((acc, part) => acc + BODYPART_COST[part], 0)
-      const times = Math.floor(energyMax / cost)
-      const body: BodyPartConstant[] = []
-      for (let i = 0; i < times; i++) body.push(...unit)
-      return body
     }
     /**
      * [MOVE, CARRY], // 100 x unit
