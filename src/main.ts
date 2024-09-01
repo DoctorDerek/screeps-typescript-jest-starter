@@ -581,6 +581,7 @@ function unwrappedLoop() {
         memory: { role: "miner", emoji: "⛏️" }
       } as Pick<Miner, "memory">)
     }
+    /** Finds the max body of a given repeatable unit at current `energyMax` */
     const getBodyByUnit = (unit: BodyPartConstant[]) => {
       const cost = unit.reduce((acc, part) => acc + BODYPART_COST[part], 0)
       const times = Math.floor(energyMax / cost)
