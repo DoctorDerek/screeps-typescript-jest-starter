@@ -108,7 +108,21 @@ const roleMiner = {
           thisCreep.memory.mission = "THINK"
           roleMiner.run(thisCreep, availableMiningPositions) // Run again
         }
-      } else actionMoveToDestination(thisCreep)
+      } else {
+        /**
+         * Miners are vulnerable to "over exploring" where they walk away from
+         * available mines, so I randomly check 10% of the time to look again.
+         * */
+        const destinationNotInThisRoom = roomName !== thisCreep.room.name
+        if (destinationNotInThisRoom && Math.random() < 0.1) {
+          thisCreep.memory.mission = "THINK"
+          thisCreep.memory.destination = null
+          thisCreep.memory.objective = null
+          roleMiner.run(thisCreep, availableMiningPositions) // Run again
+        } else {
+          actionMoveToDestination(thisCreep)
+        }
+      }
     }
   }
 }
