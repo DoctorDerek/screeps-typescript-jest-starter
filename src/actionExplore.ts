@@ -25,9 +25,9 @@ function actionExplore(thisCreep: Explorer) {
   ) {
     thisCreep.say(`${thisCreep.memory.emoji}⛵🎯`)
     // const exitPositions = thisCreep.room.find(FIND_EXIT)
-    const exitRoomNameArray = Array.from(
-      Object.values(Game.map.describeExits(thisCreep.room.name))
-    )
+    const exits = Game.map.describeExits(thisCreep.room.name)
+    const exitDirectionArray = Array.from(Object.keys(exits))
+    const exitRoomNameArray = Array.from(Object.values(exits))
     /* Game.map.describeExits(thisCreep.room.name) Return value
 
 
@@ -39,32 +39,48 @@ function actionExplore(thisCreep: Explorer) {
         "5": "W8N2",    // BOTTOM
         "7": "W9N3"     // LEFT
     } */
-
-    const destinationRoomName =
-      exitRoomNameArray[Math.floor(Math.random() * exitRoomNameArray.length)]
+    const exitIndex = Math.floor(Math.random() * exitRoomNameArray.length)
+    const exitDirection = exitDirectionArray[exitIndex]
+    const destinationRoomName = exitRoomNameArray[exitIndex]
     const destinationRoom = Game.rooms[destinationRoomName]
+    // The exit direction tells us which pos we will be at in the new room:
     let proposedX = 25
     let proposedY = 25
+    // Coming in from 1 top, we will be at x=25, y=1
+    // Coming in from 3 right, we will be at x=48, y=25
+    // Coming in from 5 bottom, we will be at x=25, y=48
+    // Coming in from 7 left, we will be at x=1, y=25
+    if (exitDirection === "1") proposedY = 1
+    if (exitDirection === "3") proposedX = 48
+    if (exitDirection === "5") proposedY = 48
+    if (exitDirection === "7") proposedX = 1
     // Check for no terrain blocking, move y using a for loop
     if (destinationRoom)
-      while (
+      for (
+        let i = 0;
+        i < 100 &&
         destinationRoom
           .lookAt(proposedX, proposedY)
-          .filter((object) => object.type === "terrain")[0].terrain === "wall"
+          .filter((object) => object.type === "terrain")[0].terrain === "wall";
+        i++ // Prevent infinite loop in broken rooms
       ) {
-        // Random walk weighted 60%/40% in favor of decreasing x/y
-        if (Math.random() > 0.6) Math.random() > 0.5 ? proposedY-- : proposedX--
-        else Math.random() > 0.5 ? proposedY++ : proposedX++
-        proposedX = proposedX < 0 ? 0 : proposedX
-        proposedY = proposedY < 0 ? 0 : proposedY
-        proposedX > 49 ? 49 : proposedX
-        proposedY > 49 ? 49 : proposedY
+        if (exitDirection === "1") proposedX++
+        if (exitDirection === "3") proposedY++
+        if (exitDirection === "5") proposedX--
+        if (exitDirection === "7") proposedY--
+        // Loop around for search
+        if (proposedX > 48) proposedX = 1
+        if (proposedX < 1) proposedX = 48
+        if (proposedY > 48) proposedY = 1
+        if (proposedY < 1) proposedY = 48
       }
     /** Calling new RoomPosition() won't work without vision, but this will */
     const destination =
       `[room ${destinationRoomName} pos ${proposedX},${proposedY}]` as Position
     thisCreep.memory.destination = destination
-
+    thisCreep.say(
+      `${thisCreep.memory.emoji}🚀${destinationRoomName}${proposedX},${proposedY}`
+    )
     console.log(
       `${thisCreep.name} assigned mission to EXPLORE to Destination ${destination}`
     )
