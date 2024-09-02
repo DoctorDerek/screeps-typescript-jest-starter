@@ -16,34 +16,12 @@ interface ClaimerMemory extends CreepMemory {
 }
 
 const roleClaimer = {
-  run: function (creep: Claimer) {
+  run: function (creep: Claimer, allControllers: StructureController[]) {
     if (!creep.memory.mission || creep.memory.mission === "THINK")
       creep.memory.mission = "CLAIM"
     if (creep.memory.mission === "CLAIM") {
       if (!creep.memory.destination) {
-        const allRooms = Object.values(Game.rooms)
-        const allControllers = allRooms
-          .map((room) => room.controller)
-          .filter((controller) => {
-            // Claimers should only 2 source rooms, not 1 source rooms
-            const has2Sources = controller?.room.find(FIND_SOURCES).length === 2
-            if (!has2Sources) return false
-            const isMyController = Boolean(controller?.my)
-            if (isMyController) return false
-            const { username, ticksToEnd } = controller?.reservation || {}
-            const hasReservation = Boolean(ticksToEnd)
-            if (!hasReservation) return true
-            const isMyReservation = username === "Mapachito"
-            const notMyReservation = !isMyReservation
-            if (hasReservation && notMyReservation) return false
-            const myReservationButNotFull =
-              isMyReservation && ticksToEnd && ticksToEnd < 3000
-            if (myReservationButNotFull) return true
-            return false
-          })
-        const allPositions = allControllers
-          .map((controller) => controller?.pos)
-          .filter(Boolean)
+        const allPositions = allControllers.map((controller) => controller?.pos)
         if (allPositions.length === 0) creep.memory.mission = "EXPLORE"
         // @ts-expect-error This can't be undefined due to .filter(Boolean):
         const closestPosition = findNearestPositionByRange(creep, allPositions)

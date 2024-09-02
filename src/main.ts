@@ -16,6 +16,7 @@ import convertRoomPositionStringBackToRoomPositionObject from "convertRoomPositi
 import type { Claimer } from "roleClaimer"
 import roleClaimer from "roleClaimer"
 import parsePosition from "parsePosition"
+import assessControllersToClaim from "assessControllersToClaim"
 
 /** IntRange<0,49> types create unions too complex to evaluate 😎 */
 export type X = number
@@ -809,6 +810,7 @@ function unwrappedLoop() {
   const FORCE_FACTOR = 3
   const overwhelmingForce = totalAlliedHP > totalEnemyHP * FORCE_FACTOR
 
+  const allControllers = assessControllersToClaim(claimers)
   // Run all creeps
   for (const creep of creeps) {
     try {
@@ -830,7 +832,8 @@ function unwrappedLoop() {
       else if (creep.memory.role == "healer")
         roleHealer.run(creep as Healer, creepsToHeal)
       else if (creep.memory.role == "eye") roleEye.run(creep as Eye)
-      else if (creep.memory.role == "claimer") roleClaimer.run(creep as Claimer)
+      else if (creep.memory.role == "claimer")
+        roleClaimer.run(creep as Claimer, allControllers)
     } catch (e) {
       console.log(`${creep.name} threw a ${e}`)
     }
