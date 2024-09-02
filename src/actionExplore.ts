@@ -46,14 +46,14 @@ function actionExplore(thisCreep: Explorer) {
     // The exit direction tells us which pos we will be at in the new room:
     let proposedX = 25
     let proposedY = 25
-    // Coming in from 1 top, we will be at x=25, y=1
-    // Coming in from 3 right, we will be at x=48, y=25
-    // Coming in from 5 bottom, we will be at x=25, y=48
-    // Coming in from 7 left, we will be at x=1, y=25
-    if (exitDirection === "1") proposedY = 1
-    if (exitDirection === "3") proposedX = 48
-    if (exitDirection === "5") proposedY = 48
-    if (exitDirection === "7") proposedX = 1
+    // Coming in from 1 top, we will be at bottom x=25, y=48
+    // Coming in from 3 right, we will be at left x=1, y=25
+    // Coming in from 5 bottom, we will be at top x=25, y=1
+    // Coming in from 7 left, we will be at right x=48, y=25
+    if (exitDirection === "1") proposedY = 48
+    if (exitDirection === "3") proposedX = 1
+    if (exitDirection === "5") proposedY = 1
+    if (exitDirection === "7") proposedX = 48
     // Check for no terrain blocking, move y using a for loop
     if (destinationRoom)
       for (
