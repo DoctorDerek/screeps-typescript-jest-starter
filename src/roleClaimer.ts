@@ -25,6 +25,9 @@ const roleClaimer = {
         const allControllers = allRooms
           .map((room) => room.controller)
           .filter((controller) => {
+            // Claimers should only 2 source rooms, not 1 source rooms
+            const has2Sources = controller?.room.find(FIND_SOURCES).length === 2
+            if (!has2Sources) return false
             const isMyController = Boolean(controller?.my)
             if (isMyController) return false
             const { username, ticksToEnd } = controller?.reservation || {}
