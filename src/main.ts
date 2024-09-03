@@ -531,7 +531,14 @@ function unwrappedLoop() {
   /** 300 at the beginning RCL1 then 550 at RCL2 with 5 extensions */
   const energyMax = Game.spawns["Spawn1"].room.energyCapacityAvailable
   const notSpawning = Game.spawns["Spawn1"].spawning == undefined
-  if (energy >= energyMax && notSpawning) {
+  if (
+    notSpawning &&
+    /**
+     * Normally I wait until full energy to spawn, but if an invader wipes my
+     * base then my spawn will only charge up to 300 energy when I start over.
+     * */
+    (energy >= energyMax || (energy >= 300 && totalCreeps < 4))
+  ) {
     console.log("Harvesters: " + harvesters.length)
     console.log("Upgraders: " + upgraders.length)
     console.log("Builders: " + builders.length)
@@ -544,10 +551,10 @@ function unwrappedLoop() {
     console.log("Claimers: " + claimers.length)
     console.log("Total creeps: " + totalCreeps)
 
-    /** Finds the max body of a given repeatable unit at current `energyMax` */
+    /** Finds the max body of a given repeatable unit at current `energy` */
     const getBodyByUnit = (unit: BodyPartConstant[]) => {
       const cost = unit.reduce((acc, part) => acc + BODYPART_COST[part], 0)
-      const times = Math.floor(energyMax / cost)
+      const times = Math.floor(energy / cost)
       const body: BodyPartConstant[] = []
       for (let i = 0; i < times; i++) body.push(...unit)
       return body
